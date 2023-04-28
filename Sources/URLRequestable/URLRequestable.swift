@@ -7,7 +7,8 @@
 import Foundation
 
 public protocol URLRequestable {
-    associatedtype Response: Any
+    associatedtype Response
+
     typealias ResponseTransformer = Transformer<DataResponse, Response>
 
     var apiBaseURLString: String { get }
@@ -24,6 +25,10 @@ public protocol URLRequestable {
 }
 
 public extension URLRequestable {
+    var method: HTTPMethod {
+        .GET
+    }
+    
     var headers: [HTTPHeader] {
         [.accept(.json), .defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage]
     }
@@ -59,5 +64,11 @@ public extension URLRequestable {
             .addHeaders(headers ?? [])
             .setHttpBody(body, contentType: .json)
         return request
+    }
+}
+
+public extension URLRequestable where Response: Decodable {
+    var transformer: ResponseTransformer {
+        JSONDecoder.transformer()
     }
 }
