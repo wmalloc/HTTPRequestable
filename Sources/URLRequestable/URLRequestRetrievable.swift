@@ -135,12 +135,12 @@ public extension URLRequestRetrievable {
 
 @available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
 public extension URLRequestAsyncRetrievable {
-    func data<ObjectType>(for request: URLRequest, transform: Transformer<DataResponse, ObjectType>, delegate:(URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
+    func data<ObjectType>(for request: URLRequest, transform: AsyncTransformer<DataResponse, ObjectType>, delegate:(URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
         let result = try await session.data(for: request, delegate: delegate)
-        return try transform(result)
+        return try await transform(result)
     }
     
-    func data<ObjectType>(for route: any URLRequestable, transform: Transformer<DataResponse, ObjectType>, delegate:(URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
+    func data<ObjectType>(for route: any URLRequestable, transform: AsyncTransformer<DataResponse, ObjectType>, delegate:(URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
         let request = try route.urlRequest(headers: nil, queryItems: nil)
         return try await data(for: request, transform: transform, delegate: delegate)
     }
