@@ -20,7 +20,7 @@ public protocol URLRequestTransferable {
 
      - returns: URLSessionDataTask
      */
-    func dataTask<T>(for request: URLRequest, transform: @escaping Transformer<DataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask?
+    func dataTask<T>(for request: URLRequest, transformer: @escaping Transformer<DataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask?
 
     /**
      Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -31,7 +31,7 @@ public protocol URLRequestTransferable {
 
      - returns: URLSessionDataTask
      */
-    func dataTask<T>(for route: any URLRequestable, transform: @escaping Transformer<DataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask?
+    func dataTask<T>(for route: any URLRequestable, transformer: @escaping Transformer<DataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask?
 
     /**
      Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -41,7 +41,7 @@ public protocol URLRequestTransferable {
 
      - returns: Publisher with decoded response
      */
-    func dataPublisher<ObjectType>(for request: URLRequest, transform: @escaping Transformer<DataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error>
+    func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<DataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error>
 
     /**
      Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -51,7 +51,7 @@ public protocol URLRequestTransferable {
 
      - returns: Publisher with decoded response
      */
-    func dataPublisher<ObjectType>(for route: any URLRequestable, transform: @escaping Transformer<DataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error>
+    func dataPublisher<ObjectType>(for route: any URLRequestable, transformer: @escaping Transformer<DataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error>
 }
 
 @available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
@@ -64,7 +64,7 @@ public protocol URLRequestAsyncTransferable: URLRequestTransferable {
 
      - returns: Transformed Object
      */
-    func data<ObjectType>(for request: URLRequest, transform: AsyncTransformer<DataResponse, ObjectType>, delegate: URLSessionTaskDelegate?) async throws -> ObjectType
+    func data<ObjectType>(for request: URLRequest, transformer: @escaping AsyncTransformer<DataResponse, ObjectType>, delegate: URLSessionTaskDelegate?) async throws -> ObjectType
 
     /**
      Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -74,12 +74,12 @@ public protocol URLRequestAsyncTransferable: URLRequestTransferable {
 
      - returns: Transformed Object
      */
-    func data<ObjectType>(for route: any URLRequestable, transform: AsyncTransformer<DataResponse, ObjectType>, delegate: URLSessionTaskDelegate?) async throws -> ObjectType
+    func data<ObjectType>(for route: any URLRequestable, transformer: @escaping AsyncTransformer<DataResponse, ObjectType>, delegate: URLSessionTaskDelegate?) async throws -> ObjectType
 }
 
 public extension URLRequestTransferable {
     @discardableResult
-    func dataTask<T>(for request: URLRequest, transform: @escaping Transformer<DataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask? {
+    func dataTask<T>(for request: URLRequest, transformer: @escaping Transformer<DataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask? {
         let dataTask = session.dataTask(with: request) { data, urlResponse, error in
             if let error {
                 completion?(.failure(error))
@@ -92,7 +92,7 @@ public extension URLRequestTransferable {
             }
             do {
                 try urlResponse.url_validate()
-                let mapped = try transform((data, urlResponse))
+                let mapped = try transformer((data, urlResponse))
                 completion?(.success(mapped))
             } catch {
                 completion?(.failure(error))
@@ -103,43 +103,43 @@ public extension URLRequestTransferable {
     }
 
     @discardableResult
-    func dataTask<T>(for route: any URLRequestable, transform: @escaping Transformer<DataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask? {
+    func dataTask<T>(for route: any URLRequestable, transformer: @escaping Transformer<DataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask? {
         guard let urlRequest = try? route.urlRequest(headers: nil, queryItems: nil) else {
             return nil
         }
-        return dataTask(for: urlRequest, transform: transform, completion: completion)
+        return dataTask(for: urlRequest, transformer: transformer, completion: completion)
     }
 }
 
 public extension URLRequestTransferable {
-    func dataPublisher<ObjectType>(for request: URLRequest, transform: @escaping Transformer<DataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error> {
+    func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<DataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error> {
         session.dataTaskPublisher(for: request)
             .tryMap { result -> ObjectType in
                 try result.response.url_validate()
                 try result.data.url_validateNotEmptyData()
-                return try transform(result)
+                return try transformer(result)
             }
             .eraseToAnyPublisher()
     }
 
-    func dataPublisher<ObjectType>(for route: any URLRequestable, transform: @escaping Transformer<DataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error> {
+    func dataPublisher<ObjectType>(for route: any URLRequestable, transformer: @escaping Transformer<DataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error> {
         guard let urlRequest = try? route.urlRequest() else {
             return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
         }
 
-        return dataPublisher(for: urlRequest, transform: transform)
+        return dataPublisher(for: urlRequest, transformer: transformer)
     }
 }
 
 @available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
 public extension URLRequestAsyncTransferable {
-    func data<ObjectType>(for request: URLRequest, transform: AsyncTransformer<DataResponse, ObjectType>, delegate: URLSessionTaskDelegate? = nil) async throws -> ObjectType {
+    func data<ObjectType>(for request: URLRequest, transformer: @escaping AsyncTransformer<DataResponse, ObjectType>, delegate: URLSessionTaskDelegate? = nil) async throws -> ObjectType {
         let result = try await session.data(for: request, delegate: delegate)
-        return try await transform(result)
+        return try await transformer(result)
     }
 
-    func data<ObjectType>(for route: any URLRequestable, transform: AsyncTransformer<DataResponse, ObjectType>, delegate: URLSessionTaskDelegate? = nil) async throws -> ObjectType {
+    func data<ObjectType>(for route: any URLRequestable, transformer: @escaping AsyncTransformer<DataResponse, ObjectType>, delegate: URLSessionTaskDelegate? = nil) async throws -> ObjectType {
         let request = try route.urlRequest(headers: nil, queryItems: nil)
-        return try await data(for: request, transform: transform, delegate: delegate)
+        return try await data(for: request, transformer: transformer, delegate: delegate)
     }
 }
