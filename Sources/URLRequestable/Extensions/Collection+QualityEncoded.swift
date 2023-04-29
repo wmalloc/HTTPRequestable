@@ -6,7 +6,7 @@
 
 import Foundation
 
-extension Collection where Element == String {
+extension Collection<String> {
     func url_qualityEncoded() -> Element {
         enumerated().map { index, encoding in
             let quality = 1.0 - (Double(index) * 0.1)

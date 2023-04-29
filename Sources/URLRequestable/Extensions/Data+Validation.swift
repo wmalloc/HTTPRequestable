@@ -7,29 +7,29 @@
 import Foundation
 
 public extension Data {
-  /**
-   Checks if the data is empty or not, throws if data is empty
-   
-   - returns: Data
-   */
-  @discardableResult
-  func url_validateNotEmptyData() throws -> Self {
-    guard !isEmpty else {
-      throw URLError(.zeroByteResource)
+    /**
+     Checks if the data is empty or not, throws if data is empty
+
+     - returns: Data
+     */
+    @discardableResult
+    func url_validateNotEmptyData() throws -> Self {
+        guard !isEmpty else {
+            throw URLError(.zeroByteResource)
+        }
+        return self
     }
-    return self
-  }
 }
 
-public extension Optional where Wrapped == Data {
-  @discardableResult
-  func url_validateNotEmptyData() throws -> Self {
-    guard let data = self else {
-      throw URLError(.cannotDecodeContentData)
+public extension Data? {
+    @discardableResult
+    func url_validateNotEmptyData() throws -> Self {
+        guard let data = self else {
+            throw URLError(.cannotDecodeContentData)
+        }
+        guard !data.isEmpty else {
+            throw URLError(.zeroByteResource)
+        }
+        return data
     }
-    guard !data.isEmpty else {
-      throw URLError(.zeroByteResource)
-    }
-    return data
-  }
 }

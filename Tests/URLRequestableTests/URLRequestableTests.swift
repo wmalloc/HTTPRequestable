@@ -1,5 +1,5 @@
-import XCTest
 @testable import URLRequestable
+import XCTest
 
 final class URLRequestableTests: XCTestCase {
     func testDefaultHeaders() throws {

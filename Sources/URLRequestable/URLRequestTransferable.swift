@@ -4,10 +4,10 @@
 //  Created by Waqar Malik on 4/28/23.
 //
 
-import Foundation
 import Combine
+import Foundation
 
-public protocol URLRequestRetrievable {
+public protocol URLRequestTransferable {
     var session: URLSession { get }
     init(session: URLSession)
 
@@ -21,7 +21,7 @@ public protocol URLRequestRetrievable {
      - returns: URLSessionDataTask
      */
     func dataTask<T>(for request: URLRequest, transform: @escaping Transformer<DataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask?
-    
+
     /**
      Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
@@ -32,31 +32,30 @@ public protocol URLRequestRetrievable {
      - returns: URLSessionDataTask
      */
     func dataTask<T>(for route: any URLRequestable, transform: @escaping Transformer<DataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask?
-    
+
     /**
      Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
      - parameter request:    Request where to get the data from
      - parameter transform:  Transformer how to convert the data to different type
-     
+
      - returns: Publisher with decoded response
      */
     func dataPublisher<ObjectType>(for request: URLRequest, transform: @escaping Transformer<DataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error>
-    
+
     /**
      Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
      - parameter route:    Route to create URLRequest
      - parameter transform:  Transformer how to convert the data to different type
-     
+
      - returns: Publisher with decoded response
      */
     func dataPublisher<ObjectType>(for route: any URLRequestable, transform: @escaping Transformer<DataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error>
-
 }
 
 @available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
-public protocol URLRequestAsyncRetrievable: URLRequestRetrievable {
+public protocol URLRequestAsyncTransferable: URLRequestTransferable {
     /**
      Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
@@ -66,7 +65,7 @@ public protocol URLRequestAsyncRetrievable: URLRequestRetrievable {
      - returns: Transformed Object
      */
     func data<ObjectType>(for request: URLRequest, transform: AsyncTransformer<DataResponse, ObjectType>, delegate: URLSessionTaskDelegate?) async throws -> ObjectType
-    
+
     /**
      Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
@@ -78,7 +77,7 @@ public protocol URLRequestAsyncRetrievable: URLRequestRetrievable {
     func data<ObjectType>(for route: any URLRequestable, transform: AsyncTransformer<DataResponse, ObjectType>, delegate: URLSessionTaskDelegate?) async throws -> ObjectType
 }
 
-public extension URLRequestRetrievable {
+public extension URLRequestTransferable {
     @discardableResult
     func dataTask<T>(for request: URLRequest, transform: @escaping Transformer<DataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask? {
         let dataTask = session.dataTask(with: request) { data, urlResponse, error in
@@ -102,7 +101,7 @@ public extension URLRequestRetrievable {
         dataTask.resume()
         return dataTask
     }
-    
+
     @discardableResult
     func dataTask<T>(for route: any URLRequestable, transform: @escaping Transformer<DataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask? {
         guard let urlRequest = try? route.urlRequest(headers: nil, queryItems: nil) else {
@@ -112,7 +111,7 @@ public extension URLRequestRetrievable {
     }
 }
 
-public extension URLRequestRetrievable {
+public extension URLRequestTransferable {
     func dataPublisher<ObjectType>(for request: URLRequest, transform: @escaping Transformer<DataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error> {
         session.dataTaskPublisher(for: request)
             .tryMap { result -> ObjectType in
@@ -122,27 +121,25 @@ public extension URLRequestRetrievable {
             }
             .eraseToAnyPublisher()
     }
-    
+
     func dataPublisher<ObjectType>(for route: any URLRequestable, transform: @escaping Transformer<DataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error> {
         guard let urlRequest = try? route.urlRequest() else {
             return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
         }
-        
+
         return dataPublisher(for: urlRequest, transform: transform)
     }
 }
 
-
 @available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
-public extension URLRequestAsyncRetrievable {
-    func data<ObjectType>(for request: URLRequest, transform: AsyncTransformer<DataResponse, ObjectType>, delegate:(URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
+public extension URLRequestAsyncTransferable {
+    func data<ObjectType>(for request: URLRequest, transform: AsyncTransformer<DataResponse, ObjectType>, delegate: URLSessionTaskDelegate? = nil) async throws -> ObjectType {
         let result = try await session.data(for: request, delegate: delegate)
         return try await transform(result)
     }
-    
-    func data<ObjectType>(for route: any URLRequestable, transform: AsyncTransformer<DataResponse, ObjectType>, delegate:(URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
+
+    func data<ObjectType>(for route: any URLRequestable, transform: AsyncTransformer<DataResponse, ObjectType>, delegate: URLSessionTaskDelegate? = nil) async throws -> ObjectType {
         let request = try route.urlRequest(headers: nil, queryItems: nil)
         return try await data(for: request, transform: transform, delegate: delegate)
     }
 }
-

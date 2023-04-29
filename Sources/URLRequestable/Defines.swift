@@ -15,4 +15,3 @@ public typealias DataResponse = (data: Data, response: URLResponse)
 
 @available(iOS 15, tvOS 15, watchOS 8, macCatalyst 15, macOS 12, *)
 public typealias AsyncTransformer<InputType, OutputType> = (InputType) async throws -> OutputType
-

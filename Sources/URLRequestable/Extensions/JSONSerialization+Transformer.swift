@@ -7,11 +7,11 @@
 import Foundation
 
 public extension JSONSerialization {
-  static func transformer(options: JSONSerialization.ReadingOptions = .allowFragments) -> Transformer<DataResponse, Any> {
-    { response in
-      try response.response.url_validate()
-      try response.data.url_validateNotEmptyData()
-      return try JSONSerialization.jsonObject(with: response.data, options: options)
+    static func transformer(options: JSONSerialization.ReadingOptions = .allowFragments) -> Transformer<DataResponse, Any> {
+        { response in
+            try response.response.url_validate()
+            try response.data.url_validateNotEmptyData()
+            return try JSONSerialization.jsonObject(with: response.data, options: options)
+        }
     }
-  }
 }

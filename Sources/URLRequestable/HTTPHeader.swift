@@ -7,25 +7,24 @@
 import Foundation
 
 public struct HTTPHeader: Hashable, Identifiable {
-  public let name: String
-  public let value: String?
+    public let name: String
+    public let value: String?
 
-  public init(name: String, value: String? = nil) {
-    self.name = name
-    self.value = value
-  }
+    public init(name: String, value: String? = nil) {
+        self.name = name
+        self.value = value
+    }
 
-  public var id: HTTPHeader {
-    self
-  }
+    public var id: HTTPHeader {
+        self
+    }
 }
 
 extension HTTPHeader: CustomStringConvertible {
-  public var description: String {
-    "\(name): \(value ?? "")"
-  }
+    public var description: String {
+        "\(name): \(value ?? "")"
+    }
 }
 
 @available(iOS 15, tvOS 15, watchOS 8, macCatalyst 15, macOS 12, *)
-extension HTTPHeader: @unchecked Sendable {
-}
+extension HTTPHeader: @unchecked Sendable {}

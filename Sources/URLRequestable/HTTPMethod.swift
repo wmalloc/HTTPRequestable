@@ -21,26 +21,25 @@ import Foundation
  */
 
 public enum HTTPMethod: String, CaseIterable, Hashable, Identifiable {
-  case GET
-  case POST
-  case PUT
-  case PATCH
-  case DELETE
-  case HEAD
-  case OPTIONS
-  case TRACE
+    case GET
+    case POST
+    case PUT
+    case PATCH
+    case DELETE
+    case HEAD
+    case OPTIONS
+    case TRACE
 
-  public var id: HTTPMethod {
-    self
-  }
+    public var id: HTTPMethod {
+        self
+    }
 }
 
 extension HTTPMethod: CustomStringConvertible {
-  public var description: String {
-    rawValue
-  }
+    public var description: String {
+        rawValue
+    }
 }
 
 @available(iOS 15, tvOS 15, watchOS 8, macCatalyst 15, macOS 12, *)
-extension HTTPMethod: @unchecked Sendable {
-}
+extension HTTPMethod: @unchecked Sendable {}

@@ -28,7 +28,7 @@ public extension URLRequestable {
     var method: HTTPMethod {
         .GET
     }
-    
+
     var headers: [HTTPHeader] {
         [.accept(.json), .defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage]
     }
@@ -40,7 +40,7 @@ public extension URLRequestable {
     var queryItems: [URLQueryItem]? {
         nil
     }
-    
+
     func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
         guard var components = URLComponents(string: apiBaseURLString) else {
             throw URLError(.badURL)
@@ -55,7 +55,7 @@ public extension URLRequestable {
         }
         return url
     }
-    
+
     func urlRequest(headers: [HTTPHeader]? = nil, queryItems: [URLQueryItem]? = nil) throws -> URLRequest {
         let url = try url(queryItems: queryItems)
         let request = URLRequest(url: url)

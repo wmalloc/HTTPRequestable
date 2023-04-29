@@ -42,12 +42,12 @@ public extension HTTPHeader {
     static func contentDisposition(_ value: String) -> HTTPHeader {
         HTTPHeader(name: .contentDisposition, value: value)
     }
-    
+
     /// See the [User-Agent header](https://tools.ietf.org/html/rfc7231#section-5.5.3).
     static var defaultUserAgent: HTTPHeader {
         .userAgent(String.url_userAgent)
     }
-    
+
     static var defaultAcceptLanguage: HTTPHeader {
         .acceptLanguage(Locale.preferredLanguages.prefix(6).url_qualityEncoded())
     }
