@@ -9,6 +9,7 @@ import Foundation
 
 public protocol URLRequestTransferable {
     var session: URLSession { get }
+    
     init(session: URLSession)
 
     /**
