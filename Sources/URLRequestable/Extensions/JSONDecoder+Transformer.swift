@@ -7,7 +7,7 @@
 import Foundation
 
 public extension JSONDecoder {
-    static func transformer<T: Decodable>(decoder: JSONDecoder = JSONDecoder()) -> Transformer<DataResponse, T> {
+    static func transformer<T: Decodable>(decoder: JSONDecoder = JSONDecoder()) -> Transformer<URLDataResponse, T> {
         { response in
             try response.response.url_validate()
             try response.data.url_validateNotEmptyData()

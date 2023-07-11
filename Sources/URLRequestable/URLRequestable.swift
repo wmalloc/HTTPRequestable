@@ -6,10 +6,12 @@
 
 import Foundation
 
+public typealias URLDataResponse = (data: Data, response: URLResponse)
+
 public protocol URLRequestable {
     associatedtype Response
 
-    typealias ResponseTransformer = Transformer<DataResponse, Response>
+    typealias ResponseTransformer = Transformer<URLDataResponse, Response>
 
     var apiBaseURLString: String { get }
     var method: HTTPMethod { get }
