@@ -7,7 +7,7 @@
 import Foundation
 
 public extension JSONSerialization {
-    static func transformer(options: JSONSerialization.ReadingOptions = .allowFragments) -> Transformer<DataResponse, Any> {
+    static func transformer(options: JSONSerialization.ReadingOptions = .allowFragments) -> Transformer<URLDataResponse, Any> {
         { response in
             try response.response.url_validate()
             try response.data.url_validateNotEmptyData()
