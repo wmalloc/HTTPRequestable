@@ -25,7 +25,7 @@ public extension HTTPURLResponse {
     @discardableResult
     func url_httpValidate(acceptableContentTypes: Set<String>? = nil) throws -> Self {
         if let validContentType = acceptableContentTypes {
-            if let contentType = (allHeaderFields[HTTPHeaderType.contentType] ?? allHeaderFields[HTTPHeaderType.contentType.lowercased()]) as? String {
+            if let contentType = value(forHTTPHeaderField: HTTPHeaderType.contentType) ?? value(forHTTPHeaderField: HTTPHeaderType.contentType.lowercased()) {
                 if !validContentType.contains(contentType) {
                     throw URLError(.dataNotAllowed)
                 }
