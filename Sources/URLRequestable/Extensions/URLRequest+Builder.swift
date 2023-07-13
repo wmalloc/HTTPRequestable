@@ -156,7 +156,7 @@ public extension URLRequest {
     }
 
     @discardableResult
-    func setMethod(_ method: HTTPMethod?) -> Self {
+    func setMethod(_ method: URLRequest.Method?) -> Self {
         setHttpMethod(method?.rawValue)
     }
 
