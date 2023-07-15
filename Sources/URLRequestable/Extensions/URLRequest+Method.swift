@@ -23,4 +23,41 @@ public extension URLRequest {
     mutating func addValue(_ value: String, forHTTPHeaderField field: HTTPField.Name) {
         self.addValue(value, forHTTPHeaderField: field.canonicalName)
     }
+    
+    subscript(header key: String) -> String? {
+        get {
+            value(forHTTPHeaderField: key)
+        }
+        set {
+            setValue(newValue, forHTTPHeaderField: key)
+        }
+    }
+
+    subscript(field: HTTPField.Name) -> String? {
+        get {
+            value(forHTTPHeaderField: field)
+        }
+        set {
+            setValue(newValue, forHTTPHeaderField: field)
+        }
+    }
+
+    var contentType: String? {
+        get {
+            self[.contentType]
+        }
+        set {
+            self[.contentType] = newValue
+        }
+    }
+
+    var userAgent: String? {
+        get {
+            self[.userAgent]
+        }
+        set {
+            self[.userAgent] = newValue
+        }
+    }
+
 }
