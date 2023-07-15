@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import HTTPTypes
 
 public extension URLRequest {
 	@discardableResult
@@ -24,8 +25,8 @@ public extension URLRequest {
     func setMultipartFormData(_ multipartFormData: MultipartFormData) throws -> Self {
         let request = self
         request.setHttpBody(try multipartFormData.encoded(), contentType: multipartFormData.contentType)
-            .setHeader(HTTPHeader(name: .contentLength, value: "\(multipartFormData.contentLength)"))
-            .setHeader(HTTPHeader(name: .contentType, value: multipartFormData.contentType))
+            .setHeader(HTTPHeader(field: .contentLength, value: "\(multipartFormData.contentLength)"))
+            .setHeader(HTTPHeader(field: .contentType, value: multipartFormData.contentType))
         return self
     }
 }
