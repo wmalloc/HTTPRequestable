@@ -5,26 +5,23 @@
 //
 
 import Foundation
+import HTTPTypes
 
 public extension HTTPHeader {
     static func accept(_ value: String) -> Self {
-        .init(name: .accept, value: value)
-    }
-
-    static func acceptCharset(_ value: String) -> Self {
-        .init(name: .acceptCharset, value: value)
+        .init(field: .accept, value: value)
     }
 
     static func acceptLanguage(_ value: String) -> Self {
-        .init(name: .acceptLanguage, value: value)
+        .init(field: .acceptLanguage, value: value)
     }
 
     static func acceptEncoding(_ value: String) -> Self {
-        .init(name: .acceptEncoding, value: value)
+        .init(field: .acceptEncoding, value: value)
     }
 
     static func authorization(_ value: String) -> Self {
-        .init(name: .authorization, value: value)
+        .init(field: .authorization, value: value)
     }
 
     static func authorization(token: String) -> Self {
@@ -32,15 +29,15 @@ public extension HTTPHeader {
     }
 
     static func contentType(_ value: String) -> Self {
-        .init(name: .contentType, value: value)
+        .init(field: .contentType, value: value)
     }
 
     static func userAgent(_ value: String) -> Self {
-        .init(name: .userAgent, value: value)
+        .init(field: .userAgent, value: value)
     }
 
     static func contentDisposition(_ value: String) -> Self {
-        .init(name: .contentDisposition, value: value)
+        .init(field: .contentDisposition, value: value)
     }
 
     /// See the [User-Agent header](https://tools.ietf.org/html/rfc7231#section-5.5.3).
