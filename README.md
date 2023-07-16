@@ -21,16 +21,16 @@ dependencies: [
 | |Features |
 --------------------------|------------------------------------------------------------
 `URLRequestable` | Build your `URLRequest` to make a call
-`URLRequestTransferable` Protocol | To create your API client
-`URLRequestAsyncTransferable` Protocol | Concurrency version of the API.
+`URLRequestTransferable` | To create your API client
+`URLRequestAsyncTransferable` | Concurrency version of the API.
 
 ## Usage
 
 To defineing a request:
 
 ```swift
-struct TopStories: URLRequestable {
-    typealias Response = [Int]
+struct TopStories: URLAsyncRequestable {
+    typealias ResultType = [Int]
     
     let apiBaseURLString: String = "https://hacker-news.firebaseio.com"
     let method: URLRequest.Method = .get
@@ -49,9 +49,9 @@ class HackerNewsAPI: URLRequestAsyncTransferable {
         self.session = session
     }
     
-    func topStories() async throws -> TopStories.Response {
+    func topStories() async throws -> TopStories.ResultType {
         let request = TopStories()
-        return try await data(for: request, transformer: request.transformer)
+        return try await data(for: request, transformer: request.asyncTransformer)
     }
 }
 ```
