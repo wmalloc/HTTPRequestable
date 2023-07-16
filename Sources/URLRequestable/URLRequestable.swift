@@ -10,9 +10,9 @@ import HTTPTypes
 public typealias URLDataResponse = (data: Data, response: URLResponse)
 
 public protocol URLRequestable {
-    associatedtype Response
+    associatedtype ResponseType
 
-    typealias ResponseTransformer = Transformer<URLDataResponse, Response>
+    typealias URLResponseTransformer = Transformer<URLDataResponse, ResponseType>
 
     var apiBaseURLString: String { get }
     var method: URLRequest.Method { get }
@@ -21,7 +21,7 @@ public protocol URLRequestable {
     var body: Data? { get }
     var queryItems: [URLQueryItem]? { get }
 
-    var transformer: ResponseTransformer { get }
+    var transformer: URLResponseTransformer { get }
 
     func url(queryItems: [URLQueryItem]?) throws -> URL
     func urlRequest(headers: [HTTPHeader]?, queryItems: [URLQueryItem]?) throws -> URLRequest
@@ -70,8 +70,8 @@ public extension URLRequestable {
     }
 }
 
-public extension URLRequestable where Response: Decodable {
-    var transformer: ResponseTransformer {
+public extension URLRequestable where ResponseType: Decodable {
+    var transformer: URLResponseTransformer {
         JSONDecoder.transformer()
     }
 }
