@@ -8,6 +8,7 @@ import Foundation
 import HTTPTypes
 
 public typealias URLDataResponse = (data: Data, response: URLResponse)
+public typealias Transformer<InputType, OutputType> = (InputType) throws -> OutputType
 
 public protocol URLRequestable {
     associatedtype ResultType
