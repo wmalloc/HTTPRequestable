@@ -10,9 +10,9 @@ import HTTPTypes
 public typealias URLDataResponse = (data: Data, response: URLResponse)
 
 public protocol URLRequestable {
-    associatedtype ResponseType
+    associatedtype ResultType
 
-    typealias URLResponseTransformer = Transformer<URLDataResponse, ResponseType>
+    typealias URLResponseTransformer = Transformer<URLDataResponse, ResultType>
 
     var apiBaseURLString: String { get }
     var method: URLRequest.Method { get }
@@ -70,7 +70,7 @@ public extension URLRequestable {
     }
 }
 
-public extension URLRequestable where ResponseType: Decodable {
+public extension URLRequestable where ResultType: Decodable {
     var transformer: URLResponseTransformer {
         JSONDecoder.transformer()
     }

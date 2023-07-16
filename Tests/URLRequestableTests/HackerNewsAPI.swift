@@ -16,7 +16,7 @@ class HackerNewsAPI: URLRequestAsyncTransferable {
         self.session = session
     }
     
-    func topStories() async throws -> TopStories.ResponseType {
+    func topStories() async throws -> TopStories.ResultType {
         let request = TopStories()
         return try await data(for: request, transformer: request.asyncTransformer)
     }
@@ -27,7 +27,7 @@ extension URLRequestable {
 }
 
 struct TopStories: URLAsyncRequestable {
-    typealias ResponseType = [Int]
+    typealias ResultType = [Int]
     
     let method: URLRequest.Method = .get
     let path: String = "/v0/topstories.json"

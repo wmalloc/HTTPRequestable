@@ -11,13 +11,13 @@ public typealias AsyncTransformer<InputType, OutputType> = (InputType) async thr
 
 @available(iOS 15, tvOS 15, watchOS 8, macCatalyst 15, macOS 12, *)
 public protocol URLAsyncRequestable: URLRequestable {
-    typealias AsyncURLResponseTransformer = AsyncTransformer<URLDataResponse, ResponseType>
+    typealias AsyncURLResponseTransformer = AsyncTransformer<URLDataResponse, ResultType>
     
     var asyncTransformer: AsyncURLResponseTransformer { get }
 }
 
 @available(iOS 15, tvOS 15, watchOS 8, macCatalyst 15, macOS 12, *)
-public extension URLAsyncRequestable where ResponseType: Decodable {
+public extension URLAsyncRequestable where ResultType: Decodable {
     var asyncTransformer: AsyncURLResponseTransformer {
         JSONDecoder.transformer()
     }

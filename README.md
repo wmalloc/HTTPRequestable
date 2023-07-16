@@ -30,7 +30,7 @@ To defineing a request:
 
 ```swift
 struct TopStories: URLAsyncRequestable {
-    typealias Response = [Int]
+    typealias ResultType = [Int]
     
     let apiBaseURLString: String = "https://hacker-news.firebaseio.com"
     let method: URLRequest.Method = .get
@@ -49,9 +49,9 @@ class HackerNewsAPI: URLRequestAsyncTransferable {
         self.session = session
     }
     
-    func topStories() async throws -> TopStories.Response {
+    func topStories() async throws -> TopStories.ResultType {
         let request = TopStories()
-        return try await data(for: request, transformer: request.transformer)
+        return try await data(for: request, transformer: request.asyncTransformer)
     }
 }
 ```
