@@ -18,14 +18,14 @@ public protocol URLRequestable {
     var apiBaseURLString: String { get }
     var method: URLRequest.Method { get }
     var path: String { get }
-    var headers: [HTTPHeader] { get }
+    var headers: [HTTPField] { get }
     var body: Data? { get }
     var queryItems: [URLQueryItem]? { get }
 
     var transformer: URLResponseTransformer { get }
 
     func url(queryItems: [URLQueryItem]?) throws -> URL
-    func urlRequest(headers: [HTTPHeader]?, queryItems: [URLQueryItem]?) throws -> URLRequest
+    func urlRequest(headers: [HTTPField]?, queryItems: [URLQueryItem]?) throws -> URLRequest
 }
 
 public extension URLRequestable {
@@ -33,7 +33,7 @@ public extension URLRequestable {
         .get
     }
 
-    var headers: [HTTPHeader] {
+    var headers: [HTTPField] {
         [.accept(.json), .defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage]
     }
 
@@ -60,7 +60,7 @@ public extension URLRequestable {
         return url
     }
 
-    func urlRequest(headers: [HTTPHeader]? = nil, queryItems: [URLQueryItem]? = nil) throws -> URLRequest {
+    func urlRequest(headers: [HTTPField]? = nil, queryItems: [URLQueryItem]? = nil) throws -> URLRequest {
         let url = try url(queryItems: queryItems)
         let request = URLRequest(url: url)
             .setMethod(method)

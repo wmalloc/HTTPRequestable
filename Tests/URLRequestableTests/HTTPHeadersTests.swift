@@ -8,6 +8,7 @@
 
 @testable import URLRequestable
 import XCTest
+import HTTPTypes
 
 final class HTTPHeadersTests: XCTestCase {
     static let baseURLString = "http://localhost:8080"
@@ -39,13 +40,13 @@ final class HTTPHeadersTests: XCTestCase {
 			.setMethod(.get)
 			.setUserAgent(String.url_userAgent)
 			.setHttpHeaders(HTTPHeaders.defaultHeaders)
-			.addHeader(HTTPHeader.accept(.json))
+			.addHeader(HTTPField.accept(.json))
 
 		let headers = request.headers
 		XCTAssertNotNil(headers)
 		XCTAssertEqual(headers?.count, 4)
 		XCTAssertFalse(headers!.contains(.contentType(.xml)))
-		//XCTAssertTrue(headers!.contains(.defaultAcceptLanguage))
+		XCTAssertTrue(headers!.contains(.defaultAcceptLanguage))
 	}
 
 	func testDictionary() throws {
@@ -56,8 +57,8 @@ final class HTTPHeadersTests: XCTestCase {
 		headers[.contentType] = .json
 		XCTAssertEqual(headers.count, 1)
 		XCTAssertEqual(headers[.contentType], .json)
-		headers = headers.add(HTTPHeader(field: .authorization, value: "Password"))
-			.add(HTTPHeader(field: .contentLength, value: "\(0)"))
+		headers = headers.add(HTTPField(name: .authorization, value: "Password"))
+			.add(HTTPField(name: .contentLength, value: "\(0)"))
 			.add(.authorization(token: "Token"))
 		XCTAssertEqual(headers.count, 3)
 		let dictionary = headers.dictionary

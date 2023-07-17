@@ -5,6 +5,7 @@
 //
 
 import Foundation
+import HTTPTypes
 
 public extension URLRequest {
     @discardableResult
@@ -161,15 +162,15 @@ public extension URLRequest {
     }
 
     @discardableResult
-    func setHeader(_ header: HTTPHeader?) -> Self {
+    func setHeader(_ header: HTTPField?) -> Self {
         guard let header else {
             return self
         }
-        return setHttpHeader(header.value, forName: header.name)
+        return setHttpHeader(header.value, forName: header.name.canonicalName)
     }
 
     @discardableResult
-    func setHeaders(_ headers: [HTTPHeader]?) -> Self {
+    func setHeaders(_ headers: [HTTPField]?) -> Self {
         guard let headers else {
             return self
         }
@@ -181,21 +182,15 @@ public extension URLRequest {
     }
 
     @discardableResult
-    func addHeader(_ header: HTTPHeader) -> Self {
-        guard let value = header.value else {
-            return self
-        }
-        return addHttpHeader(value, forName: header.name)
+    func addHeader(_ header: HTTPField) -> Self {
+        return addHttpHeader(header.value, forName: header.name.canonicalName)
     }
 
     @discardableResult
-    func addHeaders(_ headers: [HTTPHeader]) -> Self {
+    func addHeaders(_ headers: [HTTPField]) -> Self {
         var request = self
         for header in headers {
-            guard let value = header.value else {
-                continue
-            }
-            request.addValue(value, forHTTPHeaderField: header.name)
+            request.addValue(header.value, forHTTPHeaderField: header.name.canonicalName)
         }
         return request
     }
