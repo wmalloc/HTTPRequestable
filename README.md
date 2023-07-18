@@ -29,14 +29,21 @@ dependencies: [
 To defineing a request:
 
 ```swift
-struct TopStories: URLAsyncRequestable {
+struct StoryList: URLAsyncRequestable {
     typealias ResultType = [Int]
     
     let apiBaseURLString: String = "https://hacker-news.firebaseio.com"
     let method: URLRequest.Method = .get
-    let path: String = "/v0/topstories.json"
-    let headers: [HTTPHeader] = [.accept(.json)]
+    let path: String
+    let headers: [HTTPField] = [.accept(.json)]
     let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
+    
+    init(storyType: String) throws {
+        guard !storyType.isEmpty else {
+            throw URLError(.badURL)
+        }
+        self.path = "/v0/" + storyType
+    }
 }
 ```
 #### Creating an API
@@ -49,9 +56,16 @@ class HackerNewsAPI: URLRequestAsyncTransferable {
         self.session = session
     }
     
-    func topStories() async throws -> TopStories.ResultType {
-        let request = TopStories()
+    func storyList(type: String) async throws -> StoryList.ResultType {
+        let request = try StoryList(storyType: type)
         return try await data(for: request, transformer: request.asyncTransformer)
     }
 }
+```
+
+Then you can create an instantiate your API object to make calls
+
+```swift
+var api = HackerNewsAPI()
+let topStories = try await api.storyList(type: "topstories.json")
 ```
