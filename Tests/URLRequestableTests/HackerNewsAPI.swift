@@ -17,8 +17,8 @@ class HackerNewsAPI: URLRequestAsyncTransferable {
         self.session = session
     }
     
-    func topStories() async throws -> TopStories.ResultType {
-        let request = TopStories()
+    func storyList(type: String) async throws -> StoryList.ResultType {
+        let request = try StoryList(storyType: type)
         return try await data(for: request, transformer: request.asyncTransformer)
     }
 }
@@ -27,11 +27,18 @@ extension URLRequestable {
     var apiBaseURLString: String { "https://hacker-news.firebaseio.com" }
 }
 
-struct TopStories: URLAsyncRequestable {
+struct StoryList: URLAsyncRequestable {
     typealias ResultType = [Int]
     
     let method: URLRequest.Method = .get
-    let path: String = "/v0/topstories.json"
+    let path: String
     let headers: [HTTPField] = [.accept(.json)]
     let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
+    
+    init(storyType: String) throws {
+        guard !storyType.isEmpty else {
+            throw URLError(.badURL)
+        }
+        self.path = "/v0/" + storyType
+    }
 }

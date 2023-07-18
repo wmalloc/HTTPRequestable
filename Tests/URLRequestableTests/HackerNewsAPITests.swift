@@ -20,7 +20,17 @@ final class HackerNewsAPITests: XCTestCase {
     }
 
     func testTopStories() async throws {
-        let topStories = try await api.topStories()
+        let topStories = try await api.storyList(type: "topstories.json")
         XCTAssertEqual(topStories.count, 500)
+    }
+    
+    func testNewStories() async throws {
+        let newStories = try await api.storyList(type: "newstories.json")
+        XCTAssertEqual(newStories.count, 500)
+    }
+    
+    func testBestStories() async throws {
+        let bestStories = try await api.storyList(type: "beststories.json")
+        XCTAssertEqual(bestStories.count, 200)
     }
 }
