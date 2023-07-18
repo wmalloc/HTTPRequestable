@@ -6,15 +6,16 @@
 //
 
 import Foundation
+import HTTPTypes
 
 public extension URLSessionConfiguration {
 	var headers: HTTPHeaders? {
 		get {
-			let result = httpAdditionalHeaders?.compactMap { (key: AnyHashable, value: Any) -> HTTPHeader? in
-				guard let name = key as? String, let value = value as? String else {
+			let result = httpAdditionalHeaders?.compactMap { (key: AnyHashable, value: Any) -> HTTPField? in
+                guard let key = key as? String, let value = value as? String, let name = HTTPField.Name(key) else {
 					return nil
 				}
-				return HTTPHeader(name: name, value: value)
+				return HTTPField(name: name, value: value)
 			}
 			guard let result else {
 				return nil
