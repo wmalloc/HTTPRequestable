@@ -10,21 +10,9 @@ import HTTPTypes
 
 public extension URLRequest {
 	@discardableResult
-	func setHttpHeaders(_ httpHeaders: HTTPHeaders?) -> Self {
+	func setHttpHeaderFields(_ fields: HTTPFields?) -> Self {
 		var request = self
-		request.headers = httpHeaders
-		return request
-	}
-
-	@discardableResult
-	func addHeaders(_ headers: HTTPHeaders) -> Self {
-		addHeaders(headers.headers)
-	}
-
-	@discardableResult
-	func setHttpHeaderFields(_: HTTPFields?) -> Self {
-		var request = self
-		request.headerFields = headerFields
+		request.headerFields = fields
 		return request
 	}
 
@@ -51,26 +39,6 @@ public extension URLRequest {
 }
 
 public extension URLRequest {
-	var headers: HTTPHeaders? {
-		get {
-			let values: [HTTPField]? = allHTTPHeaderFields?.compactMap { (key: String, value: String) in
-				guard let name = HTTPField.Name(key) else {
-					return nil
-				}
-				return HTTPField(name: name, value: value)
-			}
-			guard let values else {
-				return nil
-			}
-			return HTTPHeaders(values)
-		}
-		set {
-			allHTTPHeaderFields = newValue?.dictionary
-		}
-	}
-}
-
-public extension URLRequest {
 	var headerFields: HTTPFields? {
 		get {
 			guard let allHTTPHeaderFields else {
@@ -79,7 +47,8 @@ public extension URLRequest {
 			return HTTPFields(rawValue: allHTTPHeaderFields)
 		}
 		set {
-			allHTTPHeaderFields = newValue?.rawValue
+            let rawValues = newValue?.rawValue
+			allHTTPHeaderFields = rawValues
 		}
 	}
 }
@@ -99,9 +68,9 @@ extension HTTPFields: RawRepresentable {
 
 	public var rawValue: [String: String] {
 		var rawValues: [String: String] = [:]
-		for value in self {
-			rawValues[value.name.canonicalName] = value.value
-		}
+        for value in self {
+            rawValues[value.name.canonicalName] = value.value
+        }
 		return rawValues
 	}
 }

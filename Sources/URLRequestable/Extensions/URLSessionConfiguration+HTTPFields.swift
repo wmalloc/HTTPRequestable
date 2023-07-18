@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 
 public extension URLSessionConfiguration {
-	var headers: HTTPHeaders? {
+	var headers: HTTPFields? {
 		get {
 			let result = httpAdditionalHeaders?.compactMap { (key: AnyHashable, value: Any) -> HTTPField? in
 				guard let key = key as? String, let value = value as? String, let name = HTTPField.Name(key) else {
@@ -20,10 +20,10 @@ public extension URLSessionConfiguration {
 			guard let result else {
 				return nil
 			}
-			return HTTPHeaders(result)
+			return HTTPFields(result)
 		}
 		set {
-			httpAdditionalHeaders = newValue?.dictionary
+			httpAdditionalHeaders = newValue?.rawValue
 		}
 	}
 }

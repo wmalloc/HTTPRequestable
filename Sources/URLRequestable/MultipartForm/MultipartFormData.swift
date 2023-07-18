@@ -28,7 +28,7 @@ open class MultipartFormData {
 	let fileManager: FileManager
 	public private(set) var bodyParts: [MultipartFormBodyPart] = []
 
-	public func append(stream: InputStream, withLength length: UInt64, headers: HTTPHeaders) {
+	public func append(stream: InputStream, withLength length: UInt64, headers: HTTPFields) {
 		let bodyPart = MultipartFormBodyPart(headers: headers, bodyStream: stream, bodyContentLength: length)
 		bodyParts.append(bodyPart)
 	}
@@ -155,7 +155,7 @@ extension MultipartFormData {
 		Data(finalBoundary.utf8)
 	}
 
-	func contentHeaders(withName name: String, fileName: String? = nil, mimeType: String? = nil) -> HTTPHeaders {
+	func contentHeaders(withName name: String, fileName: String? = nil, mimeType: String? = nil) -> HTTPFields {
 		var disposition = "form-data; name=\"\(name)\""
 		if let fileName {
 			disposition += "; filename=\"\(fileName)\""
@@ -165,11 +165,7 @@ extension MultipartFormData {
 		if let mimeType {
 			headers.append(HTTPField.contentType(mimeType + EncodingCharacters.crlf))
 		}
-		return headers.reduce(HTTPHeaders()) { partialResult, header in
-			var result = partialResult
-			result[header.name] = header.value
-			return result
-		}
+		return HTTPFields(headers)
 	}
 }
 
