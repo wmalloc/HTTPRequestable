@@ -25,8 +25,8 @@ public extension URLRequest {
     func setMultipartFormData(_ multipartFormData: MultipartFormData) throws -> Self {
         let request = self
         request.setHttpBody(try multipartFormData.encoded(), contentType: multipartFormData.contentType)
-            .setHeader(HTTPHeader(field: .contentLength, value: "\(multipartFormData.contentLength)"))
-            .setHeader(HTTPHeader(field: .contentType, value: multipartFormData.contentType))
+            .setHeader(HTTPField(name: .contentLength, value: "\(multipartFormData.contentLength)"))
+            .setHeader(HTTPField(name: .contentType, value: multipartFormData.contentType))
         return self
     }
 }
@@ -34,8 +34,11 @@ public extension URLRequest {
 public extension URLRequest {
 	var headers: HTTPHeaders? {
 		get {
-			let values = allHTTPHeaderFields?.compactMap { (key: String, value: String) in
-				HTTPHeader(name: key, value: value)
+            let values: [HTTPField]? = allHTTPHeaderFields?.compactMap { (key: String, value: String) in
+                guard let name = HTTPField.Name(key) else {
+                    return nil
+                }
+                return HTTPField(name: name, value: value)
 			}
 			guard let values else {
 				return nil

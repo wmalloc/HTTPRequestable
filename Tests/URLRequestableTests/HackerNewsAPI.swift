@@ -7,6 +7,7 @@
 
 import Foundation
 import URLRequestable
+import HTTPTypes
 
 @available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
 class HackerNewsAPI: URLRequestAsyncTransferable {
@@ -31,6 +32,6 @@ struct TopStories: URLAsyncRequestable {
     
     let method: URLRequest.Method = .get
     let path: String = "/v0/topstories.json"
-    let headers: [HTTPHeader] = [.accept(.json)]
+    let headers: [HTTPField] = [.accept(.json)]
     let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
 }

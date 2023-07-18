@@ -8,8 +8,6 @@
 import Foundation
 import OrderedCollections
 
-public typealias HTTPHeaders = OrderedDictionary<String, String>
-
 open class MultipartFormBodyPart {
 	static var streamBufferSize: Int = 1024
 	public let headers: HTTPHeaders

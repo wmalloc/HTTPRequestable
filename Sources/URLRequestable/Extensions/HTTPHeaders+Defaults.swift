@@ -11,17 +11,6 @@ import HTTPTypes
 
 public extension HTTPHeaders {
 	static var defaultHeaders: HTTPHeaders {
-		HTTPHeaders(arrayLiteral: HTTPHeader.defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage)
+		HTTPHeaders(arrayLiteral: HTTPField.defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage)
 	}
-}
-
-public extension HTTPHeaders {
-    subscript(field: HTTPField.Name) -> String? {
-        get {
-            self[field.canonicalName] ?? self[field.rawName]
-        }
-        set {
-            self[field.canonicalName] = newValue
-        }
-    }
 }
