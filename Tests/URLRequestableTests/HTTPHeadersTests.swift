@@ -9,6 +9,7 @@
 import HTTPTypes
 @testable import URLRequestable
 import XCTest
+import HTTPTypes
 
 final class HTTPHeadersTests: XCTestCase {
 	static let baseURLString = "http://localhost:8080"

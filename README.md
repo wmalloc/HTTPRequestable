@@ -30,6 +30,7 @@ To defineing a request:
 
 ```swift
 struct StoryList: URLAsyncRequestable {
+
     typealias ResultType = [Int]
     
     let apiBaseURLString: String = "https://hacker-news.firebaseio.com"
