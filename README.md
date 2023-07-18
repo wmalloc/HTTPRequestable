@@ -30,6 +30,7 @@ To defineing a request:
 
 ```swift
 struct StoryList: URLAsyncRequestable {
+
     typealias ResultType = [Int]
     
     let apiBaseURLString: String = "https://hacker-news.firebaseio.com"
@@ -58,6 +59,7 @@ class HackerNewsAPI: URLRequestAsyncTransferable {
     
     func storyList(type: String) async throws -> StoryList.ResultType {
         let request = try StoryList(storyType: type)
+
         return try await data(for: request, transformer: request.asyncTransformer)
     }
 }
