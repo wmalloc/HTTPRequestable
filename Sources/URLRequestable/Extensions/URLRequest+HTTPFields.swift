@@ -22,9 +22,9 @@ public extension URLRequest {
 	}
 
 	@discardableResult
-	func setHttpHeaderFields(_: HTTPFields?) -> Self {
+	func setHttpHeaderFields(_ fields: HTTPFields?) -> Self {
 		var request = self
-		request.headerFields = headerFields
+		request.headerFields = fields
 		return request
 	}
 
