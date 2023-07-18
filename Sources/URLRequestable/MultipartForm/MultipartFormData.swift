@@ -163,13 +163,13 @@ extension MultipartFormData {
 
 		var headers: [HTTPField] = [.contentDisposition(disposition)]
 		if let mimeType {
-            headers.append(HTTPField.contentType(mimeType + EncodingCharacters.crlf))
+			headers.append(HTTPField.contentType(mimeType + EncodingCharacters.crlf))
 		}
-        return headers.reduce(HTTPHeaders()) { partialResult, header in
-            var result = partialResult
-            result[header.name] = header.value ?? ""
-            return result
-        }
+		return headers.reduce(HTTPHeaders()) { partialResult, header in
+			var result = partialResult
+			result[header.name] = header.value
+			return result
+		}
 	}
 }
 

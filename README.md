@@ -35,7 +35,7 @@ struct StoryList: URLAsyncRequestable {
     let apiBaseURLString: String = "https://hacker-news.firebaseio.com"
     let method: URLRequest.Method = .get
     let path: String
-    let headers: [HTTPField] = [.accept(.json)]
+    let headers: HTTPFields = HTTPFields([.accept(.json)])
     let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
     
     init(storyType: String) throws {
