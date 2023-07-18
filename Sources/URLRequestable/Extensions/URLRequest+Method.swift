@@ -8,56 +8,55 @@ import Foundation
 import HTTPTypes
 
 public extension URLRequest {
-    typealias Method = HTTPRequest.Method
+	typealias Method = HTTPRequest.Method
 }
 
 public extension URLRequest {
-    func value(forHTTPHeaderField field: HTTPField.Name) -> String? {
-        value(forHTTPHeaderField: field.canonicalName) ?? value(forHTTPHeaderField: field.rawName)
-    }
+	func value(forHTTPHeaderField field: HTTPField.Name) -> String? {
+		value(forHTTPHeaderField: field.canonicalName) ?? value(forHTTPHeaderField: field.rawName)
+	}
 
-    mutating func setValue(_ value: String?, forHTTPHeaderField field: HTTPField.Name) {
-        setValue(value, forHTTPHeaderField: field.canonicalName)
-    }
+	mutating func setValue(_ value: String?, forHTTPHeaderField field: HTTPField.Name) {
+		setValue(value, forHTTPHeaderField: field.canonicalName)
+	}
 
-    mutating func addValue(_ value: String, forHTTPHeaderField field: HTTPField.Name) {
-        self.addValue(value, forHTTPHeaderField: field.canonicalName)
-    }
-    
-    subscript(header key: String) -> String? {
-        get {
-            value(forHTTPHeaderField: key)
-        }
-        set {
-            setValue(newValue, forHTTPHeaderField: key)
-        }
-    }
+	mutating func addValue(_ value: String, forHTTPHeaderField field: HTTPField.Name) {
+		addValue(value, forHTTPHeaderField: field.canonicalName)
+	}
 
-    subscript(field: HTTPField.Name) -> String? {
-        get {
-            value(forHTTPHeaderField: field)
-        }
-        set {
-            setValue(newValue, forHTTPHeaderField: field)
-        }
-    }
+	subscript(header key: String) -> String? {
+		get {
+			value(forHTTPHeaderField: key)
+		}
+		set {
+			setValue(newValue, forHTTPHeaderField: key)
+		}
+	}
 
-    var contentType: String? {
-        get {
-            self[.contentType]
-        }
-        set {
-            self[.contentType] = newValue
-        }
-    }
+	subscript(field: HTTPField.Name) -> String? {
+		get {
+			value(forHTTPHeaderField: field)
+		}
+		set {
+			setValue(newValue, forHTTPHeaderField: field)
+		}
+	}
 
-    var userAgent: String? {
-        get {
-            self[.userAgent]
-        }
-        set {
-            self[.userAgent] = newValue
-        }
-    }
+	var contentType: String? {
+		get {
+			self[.contentType]
+		}
+		set {
+			self[.contentType] = newValue
+		}
+	}
 
+	var userAgent: String? {
+		get {
+			self[.userAgent]
+		}
+		set {
+			self[.userAgent] = newValue
+		}
+	}
 }

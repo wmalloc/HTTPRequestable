@@ -5,13 +5,13 @@
 //
 
 import Foundation
-import OrderedCollections
 import HTTPTypes
+import OrderedCollections
 
 public extension HTTPHeaders {
-    func add(_ field: HTTPField) -> Self {
-        var headers = self
-        headers[field.name] = field.value
-        return headers
-    }
+	func add(_ field: HTTPField) -> Self {
+		var headers = self
+		headers[field.name] = field.value
+		return headers
+	}
 }
