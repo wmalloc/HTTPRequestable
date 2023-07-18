@@ -47,8 +47,7 @@ public extension URLRequest {
 			return HTTPFields(rawValue: allHTTPHeaderFields)
 		}
 		set {
-            let rawValues = newValue?.rawValue
-			allHTTPHeaderFields = rawValues
+			allHTTPHeaderFields = newValue?.rawValue
 		}
 	}
 }
