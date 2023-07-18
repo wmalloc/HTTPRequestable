@@ -11,68 +11,68 @@ public typealias URLDataResponse = (data: Data, response: URLResponse)
 public typealias Transformer<InputType, OutputType> = (InputType) throws -> OutputType
 
 public protocol URLRequestable {
-    associatedtype ResultType
+	associatedtype ResultType
 
-    typealias URLResponseTransformer = Transformer<URLDataResponse, ResultType>
+	typealias URLResponseTransformer = Transformer<URLDataResponse, ResultType>
 
-    var apiBaseURLString: String { get }
-    var method: URLRequest.Method { get }
-    var path: String { get }
-    var headers: [HTTPField] { get }
-    var body: Data? { get }
-    var queryItems: [URLQueryItem]? { get }
+	var apiBaseURLString: String { get }
+	var method: URLRequest.Method { get }
+	var path: String { get }
+	var headers: HTTPFields { get }
+	var body: Data? { get }
+	var queryItems: [URLQueryItem]? { get }
 
-    var transformer: URLResponseTransformer { get }
+	var transformer: URLResponseTransformer { get }
 
-    func url(queryItems: [URLQueryItem]?) throws -> URL
-    func urlRequest(headers: [HTTPField]?, queryItems: [URLQueryItem]?) throws -> URLRequest
+	func url(queryItems: [URLQueryItem]?) throws -> URL
+	func urlRequest(headers: HTTPFields?, queryItems: [URLQueryItem]?) throws -> URLRequest
 }
 
 public extension URLRequestable {
-    var method: URLRequest.Method {
-        .get
-    }
+	var method: URLRequest.Method {
+		.get
+	}
 
-    var headers: [HTTPField] {
-        [.accept(.json), .defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage]
-    }
+	var headers: HTTPFields {
+		HTTPFields([.accept(.json), .defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
+	}
 
-    var body: Data? {
-        nil
-    }
+	var body: Data? {
+		nil
+	}
 
-    var queryItems: [URLQueryItem]? {
-        nil
-    }
+	var queryItems: [URLQueryItem]? {
+		nil
+	}
 
-    func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
-        guard var components = URLComponents(string: apiBaseURLString) else {
-            throw URLError(.badURL)
-        }
-        var items = self.queryItems ?? []
-        items.append(contentsOf: queryItems ?? [])
-        components = components
-            .appendQueryItems(items)
-            .setPath(path)
-        guard let url = components.url else {
-            throw URLError(.unsupportedURL)
-        }
-        return url
-    }
+	func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
+		guard var components = URLComponents(string: apiBaseURLString) else {
+			throw URLError(.badURL)
+		}
+		var items = self.queryItems ?? []
+		items.append(contentsOf: queryItems ?? [])
+		components = components
+			.appendQueryItems(items)
+			.setPath(path)
+		guard let url = components.url else {
+			throw URLError(.unsupportedURL)
+		}
+		return url
+	}
 
-    func urlRequest(headers: [HTTPField]? = nil, queryItems: [URLQueryItem]? = nil) throws -> URLRequest {
-        let url = try url(queryItems: queryItems)
-        let request = URLRequest(url: url)
-            .setMethod(method)
-            .addHeaders(self.headers)
-            .addHeaders(headers ?? [])
-            .setHttpBody(body, contentType: .json)
-        return request
-    }
+	func urlRequest(headers: HTTPFields? = nil, queryItems: [URLQueryItem]? = nil) throws -> URLRequest {
+		let url = try url(queryItems: queryItems)
+		let request = URLRequest(url: url)
+			.setMethod(method)
+			.addHeaderFields(self.headers)
+			.addHeaderFields(headers)
+			.setHttpBody(body, contentType: .json)
+		return request
+	}
 }
 
 public extension URLRequestable where ResultType: Decodable {
-    var transformer: URLResponseTransformer {
-        JSONDecoder.transformer()
-    }
+	var transformer: URLResponseTransformer {
+		JSONDecoder.transformer()
+	}
 }

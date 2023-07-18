@@ -30,12 +30,13 @@ To defineing a request:
 
 ```swift
 struct StoryList: URLAsyncRequestable {
+
     typealias ResultType = [Int]
     
     let apiBaseURLString: String = "https://hacker-news.firebaseio.com"
     let method: URLRequest.Method = .get
     let path: String
-    let headers: [HTTPField] = [.accept(.json)]
+    let headers: HTTPFields = HTTPFields([.accept(.json)])
     let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
     
     init(storyType: String) throws {

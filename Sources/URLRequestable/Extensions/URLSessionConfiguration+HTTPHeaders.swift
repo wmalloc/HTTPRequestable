@@ -12,7 +12,7 @@ public extension URLSessionConfiguration {
 	var headers: HTTPHeaders? {
 		get {
 			let result = httpAdditionalHeaders?.compactMap { (key: AnyHashable, value: Any) -> HTTPField? in
-                guard let key = key as? String, let value = value as? String, let name = HTTPField.Name(key) else {
+				guard let key = key as? String, let value = value as? String, let name = HTTPField.Name(key) else {
 					return nil
 				}
 				return HTTPField(name: name, value: value)

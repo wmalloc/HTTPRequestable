@@ -7,7 +7,7 @@
 import Foundation
 
 public extension ProcessInfo {
-    var url_appName: String? {
-        arguments.first?.split(separator: "/").last.map(String.init)
-    }
+	var url_appName: String? {
+		arguments.first?.split(separator: "/").last.map(String.init)
+	}
 }
