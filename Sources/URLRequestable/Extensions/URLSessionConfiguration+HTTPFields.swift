@@ -17,7 +17,7 @@ public extension URLSessionConfiguration {
 				}
 				return HTTPField(name: name, value: value)
 			}
-			guard let result else {
+            guard let result, !result.isEmpty else {
 				return nil
 			}
 			return HTTPFields(result)

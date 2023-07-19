@@ -17,11 +17,11 @@ public extension URLRequest {
 	}
 
 	mutating func setValue(_ value: String?, forHTTPHeaderField field: HTTPField.Name) {
-		setValue(value, forHTTPHeaderField: field.canonicalName)
+		setValue(value, forHTTPHeaderField: field.rawName)
 	}
 
 	mutating func addValue(_ value: String, forHTTPHeaderField field: HTTPField.Name) {
-		addValue(value, forHTTPHeaderField: field.canonicalName)
+		addValue(value, forHTTPHeaderField: field.rawName)
 	}
 
 	subscript(header key: String) -> String? {

@@ -35,7 +35,7 @@ public extension MultipartFormBodyPart {
 extension MultipartFormBodyPart {
 	func encodedHeaders() -> Data {
         let headerText = headers.map { field in
-            "\(field.name.canonicalName): \(field.value)\(EncodingCharacters.crlf)"
+            "\(field.name.rawName): \(field.value)\(EncodingCharacters.crlf)"
         }
             .joined()
         + EncodingCharacters.crlf

@@ -68,7 +68,7 @@ extension HTTPFields: RawRepresentable {
 	public var rawValue: [String: String] {
 		var rawValues: [String: String] = [:]
         for value in self {
-            rawValues[value.name.canonicalName] = value.value
+            rawValues[value.name.rawName] = value.value
         }
 		return rawValues
 	}
