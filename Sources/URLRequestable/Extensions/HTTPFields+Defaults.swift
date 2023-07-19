@@ -9,8 +9,8 @@
 import Foundation
 import HTTPTypes
 
-public extension HTTPHeaders {
-	static var defaultHeaders: HTTPHeaders {
-		HTTPHeaders(arrayLiteral: HTTPField.defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage)
+public extension HTTPFields {
+	static var defaultHeaders: HTTPFields {
+        HTTPFields([HTTPField.defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
 	}
 }
