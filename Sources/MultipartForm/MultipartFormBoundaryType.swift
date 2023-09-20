@@ -7,11 +7,11 @@
 
 import Foundation
 
-public enum EncodingCharacters {
+public enum EncodingCharacters: Sendable {
 	public static let crlf = "\r\n"
 }
 
-public enum MultipartFormBoundaryType: Hashable, Identifiable {
+public enum MultipartFormBoundaryType: Hashable, Identifiable, Sendable {
 	public var id: MultipartFormBoundaryType {
 		self
 	}
