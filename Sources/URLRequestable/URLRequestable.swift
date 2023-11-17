@@ -10,41 +10,34 @@ import HTTPTypes
 public typealias URLDataResponse = (data: Data, response: URLResponse)
 public typealias Transformer<InputType, OutputType> = (InputType) throws -> OutputType
 
-public protocol URLRequestable {
+public protocol URLRequestable: HTTPRequstable {
 	associatedtype ResultType
 
 	typealias URLResponseTransformer = Transformer<URLDataResponse, ResultType>
 
 	var apiBaseURLString: String { get }
-	var method: URLRequest.Method { get }
-	var path: String { get }
-	var headers: HTTPFields { get }
+  var queryItems: [URLQueryItem]? { get }
 	var body: Data? { get }
-	var queryItems: [URLQueryItem]? { get }
 
 	var transformer: URLResponseTransformer { get }
-
-	func url(queryItems: [URLQueryItem]?) throws -> URL
+  
+  func url(queryItems: [URLQueryItem]?) throws -> URL
 	func urlRequest(headers: HTTPFields?, queryItems: [URLQueryItem]?) throws -> URLRequest
 }
 
 public extension URLRequestable {
-	var method: URLRequest.Method {
-		.get
-	}
-
-	var headers: HTTPFields {
-		HTTPFields([.accept(.json), .defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
-	}
-
+  var queryItems: [URLQueryItem]? {
+    nil
+  }
+  
 	var body: Data? {
 		nil
 	}
-
-	var queryItems: [URLQueryItem]? {
-		nil
-	}
-
+  
+  var apiBaseURLString: String {
+    scheme + "://" + authority + path
+  }
+  
 	func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
 		guard var components = URLComponents(string: apiBaseURLString) else {
 			throw URLError(.badURL)

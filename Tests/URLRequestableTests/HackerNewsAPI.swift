@@ -23,13 +23,10 @@ class HackerNewsAPI: URLRequestAsyncTransferable {
 	}
 }
 
-extension URLRequestable {
-	var apiBaseURLString: String { "https://hacker-news.firebaseio.com" }
-}
-
 struct StoryList: URLAsyncRequestable {
 	typealias ResultType = [Int]
 
+  let authority: String = "hacker-news.firebaseio.com"
 	let method: URLRequest.Method = .get
 	let path: String
 	let headers: HTTPFields = .init([.accept(.json)])
