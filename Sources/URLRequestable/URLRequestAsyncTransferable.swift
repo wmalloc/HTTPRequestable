@@ -14,6 +14,7 @@ public protocol URLRequestAsyncTransferable: URLRequestTransferable {
 
 	 - parameter request:    Request where to get the data from
 	 - parameter transform:  Transformer how to convert the data to different type
+   - parameter delegate:   Delegate to handle the request
 
 	 - returns: Transformed Object
 	 */
@@ -24,6 +25,7 @@ public protocol URLRequestAsyncTransferable: URLRequestTransferable {
 
 	 - parameter route:    Request where to get the data from
 	 - parameter transform:  Transformer how to convert the data to different type
+   - parameter delegate:   Delegate to handle the request
 
 	 - returns: Transformed Object
 	 */

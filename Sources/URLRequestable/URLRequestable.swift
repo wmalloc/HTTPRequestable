@@ -11,8 +11,6 @@ public typealias URLDataResponse = (data: Data, response: URLResponse)
 public typealias Transformer<InputType, OutputType> = (InputType) throws -> OutputType
 
 public protocol URLRequestable: HTTPRequstable {
-	associatedtype ResultType
-
 	typealias URLResponseTransformer = Transformer<URLDataResponse, ResultType>
 
 	var apiBaseURLString: String { get }

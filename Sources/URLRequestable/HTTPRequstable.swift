@@ -9,12 +9,15 @@ import Foundation
 import HTTPTypes
 
 public protocol HTTPRequstable {
+  associatedtype ResultType
+  
   var scheme: String { get }
   var authority: String { get }
   var method: HTTPRequest.Method { get }
   var path: String { get }
   var headers: HTTPFields { get }
 
+  var transformer: Transformer<Data, ResultType> { get }
   func httpRequest(headers: HTTPFields?, queryItems: [URLQueryItem]?) throws -> HTTPRequest
 }
 
@@ -40,5 +43,13 @@ public extension HTTPRequstable {
     allHeaders.append(contentsOf: headers ?? [:])
     let request = HTTPRequest(method: method, scheme: scheme, authority: authority, path: path, headerFields: allHeaders)
     return request
+  }
+}
+
+public extension HTTPRequstable where ResultType: Decodable {
+  var transformer: Transformer<Data, ResultType> {
+    { data in
+      try JSONDecoder().decode(ResultType.self, from: data)
+    }
   }
 }
