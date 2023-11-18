@@ -30,7 +30,7 @@ public extension URLRequestable {
     scheme + "://" + authority + path
   }
   
-	func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
+  func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
 		guard var components = URLComponents(string: apiBaseURLString) else {
 			throw URLError(.badURL)
 		}
