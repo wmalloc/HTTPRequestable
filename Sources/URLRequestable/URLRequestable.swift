@@ -11,16 +11,10 @@ public typealias URLDataResponse = (data: Data, response: URLResponse)
 public typealias Transformer<InputType, OutputType> = (InputType) throws -> OutputType
 
 public protocol URLRequestable: HTTPRequstable {
-	typealias URLResponseTransformer = Transformer<URLDataResponse, ResultType>
-
 	var apiBaseURLString: String { get }
-  var queryItems: [URLQueryItem]? { get }
-	var body: Data? { get }
+ 	var body: Data? { get }
 
-	var transformer: URLResponseTransformer { get }
-  
-  func url(queryItems: [URLQueryItem]?) throws -> URL
-	func urlRequest(headers: HTTPFields?, queryItems: [URLQueryItem]?) throws -> URLRequest
+  func urlRequest(headers: HTTPFields?, queryItems: [URLQueryItem]?) throws -> URLRequest
 }
 
 public extension URLRequestable {
@@ -59,11 +53,5 @@ public extension URLRequestable {
 			.addHeaderFields(headers)
 			.setHttpBody(body, contentType: .json)
 		return request
-	}
-}
-
-public extension URLRequestable where ResultType: Decodable {
-	var transformer: URLResponseTransformer {
-		JSONDecoder.transformer()
 	}
 }

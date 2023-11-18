@@ -7,7 +7,7 @@
 import Combine
 import Foundation
 
-public protocol URLRequestTransferable {
+public protocol URLTransferable {
 	var session: URLSession { get }
 
 	init(session: URLSession)
@@ -21,7 +21,7 @@ public protocol URLRequestTransferable {
 
 	 - returns: URLSessionDataTask
 	 */
-	func dataTask<T>(for request: URLRequest, transformer: @escaping Transformer<URLDataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask?
+	func dataTask<T>(for request: URLRequest, transformer: @escaping Transformer<Data, T>, completion: DataHandler<T>?) -> URLSessionDataTask?
 
 	/**
 	 Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -32,7 +32,7 @@ public protocol URLRequestTransferable {
 
 	 - returns: URLSessionDataTask
 	 */
-	func dataTask<T>(for route: any URLRequestable, transformer: @escaping Transformer<URLDataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask?
+  func dataTask<T: URLRequestable>(for route: T, transformer: @escaping Transformer<Data, T.ResultType>, completion: DataHandler<T.ResultType>?) -> URLSessionDataTask?
 
 	/**
 	 Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -42,7 +42,7 @@ public protocol URLRequestTransferable {
 
 	 - returns: Publisher with decoded response
 	 */
-	func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<URLDataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error>
+	func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>) -> AnyPublisher<ObjectType, Error>
 
 	/**
 	 Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -52,12 +52,12 @@ public protocol URLRequestTransferable {
 
 	 - returns: Publisher with decoded response
 	 */
-	func dataPublisher<ObjectType>(for route: any URLRequestable, transformer: @escaping Transformer<URLDataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error>
+  func dataPublisher<T: URLRequestable>(for route: T) -> AnyPublisher<T.ResultType, Error>
 }
 
-public extension URLRequestTransferable {
+public extension URLTransferable {
 	@discardableResult
-	func dataTask<T>(for request: URLRequest, transformer: @escaping Transformer<URLDataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask? {
+	func dataTask<T>(for request: URLRequest, transformer: @escaping Transformer<Data, T>, completion: DataHandler<T>?) -> URLSessionDataTask? {
 		let dataTask = session.dataTask(with: request) { data, urlResponse, error in
 			if let error {
 				completion?(.failure(error))
@@ -70,7 +70,7 @@ public extension URLRequestTransferable {
 			}
 			do {
 				try urlResponse.url_validate()
-				let mapped = try transformer((data, urlResponse))
+				let mapped = try transformer(data)
 				completion?(.success(mapped))
 			} catch {
 				completion?(.failure(error))
@@ -81,30 +81,30 @@ public extension URLRequestTransferable {
 	}
 
 	@discardableResult
-	func dataTask<T>(for route: any URLRequestable, transformer: @escaping Transformer<URLDataResponse, T>, completion: DataHandler<T>?) -> URLSessionDataTask? {
+  func dataTask<T: URLRequestable>(for route: T, completion: DataHandler<T.ResultType>?) -> URLSessionDataTask? {
 		guard let urlRequest = try? route.urlRequest(headers: nil, queryItems: nil) else {
 			return nil
 		}
-		return dataTask(for: urlRequest, transformer: transformer, completion: completion)
+    return dataTask(for: urlRequest, transformer: route.transformer, completion: completion)
 	}
 }
 
-public extension URLRequestTransferable {
-	func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<URLDataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error> {
+public extension URLTransferable {
+	func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>) -> AnyPublisher<ObjectType, Error> {
 		session.dataTaskPublisher(for: request)
 			.tryMap { result -> ObjectType in
 				try result.response.url_validate()
 				try result.data.url_validateNotEmptyData()
-				return try transformer(result)
+        return try transformer(result.data)
 			}
 			.eraseToAnyPublisher()
 	}
 
-	func dataPublisher<ObjectType>(for route: any URLRequestable, transformer: @escaping Transformer<URLDataResponse, ObjectType>) -> AnyPublisher<ObjectType, Error> {
+  func dataPublisher<T: URLRequestable>(for route: T) -> AnyPublisher<T.ResultType, Error> {
 		guard let urlRequest = try? route.urlRequest() else {
 			return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
 		}
 
-		return dataPublisher(for: urlRequest, transformer: transformer)
+    return dataPublisher(for: urlRequest, transformer: route.transformer)
 	}
 }
