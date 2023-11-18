@@ -24,8 +24,8 @@ class HackerNewsAPI: HTTPTransferable {
 }
 
 struct StoryList: HTTPRequstable {
-	typealias ResultType = [Int]
-
+  typealias ResultType = [Int]
+  
   let authority: String = "hacker-news.firebaseio.com"
 	let method: URLRequest.Method = .get
 	let path: String

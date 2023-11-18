@@ -18,7 +18,6 @@ public protocol HTTPRequstable {
   var path: String { get }
   var queryItems: [URLQueryItem]? { get }
   var headers: HTTPFields { get }
-
   var transformer: Transformer<Data, ResultType> { get }
   
   func url(queryItems: [URLQueryItem]?) throws -> URL
