@@ -18,18 +18,14 @@ public protocol URLRequestable: HTTPRequstable {
 }
 
 public extension URLRequestable {
-  var queryItems: [URLQueryItem]? {
-    nil
-  }
-  
-	var body: Data? {
-		nil
-	}
-  
   var apiBaseURLString: String {
     scheme + "://" + authority + path
   }
   
+  var body: Data? {
+    nil
+  }
+
   func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
 		guard var components = URLComponents(string: apiBaseURLString) else {
 			throw URLError(.badURL)

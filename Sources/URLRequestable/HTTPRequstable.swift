@@ -38,6 +38,10 @@ public extension HTTPRequstable {
     ""
   }
   
+  var queryItems: [URLQueryItem]? {
+    nil
+  }
+  
   var headers: HTTPFields {
     HTTPFields([.accept(.json), .defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
   }
