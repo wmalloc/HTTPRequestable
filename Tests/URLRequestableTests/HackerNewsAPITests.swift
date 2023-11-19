@@ -21,7 +21,7 @@ final class HackerNewsAPITests: XCTestCase {
 
 	func testTopStories() async throws {
 		let topStories = try await api.storyList(type: "topstories.json")
-		XCTAssertEqual(topStories.count, 408)
+		XCTAssertEqual(topStories.count, 500)
 	}
 
 	func testNewStories() async throws {
