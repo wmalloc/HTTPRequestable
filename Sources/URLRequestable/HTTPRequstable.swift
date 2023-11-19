@@ -21,7 +21,7 @@ public protocol HTTPRequstable {
   var transformer: Transformer<Data, ResultType> { get }
   
   func url(queryItems: Set<URLQueryItem>?) throws -> URL
-  func httpRequest(headers: HTTPFields?, queryItems: [URLQueryItem]?) throws -> HTTPRequest
+  func httpRequest(headers: HTTPFields?, queryItems: Set<URLQueryItem>?) throws -> HTTPRequest
 }
 
 public extension HTTPRequstable {
@@ -45,14 +45,7 @@ public extension HTTPRequstable {
     HTTPFields([.accept(.json), .defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
   }
   
-  func httpRequest(headers: HTTPFields? = nil, queryItems: [URLQueryItem]? = nil) throws -> HTTPRequest {
-    var allHeaders = self.headers
-    allHeaders.append(contentsOf: headers ?? [:])
-    let request = HTTPRequest(method: method, url: try url(queryItems: queryItems), headerFields: allHeaders)
-    return request
-  }
-  
-  func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
+  func url(queryItems: Set<URLQueryItem>? = nil) throws -> URL {
     var components = URLComponents()
     components.scheme = scheme
     components.host = authority
@@ -64,6 +57,13 @@ public extension HTTPRequstable {
       throw URLError(.badURL)
     }
     return url
+  }
+
+  func httpRequest(headers: HTTPFields? = nil, queryItems: Set<URLQueryItem>? = nil) throws -> HTTPRequest {
+    var allHeaders = self.headers
+    allHeaders.append(contentsOf: headers ?? [:])
+    let request = HTTPRequest(method: method, url: try url(queryItems: queryItems), headerFields: allHeaders)
+    return request
   }
 }
 
