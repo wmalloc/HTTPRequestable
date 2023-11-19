@@ -16,11 +16,11 @@ public protocol HTTPRequstable {
   var authority: String { get }
   var method: HTTPRequest.Method { get }
   var path: String { get }
-  var queryItems: [URLQueryItem]? { get }
+  var queryItems: Set<URLQueryItem>? { get }
   var headers: HTTPFields { get }
   var transformer: Transformer<Data, ResultType> { get }
   
-  func url(queryItems: [URLQueryItem]?) throws -> URL
+  func url(queryItems: Set<URLQueryItem>?) throws -> URL
   func httpRequest(headers: HTTPFields?, queryItems: [URLQueryItem]?) throws -> HTTPRequest
 }
 
@@ -37,7 +37,7 @@ public extension HTTPRequstable {
     ""
   }
   
-  var queryItems: [URLQueryItem]? {
+  var queryItems: Set<URLQueryItem>? {
     nil
   }
   
@@ -57,20 +57,9 @@ public extension HTTPRequstable {
     components.scheme = scheme
     components.host = authority
     components.path = path
-    var items: [URLQueryItem] = []
-    
-    if let query = self.queryItems {
-      items.append(contentsOf: query)
-    }
-    
-    if let query = queryItems {
-      items.append(contentsOf: query)
-    }
-    
-    if !items.isEmpty {
-      components.queryItems = items
-    }
-    
+    var items: Set<URLQueryItem> = self.queryItems ?? []
+    items.formUnion(queryItems ?? [])
+    components.queryItems = items.isEmpty ? nil : Array(items)
     guard let url = components.url else {
       throw URLError(.badURL)
     }

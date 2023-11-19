@@ -27,12 +27,11 @@ public protocol URLTransferable {
 	 Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
 	 - parameter route:    Route to create URLRequest
-	 - parameter transform:  Transformer how to convert the data to different type
-	 - parameter completion: completion handler
+   - parameter completion: completion handler
 
 	 - returns: URLSessionDataTask
 	 */
-  func dataTask<T: URLRequestable>(for route: T, transformer: @escaping Transformer<Data, T.ResultType>, completion: DataHandler<T.ResultType>?) -> URLSessionDataTask?
+  func dataTask<T: URLRequestable>(for route: T, completion: DataHandler<T.ResultType>?) -> URLSessionDataTask?
 
 	/**
 	 Make a request call and return decoded data as decoded by the transformer, this requesst must return data
