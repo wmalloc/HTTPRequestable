@@ -1,5 +1,5 @@
 //
-//  URLRequestRetrievable.swift
+//  URLTransferable.swift
 //
 //  Created by Waqar Malik on 4/28/23.
 //
@@ -27,11 +27,11 @@ public protocol URLTransferable {
 	 Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
 	 - parameter route:    Route to create URLRequest
-   - parameter completion: completion handler
+	 - parameter completion: completion handler
 
 	 - returns: URLSessionDataTask
 	 */
-  func dataTask<T: URLRequestable>(for route: T, completion: DataHandler<T.ResultType>?) -> URLSessionDataTask?
+	func dataTask<T: URLRequestable>(for route: T, completion: DataHandler<T.ResultType>?) -> URLSessionDataTask?
 
 	/**
 	 Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -51,7 +51,7 @@ public protocol URLTransferable {
 
 	 - returns: Publisher with decoded response
 	 */
-  func dataPublisher<T: URLRequestable>(for route: T) -> AnyPublisher<T.ResultType, Error>
+	func dataPublisher<T: URLRequestable>(for route: T) -> AnyPublisher<T.ResultType, Error>
 }
 
 public extension URLTransferable {
@@ -80,11 +80,11 @@ public extension URLTransferable {
 	}
 
 	@discardableResult
-  func dataTask<T: URLRequestable>(for route: T, completion: DataHandler<T.ResultType>?) -> URLSessionDataTask? {
+	func dataTask<T: URLRequestable>(for route: T, completion: DataHandler<T.ResultType>?) -> URLSessionDataTask? {
 		guard let urlRequest = try? route.urlRequest(headers: nil, queryItems: nil) else {
 			return nil
 		}
-    return dataTask(for: urlRequest, transformer: route.transformer, completion: completion)
+		return dataTask(for: urlRequest, transformer: route.transformer, completion: completion)
 	}
 }
 
@@ -94,16 +94,16 @@ public extension URLTransferable {
 			.tryMap { result -> ObjectType in
 				try result.response.url_validate()
 				try result.data.url_validateNotEmptyData()
-        return try transformer(result.data)
+				return try transformer(result.data)
 			}
 			.eraseToAnyPublisher()
 	}
 
-  func dataPublisher<T: URLRequestable>(for route: T) -> AnyPublisher<T.ResultType, Error> {
+	func dataPublisher<T: URLRequestable>(for route: T) -> AnyPublisher<T.ResultType, Error> {
 		guard let urlRequest = try? route.urlRequest() else {
 			return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
 		}
 
-    return dataPublisher(for: urlRequest, transformer: route.transformer)
+		return dataPublisher(for: urlRequest, transformer: route.transformer)
 	}
 }

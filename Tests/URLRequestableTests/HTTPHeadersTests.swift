@@ -9,7 +9,6 @@
 import HTTPTypes
 @testable import URLRequestable
 import XCTest
-import HTTPTypes
 
 final class HTTPHeadersTests: XCTestCase {
 	static let baseURLString = "http://localhost:8080"
@@ -17,11 +16,11 @@ final class HTTPHeadersTests: XCTestCase {
 
 	func testBaseHeaders() throws {
 		var headers = HTTPFields()
-        headers.append(.defaultAcceptLanguage)
-        headers.append(.defaultAcceptEncoding)
-        headers.append(.defaultUserAgent)
-        
-        XCTAssertFalse(headers.isEmpty)
+		headers.append(.defaultAcceptLanguage)
+		headers.append(.defaultAcceptEncoding)
+		headers.append(.defaultUserAgent)
+
+		XCTAssertFalse(headers.isEmpty)
 		XCTAssertEqual(headers.count, 3)
 		XCTAssertTrue(headers.contains(.defaultUserAgent))
 		XCTAssertFalse(headers.contains(.contentType(.json)))
@@ -34,41 +33,41 @@ final class HTTPHeadersTests: XCTestCase {
 
 		let headers = session.headers
 		XCTAssertEqual(headers?.count, 3)
-    }
+	}
 
-    func testHeaderFieldsCounts() throws {
-        var fields = HTTPFields.defaultHeaders
-        fields.append(HTTPField.accept(.json))
-        XCTAssertEqual(fields.count, 4)
-        XCTAssertEqual(fields[0].name, .userAgent)
-        XCTAssertEqual(fields[1], .defaultAcceptEncoding)
-        XCTAssertEqual(fields[2], .defaultAcceptLanguage)
-        XCTAssertEqual(fields[3].name, .accept)
-        fields[.accept] = .xml
-        XCTAssertEqual(fields.count, 4)
-    }
-    
-    func testURLRequestHTTPFields() throws {
-        var request = URLRequest(url: URL(string: "https://api.github.com")!)
-            .setMethod(.get)
-        XCTAssertNotNil(request.allHTTPHeaderFields)
-        XCTAssertEqual(request.allHTTPHeaderFields?.count, 0)
-        request = request.setUserAgent(String.url_userAgent)
-        XCTAssertEqual(request.allHTTPHeaderFields?.count, 1)
-        
-        request = request.setHttpHeaderFields(HTTPFields.defaultHeaders)
-        XCTAssertEqual(request.allHTTPHeaderFields?.count, 3)
-    }
-    
-    func testHTTPFieldsRewValues() throws {
-        let fields = HTTPFields.defaultHeaders
-        let rawValue = fields.rawValue
-        XCTAssertEqual(rawValue.count, 3)
-        
-        let newFields = HTTPFields(rawValue: rawValue)
-        XCTAssertEqual(newFields?.count, 3)
-    }
-    
+	func testHeaderFieldsCounts() throws {
+		var fields = HTTPFields.defaultHeaders
+		fields.append(HTTPField.accept(.json))
+		XCTAssertEqual(fields.count, 4)
+		XCTAssertEqual(fields[0].name, .userAgent)
+		XCTAssertEqual(fields[1], .defaultAcceptEncoding)
+		XCTAssertEqual(fields[2], .defaultAcceptLanguage)
+		XCTAssertEqual(fields[3].name, .accept)
+		fields[.accept] = .xml
+		XCTAssertEqual(fields.count, 4)
+	}
+
+	func testURLRequestHTTPFields() throws {
+		var request = URLRequest(url: URL(string: "https://api.github.com")!)
+			.setMethod(.get)
+		XCTAssertNotNil(request.allHTTPHeaderFields)
+		XCTAssertEqual(request.allHTTPHeaderFields?.count, 0)
+		request = request.setUserAgent(String.url_userAgent)
+		XCTAssertEqual(request.allHTTPHeaderFields?.count, 1)
+
+		request = request.setHttpHeaderFields(HTTPFields.defaultHeaders)
+		XCTAssertEqual(request.allHTTPHeaderFields?.count, 3)
+	}
+
+	func testHTTPFieldsRewValues() throws {
+		let fields = HTTPFields.defaultHeaders
+		let rawValue = fields.rawValue
+		XCTAssertEqual(rawValue.count, 3)
+
+		let newFields = HTTPFields(rawValue: rawValue)
+		XCTAssertEqual(newFields?.count, 3)
+	}
+
 	func testURLRequestHeaders() throws {
 		let request = URLRequest(url: URL(string: "https://api.github.com")!)
 			.setMethod(.get)
@@ -91,9 +90,9 @@ final class HTTPHeadersTests: XCTestCase {
 		headers[.contentType] = .json
 		XCTAssertEqual(headers.count, 1)
 		XCTAssertEqual(headers[.contentType], .json)
-        headers.append(HTTPField(name: .authorization, value: "Password"))
-        headers.append(HTTPField(name: .contentLength, value: "\(0)"))
-        headers[.authorization] = "Token"
+		headers.append(HTTPField(name: .authorization, value: "Password"))
+		headers.append(HTTPField(name: .contentLength, value: "\(0)"))
+		headers[.authorization] = "Token"
 		XCTAssertEqual(headers.count, 3)
 		let dictionary = headers.rawValue
 		XCTAssertEqual(dictionary.count, 3)

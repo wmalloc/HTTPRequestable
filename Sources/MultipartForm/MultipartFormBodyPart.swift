@@ -34,12 +34,12 @@ public extension MultipartFormBodyPart {
 
 extension MultipartFormBodyPart {
 	func encodedHeaders() -> Data {
-        let headerText = headers.map { field in
-            "\(field.name.rawName): \(field.value)\(EncodingCharacters.crlf)"
-        }
-            .joined()
-        + EncodingCharacters.crlf
-        return Data(headerText.utf8)
+		let headerText = headers.map { field in
+			"\(field.name.rawName): \(field.value)\(EncodingCharacters.crlf)"
+		}
+		.joined()
+		+ EncodingCharacters.crlf
+		return Data(headerText.utf8)
 	}
 
 	private func encodedBodyStream() throws -> Data {

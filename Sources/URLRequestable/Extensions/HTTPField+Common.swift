@@ -1,5 +1,5 @@
 //
-//  HTTPHeader+Common.swift
+//  HTTPField+Common.swift
 //
 //  Created by Waqar Malik on 4/28/23.
 //

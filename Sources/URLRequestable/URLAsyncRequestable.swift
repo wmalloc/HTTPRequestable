@@ -17,8 +17,8 @@ public protocol URLAsyncRequestable: URLRequestable {
 @available(iOS 15, tvOS 15, watchOS 8, macCatalyst 15, macOS 12, *)
 public extension URLAsyncRequestable where ResultType: Decodable {
 	var asyncTransformer: AsyncTransformer<Data, ResultType> {
-    { data in
-      try JSONDecoder().decode(ResultType.self, from: data)
-    }
+		{ data in
+			try JSONDecoder().decode(ResultType.self, from: data)
+		}
 	}
 }

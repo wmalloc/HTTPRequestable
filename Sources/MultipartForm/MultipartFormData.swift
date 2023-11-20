@@ -161,9 +161,9 @@ extension MultipartFormData {
 			disposition += "; filename=\"\(fileName)\""
 		}
 
-        var fields = HTTPFields()
-        fields.append(.contentDisposition(disposition))
-        if let mimeType {
+		var fields = HTTPFields()
+		fields.append(.contentDisposition(disposition))
+		if let mimeType {
 			fields.append(HTTPField.contentType(mimeType + EncodingCharacters.crlf))
 		}
 		return fields

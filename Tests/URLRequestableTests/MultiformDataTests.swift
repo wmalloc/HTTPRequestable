@@ -5,8 +5,8 @@
 //  Created by Waqar Malik on 1/29/23.
 //
 
-@testable import URLRequestable
 @testable import MultipartForm
+@testable import URLRequestable
 import XCTest
 
 final class MultiformDataTests: XCTestCase {
