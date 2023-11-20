@@ -29,8 +29,8 @@ struct StoryList: HTTPRequstable {
   let authority: String = "hacker-news.firebaseio.com"
 	let method: URLRequest.Method = .get
 	let path: String
-	let headers: HTTPFields = .init([.accept(.json)])
-	let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
+	var headers: HTTPFields = .init([.accept(.json)])
+	var queryItems: Set<URLQueryItem>? = [URLQueryItem(name: "print", value: "pretty")]
 
 	init(storyType: String) throws {
 		guard !storyType.isEmpty else {
