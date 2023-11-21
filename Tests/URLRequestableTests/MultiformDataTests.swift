@@ -5,6 +5,7 @@
 //  Created by Waqar Malik on 1/29/23.
 //
 
+@testable import MultipartForm
 @testable import URLRequestable
 import XCTest
 

@@ -10,49 +10,30 @@ import HTTPTypes
 public typealias URLDataResponse = (data: Data, response: URLResponse)
 public typealias Transformer<InputType, OutputType> = (InputType) throws -> OutputType
 
-public protocol URLRequestable {
-	associatedtype ResultType
-
-	typealias URLResponseTransformer = Transformer<URLDataResponse, ResultType>
-
+public protocol URLRequestable: HTTPRequstable {
 	var apiBaseURLString: String { get }
-	var method: URLRequest.Method { get }
-	var path: String { get }
-	var headers: HTTPFields { get }
 	var body: Data? { get }
-	var queryItems: [URLQueryItem]? { get }
 
-	var transformer: URLResponseTransformer { get }
-
-	func url(queryItems: [URLQueryItem]?) throws -> URL
-	func urlRequest(headers: HTTPFields?, queryItems: [URLQueryItem]?) throws -> URLRequest
+	func urlRequest(headers: HTTPFields?, queryItems: Set<URLQueryItem>?) throws -> URLRequest
 }
 
 public extension URLRequestable {
-	var method: URLRequest.Method {
-		.get
-	}
-
-	var headers: HTTPFields {
-		HTTPFields([.accept(.json), .defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
+	var apiBaseURLString: String {
+		scheme + "://" + authority + path
 	}
 
 	var body: Data? {
 		nil
 	}
 
-	var queryItems: [URLQueryItem]? {
-		nil
-	}
-
-	func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
+	func url(queryItems: Set<URLQueryItem>? = nil) throws -> URL {
 		guard var components = URLComponents(string: apiBaseURLString) else {
 			throw URLError(.badURL)
 		}
 		var items = self.queryItems ?? []
-		items.append(contentsOf: queryItems ?? [])
+		items.formUnion(queryItems ?? [])
 		components = components
-			.appendQueryItems(items)
+			.appendQueryItems(Array(items))
 			.setPath(path)
 		guard let url = components.url else {
 			throw URLError(.unsupportedURL)
@@ -60,7 +41,7 @@ public extension URLRequestable {
 		return url
 	}
 
-	func urlRequest(headers: HTTPFields? = nil, queryItems: [URLQueryItem]? = nil) throws -> URLRequest {
+	func urlRequest(headers: HTTPFields? = nil, queryItems: Set<URLQueryItem>? = nil) throws -> URLRequest {
 		let url = try url(queryItems: queryItems)
 		let request = URLRequest(url: url)
 			.setMethod(method)
@@ -68,11 +49,5 @@ public extension URLRequestable {
 			.addHeaderFields(headers)
 			.setHttpBody(body, contentType: .json)
 		return request
-	}
-}
-
-public extension URLRequestable where ResultType: Decodable {
-	var transformer: URLResponseTransformer {
-		JSONDecoder.transformer()
 	}
 }

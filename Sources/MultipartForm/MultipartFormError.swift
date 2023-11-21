@@ -8,7 +8,7 @@
 
 import Foundation
 
-public enum MultipartFormError: LocalizedError {
+public enum MultipartFormError: LocalizedError, Sendable {
 	case badURL(URL)
 	case invalidFilename(URL)
 	case fileNotFound(URL, Error?)

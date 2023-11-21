@@ -1,5 +1,5 @@
 //
-//  MultipartBoundaryType.swift
+//  MultipartFormBoundaryType.swift
 //
 //  Created by Waqar Malik on 1/24/23.
 //  Copyright © 2020 Waqar Malik All rights reserved.
@@ -7,11 +7,11 @@
 
 import Foundation
 
-public enum EncodingCharacters {
+public enum EncodingCharacters: Sendable {
 	public static let crlf = "\r\n"
 }
 
-public enum MultipartFormBoundaryType: Hashable, Identifiable {
+public enum MultipartFormBoundaryType: Hashable, Identifiable, Sendable {
 	public var id: MultipartFormBoundaryType {
 		self
 	}

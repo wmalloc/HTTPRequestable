@@ -1,5 +1,5 @@
 //
-//  URLSessionConfiguration+HTTPHeaders.swift
+//  URLSessionConfiguration+HTTPFields.swift
 //
 //  Created by Waqar Malik on 1/14/23.
 //  Copyright © 2020 Waqar Malik All rights reserved.
@@ -17,7 +17,7 @@ public extension URLSessionConfiguration {
 				}
 				return HTTPField(name: name, value: value)
 			}
-            guard let result, !result.isEmpty else {
+			guard let result, !result.isEmpty else {
 				return nil
 			}
 			return HTTPFields(result)
