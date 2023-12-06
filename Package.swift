@@ -16,6 +16,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/apple/swift-http-types.git", from: "1.0.2"),
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
+        .package(url: "https://github.com/realm/SwiftLint.git", from: "0.54.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -26,7 +27,8 @@ let package = Package(
                 path: "Sources/URLRequestable"),
         .target(name: "MultipartForm", dependencies: ["URLRequestable",
                                                       .product(name: "HTTPTypes", package: "swift-http-types")],
-                path: "Sources/MultipartForm"),
+                path: "Sources/MultipartForm",
+                plugins: [.plugin(name: "SwiftLintPlugin", package: "SwiftLint")]),
         .testTarget(name: "URLRequestableTests",
                     dependencies: ["URLRequestable", "MultipartForm",
                         .product(name: "HTTPTypes", package: "swift-http-types"),
