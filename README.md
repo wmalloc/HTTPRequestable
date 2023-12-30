@@ -13,55 +13,55 @@ Add the following dependency clause to your Package.swift:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/wmalloc/URLRequestable.git", from: "0.1.4")
+    .package(url: "https://github.com/wmalloc/URLRequestable.git", from: "0.5.4")
 ]
 ```
 ## Features
 
 | |Features |
 --------------------------|------------------------------------------------------------
+`HTTPRequstable` | Define your request
 `URLRequestable` | Build your `URLRequest` to make a call
-`URLRequestTransferable` | To create your API client
-`URLRequestAsyncTransferable` | Concurrency version of the API.
+`URLTransferable` | To create your API client
+`URLAsyncTransferable` | Concurrency version of the API.
 
 ## Usage
 
 To defineing a request:
 
 ```swift
-struct StoryList: URLAsyncRequestable {
+struct StoryList: HTTPRequstable {
+  typealias ResultType = [Int]
 
-    typealias ResultType = [Int]
-    
-    let apiBaseURLString: String = "https://hacker-news.firebaseio.com"
-    let method: URLRequest.Method = .get
-    let path: String
-    let headers: HTTPFields = HTTPFields([.accept(.json)])
-    let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
-    
-    init(storyType: String) throws {
-        guard !storyType.isEmpty else {
-            throw URLError(.badURL)
-        }
-        self.path = "/v0/" + storyType
+  let authority: String = "hacker-news.firebaseio.com"
+  let method: URLRequest.Method = .get
+  let path: String
+  let headers: HTTPFields = .init([.accept(.json)])
+  let queryItems: Set<URLQueryItem>? = [URLQueryItem(name: "print", value: "pretty")]
+
+  init(storyType: String) throws {
+    guard !storyType.isEmpty else {
+      throw URLError(.badURL)
     }
+    self.path = "/v0/" + storyType
+  }
 }
+
 ```
 #### Creating an API
 
 ```swift
-class HackerNewsAPI: URLRequestAsyncTransferable {
-    let session: URLSession
-    
-    required init(session: URLSession = .shared) {
-        self.session = session
-    }
-    
-    func storyList(type: String) async throws -> StoryList.ResultType {
-        let request = try StoryList(storyType: type)
+class HackerNewsAPI: HTTPTransferable {
+  let session: URLSession
 
-        return try await data(for: request, transformer: request.asyncTransformer)
-    }
+  required init(session: URLSession = .shared) {
+    self.session = session
+  }
+
+  func storyList(type: String) async throws -> StoryList.ResultType {
+    let request = try StoryList(storyType: type)
+    return try await data(for: request, delegate: nil)
+  }
 }
 ```
 
