@@ -10,7 +10,7 @@ import Foundation
 import HTTPTypes
 
 public extension HTTPFields {
-  static var defaultHeaders: HTTPFields {
-    HTTPFields([HTTPField.defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
-  }
+	static var defaultHeaders: HTTPFields {
+		HTTPFields([HTTPField.defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
+	}
 }

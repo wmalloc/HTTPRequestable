@@ -8,11 +8,11 @@ import Foundation
 import HTTPTypes
 
 public extension HTTPField.Name {
-  static var userAuthorization: HTTPField.Name {
-    .init("User-Authorization")!
-  }
+	static var userAuthorization: HTTPField.Name {
+		.init("User-Authorization")!
+	}
 
-  static var xAPIKey: HTTPField.Name {
-    .init("X-API-Key")!
-  }
+	static var xAPIKey: HTTPField.Name {
+		.init("X-API-Key")!
+	}
 }

@@ -1,4 +1,4 @@
---exclude Pods, Package.swift
+--exclude Pods,Package.swift,.builds,.switpm,Carthage
 --swiftversion 5.9
 --binarygrouping none
 --decimalgrouping none

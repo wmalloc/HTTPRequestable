@@ -8,7 +8,7 @@
 import Foundation
 
 extension String {
-  func localized(bundle: Bundle = .module, tableName: String? = nil, value: String = "", comment: String = "") -> String {
-    NSLocalizedString(self, tableName: tableName, bundle: bundle, value: value, comment: comment)
-  }
+	func localized(bundle: Bundle = .module, tableName: String? = nil, value: String = "", comment: String = "") -> String {
+		NSLocalizedString(self, tableName: tableName, bundle: bundle, value: value, comment: comment)
+	}
 }
