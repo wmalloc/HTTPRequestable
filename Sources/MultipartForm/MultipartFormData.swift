@@ -173,7 +173,8 @@ extension MultipartFormData {
 extension MultipartFormData {
 	func mimeType(forPathExtension pathExtension: String) -> String {
 		if let id = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension as CFString, nil)?.takeRetainedValue(),
-		   let contentType = UTTypeCopyPreferredTagWithClass(id, kUTTagClassMIMEType)?.takeRetainedValue() {
+		   let contentType = UTTypeCopyPreferredTagWithClass(id, kUTTagClassMIMEType)?.takeRetainedValue()
+		{
 			return contentType as String
 		}
 		return .octetStream

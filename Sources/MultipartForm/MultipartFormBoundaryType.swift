@@ -25,14 +25,13 @@ public enum MultipartFormBoundaryType: Hashable, Identifiable, Sendable {
 	}
 
 	public static func boundary(forBoundaryType boundaryType: MultipartFormBoundaryType, boundary: String) -> String {
-		let boundaryText: String
-		switch boundaryType {
+		let boundaryText = switch boundaryType {
 		case .initial:
-			boundaryText = "--\(boundary)\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
+			"--\(boundary)\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
 		case .interstitial:
-			boundaryText = "\(EncodingCharacters.crlf)--\(boundary)\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
+			"\(EncodingCharacters.crlf)--\(boundary)\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
 		case .final:
-			boundaryText = "\(EncodingCharacters.crlf)--\(boundary)--\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
+			"\(EncodingCharacters.crlf)--\(boundary)--\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
 		}
 
 		return boundaryText

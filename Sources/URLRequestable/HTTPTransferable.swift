@@ -33,7 +33,7 @@ public protocol HTTPTransferable {
 
 	 - returns: Transformed Object
 	 */
-	func data<T: HTTPRequstable>(for route: T, delegate: URLSessionTaskDelegate?) async throws -> T.ResultType
+	func data<T: HTTPRequestable>(for route: T, delegate: URLSessionTaskDelegate?) async throws -> T.ResultType
 }
 
 @available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
@@ -48,7 +48,7 @@ public extension HTTPTransferable {
 		}
 	}
 
-	func data<T: HTTPRequstable>(for route: T, delegate: URLSessionTaskDelegate? = nil) async throws -> T.ResultType {
+	func data<T: HTTPRequestable>(for route: T, delegate: URLSessionTaskDelegate? = nil) async throws -> T.ResultType {
 		let request = try route.httpRequest(headers: nil, queryItems: nil)
 		return try await data(for: request, transformer: route.transformer, delegate: delegate)
 	}
