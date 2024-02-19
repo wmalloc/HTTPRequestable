@@ -8,10 +8,6 @@ import Foundation
 import HTTPTypes
 
 public extension URLRequest {
-	typealias Method = HTTPRequest.Method
-}
-
-public extension URLRequest {
 	func value(forHTTPHeaderField field: HTTPField.Name) -> String? {
 		value(forHTTPHeaderField: field.canonicalName) ?? value(forHTTPHeaderField: field.rawName)
 	}
