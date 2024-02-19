@@ -10,11 +10,11 @@ import HTTPTypes
 public typealias URLDataResponse = (data: Data, response: URLResponse)
 public typealias Transformer<InputType, OutputType> = (InputType) throws -> OutputType
 
-public protocol URLRequestable: HTTPRequstable {
+public protocol URLRequestable: HTTPRequestable {
 	var apiBaseURLString: String { get }
 	var body: Data? { get }
 
-	func urlRequest(headers: HTTPFields?, queryItems: Set<URLQueryItem>?) throws -> URLRequest
+	func urlRequest(headers: HTTPFields?, queryItems: Array<URLQueryItem>?) throws -> URLRequest
 }
 
 public extension URLRequestable {
@@ -26,14 +26,14 @@ public extension URLRequestable {
 		nil
 	}
 
-	func url(queryItems: Set<URLQueryItem>? = nil) throws -> URL {
+	func url(queryItems: Array<URLQueryItem>? = nil) throws -> URL {
 		guard var components = URLComponents(string: apiBaseURLString) else {
 			throw URLError(.badURL)
 		}
 		var items = self.queryItems ?? []
-		items.formUnion(queryItems ?? [])
+		items.append(contentsOf: queryItems ?? [])
 		components = components
-			.appendQueryItems(Array(items))
+			.appendQueryItems(items)
 			.setPath(path)
 		guard let url = components.url else {
 			throw URLError(.unsupportedURL)
@@ -41,7 +41,7 @@ public extension URLRequestable {
 		return url
 	}
 
-	func urlRequest(headers: HTTPFields? = nil, queryItems: Set<URLQueryItem>? = nil) throws -> URLRequest {
+	func urlRequest(headers: HTTPFields? = nil, queryItems: Array<URLQueryItem>? = nil) throws -> URLRequest {
 		let url = try url(queryItems: queryItems)
 		let request = URLRequest(url: url)
 			.setMethod(method)

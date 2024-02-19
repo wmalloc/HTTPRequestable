@@ -23,14 +23,14 @@ class HackerNewsAPI: HTTPTransferable {
 	}
 }
 
-struct StoryList: HTTPRequstable {
+struct StoryList: HTTPRequestable {
 	typealias ResultType = [Int]
 
 	let authority: String = "hacker-news.firebaseio.com"
-	let method: URLRequest.Method = .get
+	let method: HTTPMethod = .get
 	let path: String
 	let headers: HTTPFields = .init([.accept(.json)])
-	let queryItems: Set<URLQueryItem>? = [URLQueryItem(name: "print", value: "pretty")]
+	let queryItems: Array<URLQueryItem>? = [URLQueryItem(name: "print", value: "pretty")]
 
 	init(storyType: String) throws {
 		guard !storyType.isEmpty else {
