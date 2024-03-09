@@ -6,12 +6,12 @@
 
 import Combine
 import Foundation
+import HTTPTypes
+import HTTPTypesFoundation
 
-public protocol URLTransferable {
-	var session: URLSession { get }
+public typealias DataHandler<T> = (Result<T, Error>) -> Void
 
-	init(session: URLSession)
-
+public protocol URLTransferable: HTTPTransferable {
 	/**
 	 Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
@@ -52,6 +52,28 @@ public protocol URLTransferable {
 	 - returns: Publisher with decoded response
 	 */
 	func dataPublisher<T: URLRequestable>(for route: T) -> AnyPublisher<T.ResultType, Error>
+
+	/**
+	 Make a request call and return decoded data as decoded by the transformer, this requesst must return data
+
+	 - parameter request:    Request where to get the data from
+	 - parameter transform:  Transformer how to convert the data to different type
+	 - parameter delegate:   Delegate to handle the request
+
+	 - returns: Transformed Object
+	 */
+	func data<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: URLSessionTaskDelegate?) async throws -> ObjectType
+
+	/**
+	 Make a request call and return decoded data as decoded by the transformer, this requesst must return data
+
+	 - parameter route:    Request where to get the data from
+	 - parameter transform:  Transformer how to convert the data to different type
+	 - parameter delegate:   Delegate to handle the request
+
+	 - returns: Transformed Object
+	 */
+	func data<T: URLRequestable>(for route: T, delegate: URLSessionTaskDelegate?) async throws -> T.ResultType
 }
 
 public extension URLTransferable {
@@ -63,13 +85,12 @@ public extension URLTransferable {
 				return
 			}
 
-			guard let data, let urlResponse else {
+			guard let data, let response = (urlResponse as? HTTPURLResponse)?.httpResponse else {
 				completion?(.failure(URLError(.badServerResponse)))
 				return
 			}
 			do {
-				try urlResponse.url_validate()
-				let mapped = try transformer(data)
+				let mapped = try transformer(data, response)
 				completion?(.success(mapped))
 			} catch {
 				completion?(.failure(error))
@@ -92,9 +113,9 @@ public extension URLTransferable {
 	func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>) -> AnyPublisher<ObjectType, Error> {
 		session.dataTaskPublisher(for: request)
 			.tryMap { result -> ObjectType in
-				try result.response.url_validate()
+				let httpResponse = try result.response.httpResponse
 				try result.data.url_validateNotEmptyData()
-				return try transformer(result.data)
+				return try transformer(result.data, httpResponse)
 			}
 			.eraseToAnyPublisher()
 	}
@@ -105,5 +126,19 @@ public extension URLTransferable {
 		}
 
 		return dataPublisher(for: urlRequest, transformer: route.transformer)
+	}
+}
+
+public extension URLTransferable {
+	func data<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: URLSessionTaskDelegate? = nil) async throws -> ObjectType {
+		let (data, response) = try await session.data(for: request, delegate: delegate)
+		let httpResponse = try response.httpResponse
+		try data.url_validateNotEmptyData()
+		return try transformer(data, httpResponse)
+	}
+
+	func data<T: URLRequestable>(for route: T, delegate: URLSessionTaskDelegate? = nil) async throws -> T.ResultType {
+		let request = try route.urlRequest(headers: nil, queryItems: nil)
+		return try await data(for: request, transformer: route.transformer, delegate: delegate)
 	}
 }

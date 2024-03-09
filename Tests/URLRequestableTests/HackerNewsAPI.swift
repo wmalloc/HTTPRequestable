@@ -30,7 +30,11 @@ struct StoryList: HTTPRequestable {
 	let method: HTTPMethod = .get
 	let path: String
 	let headers: HTTPFields = .init([.accept(.json)])
-	let queryItems: Array<URLQueryItem>? = [URLQueryItem(name: "print", value: "pretty")]
+	let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
+
+	var transformer: Transformer<Data, [Int]> = { data, _ in
+		try JSONDecoder().decode([Int].self, from: data)
+	}
 
 	init(storyType: String) throws {
 		guard !storyType.isEmpty else {

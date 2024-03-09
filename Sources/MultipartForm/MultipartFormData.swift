@@ -8,6 +8,7 @@
 import CoreServices
 import Foundation
 import HTTPTypes
+import UniformTypeIdentifiers
 
 open class MultipartFormData {
 	public let boundary: String
@@ -172,10 +173,8 @@ extension MultipartFormData {
 
 extension MultipartFormData {
 	func mimeType(forPathExtension pathExtension: String) -> String {
-		if let id = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension as CFString, nil)?.takeRetainedValue(),
-		   let contentType = UTTypeCopyPreferredTagWithClass(id, kUTTagClassMIMEType)?.takeRetainedValue()
-		{
-			return contentType as String
+		if let id = UTType(filenameExtension: pathExtension), let contentType = id.preferredMIMEType {
+			return contentType
 		}
 		return .octetStream
 	}
