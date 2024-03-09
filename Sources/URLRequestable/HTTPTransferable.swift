@@ -9,7 +9,6 @@ import Foundation
 import HTTPTypes
 import HTTPTypesFoundation
 
-@available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
 public protocol HTTPTransferable {
 	var session: URLSession { get }
 
@@ -36,13 +35,12 @@ public protocol HTTPTransferable {
 	func data<T: HTTPRequestable>(for route: T, delegate: URLSessionTaskDelegate?) async throws -> T.ResultType
 }
 
-@available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
 public extension HTTPTransferable {
 	func data<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: URLSessionTaskDelegate? = nil) async throws -> ObjectType {
 		let (data, response) = try await session.data(for: request, delegate: delegate)
 		switch response.status.kind {
 		case .successful:
-			return try transformer(data)
+			return try transformer(data, response)
 		default:
 			throw URLError(URLError.Code(rawValue: response.status.code))
 		}

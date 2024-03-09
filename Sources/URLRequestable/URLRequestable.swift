@@ -7,14 +7,11 @@
 import Foundation
 import HTTPTypes
 
-public typealias URLDataResponse = (data: Data, response: URLResponse)
-public typealias Transformer<InputType, OutputType> = (InputType) throws -> OutputType
-
 public protocol URLRequestable: HTTPRequestable {
 	var apiBaseURLString: String { get }
 	var body: Data? { get }
 
-	func urlRequest(headers: HTTPFields?, queryItems: Array<URLQueryItem>?) throws -> URLRequest
+	func urlRequest(headers: HTTPFields?, queryItems: [URLQueryItem]?) throws -> URLRequest
 }
 
 public extension URLRequestable {
@@ -26,7 +23,7 @@ public extension URLRequestable {
 		nil
 	}
 
-	func url(queryItems: Array<URLQueryItem>? = nil) throws -> URL {
+	func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
 		guard var components = URLComponents(string: apiBaseURLString) else {
 			throw URLError(.badURL)
 		}
@@ -41,7 +38,7 @@ public extension URLRequestable {
 		return url
 	}
 
-	func urlRequest(headers: HTTPFields? = nil, queryItems: Array<URLQueryItem>? = nil) throws -> URLRequest {
+	func urlRequest(headers: HTTPFields? = nil, queryItems: [URLQueryItem]? = nil) throws -> URLRequest {
 		let url = try url(queryItems: queryItems)
 		let request = URLRequest(url: url)
 			.setMethod(method)
