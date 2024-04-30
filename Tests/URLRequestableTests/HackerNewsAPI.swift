@@ -19,7 +19,7 @@ class HackerNewsAPI: HTTPTransferable {
 
 	func storyList(type: String) async throws -> StoryList.ResultType {
 		let request = try StoryList(storyType: type)
-		return try await data(for: request, delegate: nil)
+		return try await object(for: request, delegate: nil)
 	}
 }
 
@@ -29,7 +29,7 @@ struct StoryList: HTTPRequestable {
 	let authority: String = "hacker-news.firebaseio.com"
 	let method: HTTPMethod = .get
 	let path: String
-	let headers: HTTPFields = .init([.accept(.json)])
+	let headerFields: HTTPFields? = .init([.accept(.json)])
 	let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
 
 	var transformer: Transformer<Data, [Int]> = { data, _ in

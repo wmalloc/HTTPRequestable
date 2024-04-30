@@ -10,7 +10,7 @@ import HTTPTypes
 import HTTPTypesFoundation
 
 public typealias HTTPMethod = HTTPRequest.Method
-public typealias Transformer<InputType, OutputType> = (InputType, HTTPResponse) throws -> OutputType
+public typealias Transformer<InputType, OutputType> = (InputType, HTTPURLResponse) throws -> OutputType
 
 public protocol HTTPRequestable {
 	associatedtype ResultType
@@ -20,11 +20,13 @@ public protocol HTTPRequestable {
 	var method: HTTPMethod { get }
 	var path: String { get }
 	var queryItems: [URLQueryItem]? { get }
-	var headers: HTTPFields { get }
+	var headerFields: HTTPFields? { get }
+  var httpBody: Data? { get }
 	var transformer: Transformer<Data, ResultType> { get }
 
 	func url(queryItems: [URLQueryItem]?) throws -> URL
-	func httpRequest(headers: HTTPFields?, queryItems: [URLQueryItem]?) throws -> HTTPRequest
+	func httpRequest(fields: HTTPFields?, queryItems: [URLQueryItem]?) throws -> HTTPRequest
+  func urlRequest(fields: HTTPFields?, queryItems: [URLQueryItem]?) throws -> URLRequest
 }
 
 public extension HTTPRequestable {
@@ -44,10 +46,14 @@ public extension HTTPRequestable {
 		nil
 	}
 
-	var headers: HTTPFields {
+	var headerFields: HTTPFields? {
 		HTTPFields([.accept(.json), .defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
 	}
 
+  var httpBody: Data? {
+    nil
+  }
+  
 	func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
 		var components = URLComponents()
 		components.scheme = scheme
@@ -62,10 +68,19 @@ public extension HTTPRequestable {
 		return url
 	}
 
-	func httpRequest(headers: HTTPFields? = nil, queryItems: [URLQueryItem]? = nil) throws -> HTTPRequest {
-		var allHeaders = self.headers
-		allHeaders.append(contentsOf: headers ?? [:])
+	func httpRequest(fields: HTTPFields? = nil, queryItems: [URLQueryItem]? = nil) throws -> HTTPRequest {
+		var allHeaders = self.headerFields ?? HTTPFields()
+		allHeaders.append(contentsOf: headerFields ?? [:])
 		let request = try HTTPRequest(method: method, url: url(queryItems: queryItems), headerFields: allHeaders)
 		return request
 	}
+  
+  func urlRequest(fields: HTTPFields? = nil, queryItems: [URLQueryItem]? = nil) throws -> URLRequest {
+    let httpRequest = try self.httpRequest(fields: fields, queryItems: queryItems)
+    guard let urlRequest = URLRequest(httpRequest: httpRequest) else {
+      throw URLError(.unsupportedURL)
+    }
+    return urlRequest
+      .setHttpBody(httpBody)
+  }
 }
