@@ -8,16 +8,16 @@ import Foundation
 import HTTPTypes
 
 public extension URLRequest {
-	func value(forHTTPHeaderField field: HTTPField.Name) -> String? {
-		value(forHTTPHeaderField: field.canonicalName) ?? value(forHTTPHeaderField: field.rawName)
+	func value(forHTTPField name: HTTPField.Name) -> String? {
+		value(forHTTPHeaderField: name.canonicalName) ?? value(forHTTPHeaderField: name.rawName)
 	}
 
-	mutating func setValue(_ value: String?, forHTTPHeaderField field: HTTPField.Name) {
-		setValue(value, forHTTPHeaderField: field.rawName)
+	mutating func setValue(_ value: String?, forHTTPField name: HTTPField.Name) {
+		setValue(value, forHTTPHeaderField: name.rawName)
 	}
 
-	mutating func addValue(_ value: String, forHTTPHeaderField field: HTTPField.Name) {
-		addValue(value, forHTTPHeaderField: field.rawName)
+	mutating func addValue(_ value: String, forHTTPField name: HTTPField.Name) {
+		addValue(value, forHTTPHeaderField: name.rawName)
 	}
 
 	subscript(header key: String) -> String? {
@@ -31,10 +31,10 @@ public extension URLRequest {
 
 	subscript(field: HTTPField.Name) -> String? {
 		get {
-			value(forHTTPHeaderField: field)
+			value(forHTTPField: field)
 		}
 		set {
-			setValue(newValue, forHTTPHeaderField: field)
+			setValue(newValue, forHTTPField: field)
 		}
 	}
 

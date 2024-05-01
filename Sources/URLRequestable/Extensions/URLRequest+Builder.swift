@@ -40,10 +40,10 @@ public extension URLRequest {
 	func setHttpBody(_ httpBody: Data?, contentType: String? = nil) -> Self {
 		var request = self
 		if let contentType {
-			request.setValue(contentType, forHTTPHeaderField: .contentType)
+			request.setValue(contentType, forHTTPField: .contentType)
 		}
 		request.httpBody = httpBody
-		request.setValue("\(httpBody?.count ?? 0)", forHTTPHeaderField: .contentLength)
+		request.setValue("\(httpBody?.count ?? 0)", forHTTPField: .contentLength)
 		return request
 	}
 
@@ -71,7 +71,7 @@ public extension URLRequest {
 	@discardableResult
 	func setHttpHeader(_ value: String?, forField name: HTTPField.Name) -> Self {
 		var request = self
-		request.setValue(value, forHTTPHeaderField: name)
+		request.setValue(value, forHTTPField: name)
 		return request
 	}
 
@@ -92,7 +92,7 @@ public extension URLRequest {
 	@discardableResult
 	func addHttpHeader(_ value: String, forField name: HTTPField.Name) -> Self {
 		var request = self
-		request.addValue(value, forHTTPHeaderField: name)
+		request.addValue(value, forHTTPField: name)
 		return request
 	}
 
@@ -202,7 +202,7 @@ public extension URLRequest {
 	func addHeaders(_ headers: [HTTPField]) -> Self {
 		var request = self
 		for header in headers {
-			request.addValue(header.value, forHTTPHeaderField: header.name)
+			request.addValue(header.value, forHTTPField: header.name)
 		}
 		return request
 	}

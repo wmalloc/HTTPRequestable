@@ -47,7 +47,7 @@ public extension HTTPRequestable {
 	}
 
 	var headerFields: HTTPFields? {
-		HTTPFields([.accept(.json), .defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
+		HTTPFields([.defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
 	}
 
   var httpBody: Data? {
@@ -69,9 +69,9 @@ public extension HTTPRequestable {
 	}
 
 	func httpRequest(fields: HTTPFields? = nil, queryItems: [URLQueryItem]? = nil) throws -> HTTPRequest {
-		var allHeaders = self.headerFields ?? HTTPFields()
-		allHeaders.append(contentsOf: headerFields ?? [:])
-		let request = try HTTPRequest(method: method, url: url(queryItems: queryItems), headerFields: allHeaders)
+		var allHeaderFields = self.headerFields ?? HTTPFields()
+		allHeaderFields.append(contentsOf: fields ?? [:])
+		let request = try HTTPRequest(method: method, url: url(queryItems: queryItems), headerFields: allHeaderFields)
 		return request
 	}
   

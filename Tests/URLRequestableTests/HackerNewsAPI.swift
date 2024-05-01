@@ -27,7 +27,6 @@ struct StoryList: HTTPRequestable {
 	typealias ResultType = [Int]
 
 	let authority: String = "hacker-news.firebaseio.com"
-	let method: HTTPMethod = .get
 	let path: String
 	let headerFields: HTTPFields? = .init([.accept(.json)])
 	let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]

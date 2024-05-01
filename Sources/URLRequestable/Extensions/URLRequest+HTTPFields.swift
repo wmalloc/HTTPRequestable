@@ -17,13 +17,10 @@ public extension URLRequest {
 	}
 
 	@discardableResult
-	func addHeaderFields(_ fields: HTTPFields?) -> Self {
-		guard let fields else {
-			return self
-		}
-		var request = self
+	func addHeaderFields(_ fields: HTTPFields) -> Self {
+    var request = self
 		for header in fields {
-			request.addValue(header.value, forHTTPHeaderField: header.name)
+			request.addValue(header.value, forHTTPField: header.name)
 		}
 		return request
 	}
@@ -58,9 +55,14 @@ extension HTTPFields: RawRepresentable {
 
 	public var rawValue: [String: String] {
 		var rawValues: [String: String] = [:]
-		for value in self {
-			rawValues[value.name.rawName] = value.value
-		}
-		return rawValues
+    for field in self {
+      if let existingValue = rawValues[field.name.rawName] {
+        let separator = field.name == .cookie ? "; " : ", "
+        rawValues[field.name.rawName] = "\(existingValue)\(separator)\(field.value)"
+      } else {
+        rawValues[field.name.rawName] = field.value
+      }
+    }
+    return rawValues
 	}
 }

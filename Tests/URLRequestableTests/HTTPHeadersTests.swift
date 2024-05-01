@@ -28,10 +28,10 @@ final class HTTPHeadersTests: XCTestCase {
 
 	func testURLSessionConfiguration() throws {
 		let session = URLSessionConfiguration.default
-		session.headers = HTTPFields.defaultHeaders
+		session.httpFields = HTTPFields.defaultHeaders
 		XCTAssertEqual(session.httpAdditionalHeaders?.count, 3)
 
-		let headers = session.headers
+		let headers = session.httpFields
 		XCTAssertEqual(headers?.count, 3)
 	}
 
