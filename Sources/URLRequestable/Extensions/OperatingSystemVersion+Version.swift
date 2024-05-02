@@ -7,7 +7,7 @@
 import Foundation
 
 public extension OperatingSystemVersion {
-	var url_versionString: String {
-		"\(majorVersion).\(minorVersion).\(patchVersion)"
-	}
+  var url_versionString: String {
+    "\(majorVersion).\(minorVersion).\(patchVersion)"
+  }
 }
