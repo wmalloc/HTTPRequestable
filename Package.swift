@@ -17,10 +17,12 @@ let package = Package(
   targets: [
     .target(name: "URLRequestable", dependencies: [
       .product(name: "HTTPTypes", package: "swift-http-types"),
-      .product(name: "HTTPTypesFoundation", package: "swift-http-types")]),
+      .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
+            resources: [.process("Resources")]),
     .target(name: "MultipartForm", dependencies: ["URLRequestable",
                                                   .product(name: "HTTPTypes", package: "swift-http-types"),
-                                                  .product(name: "HTTPTypesFoundation", package: "swift-http-types")]),
+                                                  .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
+            resources: [.process("Resources")]),
     .testTarget(name: "URLRequestableTests",
                 dependencies: ["URLRequestable", "MultipartForm",
                                .product(name: "HTTPTypes", package: "swift-http-types"),

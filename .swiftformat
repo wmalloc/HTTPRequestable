@@ -4,11 +4,11 @@
 --decimalgrouping none
 --hexgrouping none
 --ifdef no-indent
---indent space
 --octalgrouping none
 --patternlet inline
 --self init-only
 --stripunusedargs closure-only
 --tabwidth 2
+--indent 2
 
 # rules
