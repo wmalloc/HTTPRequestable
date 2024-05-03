@@ -3,7 +3,7 @@
 [![SPM supported](https://img.shields.io/badge/SPM-supported-DE5C43.svg?style=flat)](https://swift.org/package-manager)
 ![License](https://img.shields.io/github/license/wmalloc/URLRequestable.svg?style=flat)
 
-# URLRequestable
+# HTTPRequestable
 
 A lightweight Web API for [Apple](https://www.apple.com) devices, written in [Swift](https://swift.org) 5.x and using [Structured Concurrency](https://developer.apple.com/documentation/swift/concurrency). It builds on top of [HTTPTypes](https://github.com/apple/swift-http-types) library by [Apple](https://www.apple.com).
 
@@ -13,7 +13,7 @@ Add the following dependency clause to your Package.swift:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/wmalloc/URLRequestable.git", from: "0.5.4")
+    .package(url: "https://github.com/wmalloc/HTTpRequestable.git", from: "0.6.0")
 ]
 ```
 ## Features
@@ -36,7 +36,7 @@ struct StoryList: HTTPRequstable {
   let authority: String = "hacker-news.firebaseio.com"
   let method: HTTPMethod = .get
   let path: String
-  let headers: HTTPFields = .init([.accept(.json)])
+  let headerFields: HTTPFields = .init([.accept(.json)])
   let queryItems: Array<URLQueryItem>? = [URLQueryItem(name: "print", value: "pretty")]
 
   init(storyType: String) throws {
