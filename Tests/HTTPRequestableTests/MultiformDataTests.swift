@@ -6,7 +6,7 @@
 //
 
 @testable import MultipartForm
-@testable import URLRequestable
+@testable import HTTPRequestable
 import XCTest
 
 final class MultiformDataTests: XCTestCase {
