@@ -7,7 +7,7 @@
 
 import Foundation
 import HTTPTypes
-import URLRequestable
+import HTTPRequestable
 
 public extension URLRequest {
   @discardableResult

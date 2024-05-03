@@ -1,8 +1,8 @@
 import HTTPTypes
-@testable import URLRequestable
+@testable import HTTPRequestable
 import XCTest
 
-final class URLRequestableTests: XCTestCase {
+final class HTTPRequestableTests: XCTestCase {
   func testDefaultHeaders() throws {
     let acceptEncoding = HTTPField.defaultAcceptEncoding
     XCTAssertEqual(acceptEncoding.name, HTTPField.Name.acceptEncoding)
