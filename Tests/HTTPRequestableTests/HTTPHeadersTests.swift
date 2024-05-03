@@ -7,7 +7,7 @@
 //
 
 import HTTPTypes
-@testable import URLRequestable
+@testable import HTTPRequestable
 import XCTest
 
 final class HTTPHeadersTests: XCTestCase {
