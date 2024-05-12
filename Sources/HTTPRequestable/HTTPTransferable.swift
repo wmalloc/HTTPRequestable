@@ -10,9 +10,9 @@ import Foundation
 import HTTPTypes
 import HTTPTypesFoundation
 
-public typealias DataHandler<T> = (Result<T, Error>) -> Void
+public typealias DataHandler<T> = @Sendable (Result<T, any Error>) -> Void
 
-public protocol HTTPTransferable {
+public protocol HTTPTransferable: Sendable {
   var session: URLSession { get }
 
   init(session: URLSession)
@@ -25,7 +25,7 @@ public protocol HTTPTransferable {
 
    - returns: Transformed Object
    */
-  func object<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: URLSessionTaskDelegate?) async throws -> ObjectType
+  func object<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)?) async throws -> ObjectType
 
   /**
    Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -36,7 +36,7 @@ public protocol HTTPTransferable {
 
    - returns: Transformed Object
    */
-  func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: URLSessionTaskDelegate?) async throws -> ObjectType
+  func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)?) async throws -> ObjectType
 
   /**
    Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -46,7 +46,7 @@ public protocol HTTPTransferable {
 
    - returns: Transformed Object
    */
-  func object<Route: HTTPRequestable>(for route: Route, delegate: URLSessionTaskDelegate?) async throws -> Route.ResultType
+  func object<Route: HTTPRequestable>(for route: Route, delegate: (any URLSessionTaskDelegate)?) async throws -> Route.ResultType
 
   /**
    Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -77,7 +77,7 @@ public protocol HTTPTransferable {
 
    - returns: Publisher with decoded response
    */
-  func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>) -> AnyPublisher<ObjectType, Error>
+  func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>) -> AnyPublisher<ObjectType, any Error>
 
   /**
    Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -87,11 +87,11 @@ public protocol HTTPTransferable {
 
    - returns: Publisher with decoded response
    */
-  func dataPublisher<Route: HTTPRequestable>(for route: Route) -> AnyPublisher<Route.ResultType, Error>
+  func dataPublisher<Route: HTTPRequestable>(for route: Route) -> AnyPublisher<Route.ResultType, any Error>
 }
 
 public extension HTTPTransferable {
-  func object<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: URLSessionTaskDelegate? = nil) async throws -> ObjectType {
+  func object<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
     let (data, response) = try await session.data(for: request, delegate: delegate)
     switch response.status.kind {
     case .successful:
@@ -104,7 +104,7 @@ public extension HTTPTransferable {
     }
   }
 
-  func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: URLSessionTaskDelegate? = nil) async throws -> ObjectType {
+  func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
     let (data, response) = try await session.data(for: request, delegate: delegate)
     guard let httpURLResponse = response as? HTTPURLResponse else {
       throw URLError(.badServerResponse)
@@ -112,7 +112,7 @@ public extension HTTPTransferable {
     return try transformer(data, httpURLResponse)
   }
 
-  func object<Route: HTTPRequestable>(for route: Route, delegate: URLSessionTaskDelegate? = nil) async throws -> Route.ResultType {
+  func object<Route: HTTPRequestable>(for route: Route, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Route.ResultType {
     let request = try route.urlRequest()
     return try await object(for: request, transformer: route.transformer, delegate: delegate)
   }
@@ -152,7 +152,7 @@ public extension HTTPTransferable {
 }
 
 public extension HTTPTransferable {
-  func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>) -> AnyPublisher<ObjectType, Error> {
+  func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>) -> AnyPublisher<ObjectType, any Error> {
     session.dataTaskPublisher(for: request)
       .tryMap { result -> ObjectType in
         guard let httpURLResponse = result.response as? HTTPURLResponse else {
@@ -164,7 +164,7 @@ public extension HTTPTransferable {
       .eraseToAnyPublisher()
   }
 
-  func dataPublisher<Route: HTTPRequestable>(for route: Route) -> AnyPublisher<Route.ResultType, Error> {
+  func dataPublisher<Route: HTTPRequestable>(for route: Route) -> AnyPublisher<Route.ResultType, any Error> {
     guard let urlRequest = try? route.urlRequest() else {
       return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
     }

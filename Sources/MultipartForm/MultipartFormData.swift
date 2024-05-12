@@ -84,7 +84,7 @@ open class MultipartFormData {
     append(stream: stream, withLength: bodyContentLength, headers: headers)
   }
 
-  public func encoded() throws -> Data {
+  public func encoded(streamBufferSize: Int = 1024) throws -> Data {
     var encoded = Data()
     encoded.append(initialBoundaryData)
     var isInitial = true
@@ -94,13 +94,13 @@ open class MultipartFormData {
       } else {
         encoded.append(interstitialBoundaryData)
       }
-      try encoded.append(bodyPart.encoded())
+      try encoded.append(bodyPart.encoded(streamBufferSize: streamBufferSize))
     }
     encoded.append(finalBoundaryData)
     return encoded
   }
 
-  public func write(encodedDataTo fileURL: URL) throws {
+  public func write(encodedDataTo fileURL: URL, streamBufferSize: Int) throws {
     if fileManager.fileExists(atPath: fileURL.path) {
       throw MultipartFormError.fileAlreadyExists(fileURL)
     } else if !fileURL.isFileURL {
@@ -124,7 +124,7 @@ open class MultipartFormData {
       } else {
         try interstitialBoundaryData.write(to: outputStream)
       }
-      try bodyPart.write(to: outputStream)
+      try bodyPart.write(to: outputStream, streamBufferSize: streamBufferSize)
     }
 
     try finalBoundaryData.write(to: outputStream)
