@@ -86,7 +86,6 @@ open class MultipartForm: MultipartFormBody {
     append(stream: stream, withLength: bodyContentLength, headers: headers)
   }
   
-  
   public func encoded(streamBufferSize: Int = 1024) throws -> Data {
     var encoded = Data()
     encoded.append(encodedHeaders())
@@ -181,5 +180,28 @@ extension MultipartForm {
       return contentType
     }
     return .octetStream
+  }
+}
+
+extension MultipartForm: MutableCollection {
+  public var startIndex: Int {
+    bodyParts.startIndex
+  }
+  
+  public var endIndex: Int {
+    bodyParts.endIndex
+  }
+  
+  public func index(after i: Int) -> Int {
+    bodyParts.index(after: i)
+  }
+  
+  public subscript(position: Int) -> MultipartFormBodyPart {
+    get {
+      bodyParts[position]
+    }
+    set {
+      bodyParts[position] = newValue
+    }
   }
 }
