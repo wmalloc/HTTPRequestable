@@ -10,46 +10,48 @@ import Foundation
 import HTTPTypes
 import UniformTypeIdentifiers
 
-open class MultipartFormData {
+open class MultipartForm: MultipartFormBody {
   public let boundary: String
-
-  open lazy var contentType: String = "multipart/form-data; boundary=\(self.boundary)"
-
+  public let headers: HTTPFields
+  public let contentType: KeyedItem<String>
+  
   public var contentLength: UInt64 {
     bodyParts.reduce(0) {
-      $0 + $1.bodyContentLength
+      $0 + $1.contentLength
     }
   }
-
+  
   public init(fileManager: FileManager = .default, boundary: String = UUID().uuidString.replacingOccurrences(of: "-", with: "")) {
     self.fileManager = fileManager
     self.boundary = boundary
+    self.contentType = KeyedItem(item: "multipart/form-data", parameters: ["boundary": boundary])
+    self.headers = HTTPFields([HTTPField.contentType(self.contentType.encoded)])
   }
-
+  
   let fileManager: FileManager
   public private(set) var bodyParts: [MultipartFormBodyPart] = []
-
+  
   public func append(stream: InputStream, withLength length: UInt64, headers: HTTPFields) {
-    let bodyPart = MultipartFormBodyPart(headers: headers, bodyStream: stream, bodyContentLength: length)
+    let bodyPart = MultipartFormBodyPart(headers: headers, bodyStream: stream, contentLength: length)
     bodyParts.append(bodyPart)
   }
-
+  
   public func append(stream: InputStream, withLength length: UInt64, name: String, fileName: String, mimeType: String) {
     let headers = contentHeaders(withName: name, fileName: fileName, mimeType: mimeType)
     append(stream: stream, withLength: length, headers: headers)
   }
-
+  
   public func append(data: Data, withName name: String, fileName: String? = nil, mimeType: String? = nil) {
     let headers = contentHeaders(withName: name, fileName: fileName, mimeType: mimeType)
     let stream = InputStream(data: data)
     let length = UInt64(data.count)
     append(stream: stream, withLength: length, headers: headers)
   }
-
+  
   public func append(fileURL: URL, withName name: String) throws {
     let fileName = fileURL.lastPathComponent
     let pathExtension = fileURL.pathExtension
-
+    
     if !fileName.isEmpty, !pathExtension.isEmpty {
       let mime = mimeType(forPathExtension: pathExtension)
       try append(fileURL: fileURL, withName: name, fileName: fileName, mimeType: mime)
@@ -57,35 +59,37 @@ open class MultipartFormData {
       throw MultipartFormError.invalidFilename(fileURL)
     }
   }
-
+  
   public func append(fileURL: URL, withName name: String, fileName: String, mimeType: String) throws {
     let headers = contentHeaders(withName: name, fileName: fileName, mimeType: mimeType)
-
+    
     guard fileURL.isFileURL else {
       throw MultipartFormError.badURL(fileURL)
     }
-
+    
     let isReachable = try fileURL.checkPromisedItemIsReachable()
     if isReachable == false {
       throw MultipartFormError.accessDenied(fileURL)
     }
-
+    
     var isDirectory: ObjCBool = false
     let path = fileURL.path
     guard fileManager.fileExists(atPath: path, isDirectory: &isDirectory), !isDirectory.boolValue else {
       throw MultipartFormError.fileIsDirectory(fileURL)
     }
-
+    
     let bodyContentLength = try fileManager.fileSize(atPath: path)
     guard let stream = InputStream(url: fileURL) else {
       throw MultipartFormError.streamCreation(fileURL)
     }
-
+    
     append(stream: stream, withLength: bodyContentLength, headers: headers)
   }
-
+  
+  
   public func encoded(streamBufferSize: Int = 1024) throws -> Data {
     var encoded = Data()
+    encoded.append(encodedHeaders())
     encoded.append(initialBoundaryData)
     var isInitial = true
     try bodyParts.forEach { bodyPart in
@@ -99,23 +103,23 @@ open class MultipartFormData {
     encoded.append(finalBoundaryData)
     return encoded
   }
-
+  
   public func write(encodedDataTo fileURL: URL, streamBufferSize: Int) throws {
     if fileManager.fileExists(atPath: fileURL.path) {
       throw MultipartFormError.fileAlreadyExists(fileURL)
     } else if !fileURL.isFileURL {
       throw MultipartFormError.invalidFilename(fileURL)
     }
-
+    
     guard let outputStream = OutputStream(url: fileURL, append: false) else {
       throw MultipartFormError.streamCreation(fileURL)
     }
-
+    
     outputStream.open()
     defer {
       outputStream.close()
     }
-
+    
     var isInitial = true
     try initialBoundaryData.write(to: outputStream)
     for bodyPart in bodyParts {
@@ -126,44 +130,44 @@ open class MultipartFormData {
       }
       try bodyPart.write(to: outputStream, streamBufferSize: streamBufferSize)
     }
-
+    
     try finalBoundaryData.write(to: outputStream)
   }
 }
 
-extension MultipartFormData {
+extension MultipartForm {
   var initialBoundary: String {
     MultipartFormBoundaryType.boundary(forBoundaryType: .initial, boundary: boundary)
   }
-
+  
   var initialBoundaryData: Data {
     Data(initialBoundary.utf8)
   }
-
+  
   var interstitialBoundary: String {
     MultipartFormBoundaryType.boundary(forBoundaryType: .interstitial, boundary: boundary)
   }
-
+  
   var interstitialBoundaryData: Data {
     Data(interstitialBoundary.utf8)
   }
-
+  
   var finalBoundary: String {
     MultipartFormBoundaryType.boundary(forBoundaryType: .final, boundary: boundary)
   }
-
+  
   var finalBoundaryData: Data {
     Data(finalBoundary.utf8)
   }
-
+  
   func contentHeaders(withName name: String, fileName: String? = nil, mimeType: String? = nil) -> HTTPFields {
-    var disposition = "form-data; name=\"\(name)\""
+    var disposition = KeyedItem(item: "form-data", parameters: ["name": name])
     if let fileName {
-      disposition += "; filename=\"\(fileName)\""
+      disposition["filename"] = fileName
     }
-
+    
     var fields = HTTPFields()
-    fields.append(.contentDisposition(disposition))
+    fields.append(.contentDisposition(disposition.encoded))
     if let mimeType {
       fields.append(HTTPField.contentType(mimeType + EncodingCharacters.crlf))
     }
@@ -171,7 +175,7 @@ extension MultipartFormData {
   }
 }
 
-extension MultipartFormData {
+extension MultipartForm {
   func mimeType(forPathExtension pathExtension: String) -> String {
     if let id = UTType(filenameExtension: pathExtension), let contentType = id.preferredMIMEType {
       return contentType

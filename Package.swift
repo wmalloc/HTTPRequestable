@@ -21,8 +21,7 @@ let package = Package(
     .library(name: "MultipartForm", targets: ["MultipartForm"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-http-types.git", from: "1.0.3"),
-    .package(url: "https://github.com/apple/swift-http-structured-headers.git", from: "1.0.0")
+    .package(url: "https://github.com/apple/swift-http-types.git", from: "1.1.0"),
   ],
   targets: [
     .target(name: "HTTPRequestable", dependencies: [
@@ -32,14 +31,12 @@ let package = Package(
             swiftSettings: swiftSettings),
     .target(name: "MultipartForm", dependencies: ["HTTPRequestable",
                                                   .product(name: "HTTPTypes", package: "swift-http-types"),
-                                                  .product(name: "HTTPTypesFoundation", package: "swift-http-types"),
-                                                  .product(name: "StructuredFieldValues", package: "swift-http-structured-headers")],
+                                                  .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
             resources: [.process("Resources")],
             swiftSettings: swiftSettings),
     .testTarget(name: "HTTPRequestableTests",
                 dependencies: ["HTTPRequestable", "MultipartForm",
                                .product(name: "HTTPTypes", package: "swift-http-types"),
-                               .product(name: "HTTPTypesFoundation", package: "swift-http-types"),
-                               .product(name: "StructuredFieldValues", package: "swift-http-structured-headers")]),
+                               .product(name: "HTTPTypesFoundation", package: "swift-http-types")]),
   ]
 )

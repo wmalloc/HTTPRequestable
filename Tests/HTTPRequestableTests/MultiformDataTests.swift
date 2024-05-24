@@ -12,7 +12,7 @@ import XCTest
 final class MultiformDataTests: XCTestCase {
   func testBoundary() throws {
     let boundary = UUID().uuidString.replacingOccurrences(of: "-", with: "")
-    let multipartData = MultipartFormData(boundary: boundary)
+    let multipartData = MultipartForm(boundary: boundary)
     XCTAssertEqual(boundary, multipartData.boundary)
     let initialBoudary = "--\(boundary)\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
     XCTAssertEqual(multipartData.initialBoundary, initialBoudary)
@@ -26,11 +26,11 @@ final class MultiformDataTests: XCTestCase {
   }
 
   func testOneItem() throws {
-    let boundray = "109AF0987D004171B0A8481D6401B62D"
+    let boundary = "109AF0987D004171B0A8481D6401B62D"
     let profileDataString = "{\"familyName\": \"Malik\", \"givenName\": \"Waqar\"}"
     let profileData = profileDataString.data(using: .utf8)
     XCTAssertNotNil(profileData)
-    let multiformData = MultipartFormData(boundary: boundray)
+    let multiformData = MultipartForm(boundary: boundary)
     multiformData.append(data: profileData!, withName: "Profile", mimeType: .json)
     let imageDataString = "{\"homePage\": \"https://www.apple.com\"}"
     let imageString = imageDataString.data(using: .utf8)?.base64EncodedData()

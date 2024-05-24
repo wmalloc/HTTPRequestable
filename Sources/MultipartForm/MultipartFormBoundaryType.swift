@@ -11,7 +11,7 @@ public enum EncodingCharacters: Sendable {
   public static let crlf = "\r\n"
 }
 
-public enum MultipartFormBoundaryType: Hashable, Identifiable, Sendable {
+public enum MultipartFormBoundaryType: Hashable, Identifiable, CaseIterable, Sendable {
   public var id: MultipartFormBoundaryType {
     self
   }

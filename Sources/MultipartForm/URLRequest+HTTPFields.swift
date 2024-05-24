@@ -11,11 +11,11 @@ import HTTPRequestable
 
 public extension URLRequest {
   @discardableResult
-  func setMultipartFormData(_ multipartFormData: MultipartFormData) throws -> Self {
+  func setMultipartFormData(_ multipartForm: MultipartForm) throws -> Self {
     let request = self
-    try request.setHttpBody(multipartFormData.encoded(), contentType: multipartFormData.contentType)
-      .setHeader(HTTPField(name: .contentLength, value: "\(multipartFormData.contentLength)"))
-      .setHeader(HTTPField(name: .contentType, value: multipartFormData.contentType))
+    try request.setHttpBody(multipartForm.encoded(), contentType: multipartForm.contentType.encoded)
+      .setHeader(HTTPField(name: .contentLength, value: "\(multipartForm.contentLength)"))
+      .setHeader(HTTPField(name: .contentType, value: multipartForm.contentType.encoded))
     return self
   }
 }
