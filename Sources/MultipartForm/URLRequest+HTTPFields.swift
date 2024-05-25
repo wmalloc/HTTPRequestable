@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import HTTPTypes
 import HTTPRequestable
+import HTTPTypes
 
 public extension URLRequest {
   @discardableResult

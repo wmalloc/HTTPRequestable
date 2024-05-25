@@ -5,8 +5,8 @@
 //  Created by Waqar Malik on 1/29/23.
 //
 
-@testable import MultipartForm
 @testable import HTTPRequestable
+@testable import MultipartForm
 import XCTest
 
 final class MultiformDataTests: XCTestCase {
@@ -31,7 +31,7 @@ final class MultiformDataTests: XCTestCase {
     let profileData = profileDataString.data(using: .utf8)
     XCTAssertNotNil(profileData)
     let multiformData = MultipartForm(boundary: boundary)
-    multiformData.append(data: profileData!, withName: "Profile", mimeType: .json)
+    multiformData.append(data: profileData!, withName: "Profile", mimeType: HTTPContentType.json.rawValue)
     let imageDataString = "{\"homePage\": \"https://www.apple.com\"}"
     let imageString = imageDataString.data(using: .utf8)?.base64EncodedData()
     XCTAssertNotNil(imageString)

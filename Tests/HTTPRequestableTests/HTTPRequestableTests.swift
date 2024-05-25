@@ -1,5 +1,5 @@
-import HTTPTypes
 @testable import HTTPRequestable
+import HTTPTypes
 import XCTest
 
 final class HTTPRequestableTests: XCTestCase {

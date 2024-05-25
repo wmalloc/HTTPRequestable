@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  HTTPFields+Combined.swift
 //
 //
 //  Created by Waqar Malik on 5/18/24.
@@ -21,7 +21,7 @@ public extension HTTPFields {
     }
     return combinedFields
   }
-  
+
   var headerFields: [String: String] {
     var headerFields = [String: String](minimumCapacity: combinedFields.count)
     for (name, value) in combinedFields {

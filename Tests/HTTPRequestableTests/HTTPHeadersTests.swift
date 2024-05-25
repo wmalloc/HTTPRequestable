@@ -6,8 +6,8 @@
 //  Copyright © 2020 Waqar Malik All rights reserved.
 //
 
-import HTTPTypes
 @testable import HTTPRequestable
+import HTTPTypes
 import XCTest
 
 final class HTTPHeadersTests: XCTestCase {
@@ -39,7 +39,7 @@ final class HTTPHeadersTests: XCTestCase {
     XCTAssertEqual(fields.count, 2)
     XCTAssertEqual(fields[0].name, .userAgent)
     XCTAssertEqual(fields[1].name, .accept)
-    fields[.accept] = .xml
+    fields[.accept] = HTTPContentType.xml.rawValue
     XCTAssertEqual(fields.count, 2)
   }
 
@@ -79,12 +79,12 @@ final class HTTPHeadersTests: XCTestCase {
 
   func testDictionary() throws {
     var headers = HTTPFields()
-    headers[.contentType] = .xml
+    headers[.contentType] = HTTPContentType.xml.rawValue
     XCTAssertEqual(headers.count, 1)
-    XCTAssertEqual(headers[.contentType], .xml)
-    headers[.contentType] = .json
+    XCTAssertEqual(headers[.contentType], HTTPContentType.xml.rawValue)
+    headers[.contentType] = HTTPContentType.json.rawValue
     XCTAssertEqual(headers.count, 1)
-    XCTAssertEqual(headers[.contentType], .json)
+    XCTAssertEqual(headers[.contentType], HTTPContentType.json.rawValue)
     headers.append(HTTPField(name: .authorization, value: "Password"))
     headers.append(HTTPField(name: .contentLength, value: "\(0)"))
     headers[.authorization] = "Token"
@@ -118,7 +118,7 @@ final class HTTPHeadersTests: XCTestCase {
     request = request
       .setContentType(.json)
     let first = request[.contentType]
-    XCTAssertEqual(first, .json)
+    XCTAssertEqual(first, HTTPContentType.json.rawValue)
     XCTAssertEqual(request.allHTTPHeaderFields?.count, 1)
   }
 

@@ -14,7 +14,7 @@ public typealias Transformer<InputType, OutputType> = @Sendable (InputType, HTTP
 
 public protocol HTTPRequestable: Sendable {
   associatedtype ResultType
-  
+
   var scheme: String { get }
   var authority: String { get }
   var method: HTTPMethod { get }

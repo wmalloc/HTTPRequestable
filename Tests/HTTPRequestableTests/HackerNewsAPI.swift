@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import HTTPTypes
 @testable import HTTPRequestable
+import HTTPTypes
 
 @available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
 class HackerNewsAPI: HTTPTransferable, @unchecked Sendable {

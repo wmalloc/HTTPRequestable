@@ -12,6 +12,10 @@ public extension HTTPField {
     .init(name: .accept, value: value)
   }
 
+  static func accept(_ value: HTTPContentType) -> Self {
+    .init(name: .accept, value: value.rawValue)
+  }
+
   static func acceptLanguage(_ value: String) -> Self {
     .init(name: .acceptLanguage, value: value)
   }
@@ -30,6 +34,10 @@ public extension HTTPField {
 
   static func contentType(_ value: String) -> Self {
     .init(name: .contentType, value: value)
+  }
+
+  static func contentType(_ value: HTTPContentType) -> Self {
+    contentType(value.rawValue)
   }
 
   static func userAgent(_ value: String) -> Self {
