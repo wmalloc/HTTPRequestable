@@ -15,44 +15,44 @@ open class MultipartForm: MultipartFormBody {
   public let boundary: String
   public let headers: HTTPFields
   public let contentType: KeyedItem<String>
-
+  
   public var contentLength: UInt64 {
     bodyParts.reduce(0) {
       $0 + $1.contentLength
     }
   }
-
+  
   public init(fileManager: FileManager = .default, boundary: String = UUID().uuidString.replacingOccurrences(of: "-", with: "")) {
     self.fileManager = fileManager
     self.boundary = boundary
     self.contentType = KeyedItem(item: HTTPContentType.multipartForm.rawValue, parameters: ["boundary": boundary])
     self.headers = HTTPFields([HTTPField.contentType(contentType.encoded)])
   }
-
+  
   let fileManager: FileManager
   public private(set) var bodyParts: [MultipartFormBodyPart] = []
-
+  
   public func append(stream: InputStream, withLength length: UInt64, headers: HTTPFields) {
     let bodyPart = MultipartFormBodyPart(headers: headers, bodyStream: stream, contentLength: length)
     bodyParts.append(bodyPart)
   }
-
+  
   public func append(stream: InputStream, withLength length: UInt64, name: String, fileName: String, mimeType: String) {
     let headers = contentHeaders(withName: name, fileName: fileName, mimeType: mimeType)
     append(stream: stream, withLength: length, headers: headers)
   }
-
+  
   public func append(data: Data, withName name: String, fileName: String? = nil, mimeType: String? = nil) {
     let headers = contentHeaders(withName: name, fileName: fileName, mimeType: mimeType)
     let stream = InputStream(data: data)
     let length = UInt64(data.count)
     append(stream: stream, withLength: length, headers: headers)
   }
-
+  
   public func append(fileURL: URL, withName name: String) throws {
     let fileName = fileURL.lastPathComponent
     let pathExtension = fileURL.pathExtension
-
+    
     if !fileName.isEmpty, !pathExtension.isEmpty {
       let mime = mimeType(forPathExtension: pathExtension)
       try append(fileURL: fileURL, withName: name, fileName: fileName, mimeType: mime)
@@ -91,14 +91,11 @@ open class MultipartForm: MultipartFormBody {
     var encoded = Data()
     encoded.append(encodedHeaders())
     encoded.append(initialBoundaryData)
-    var isInitial = true
-    try bodyParts.forEach { bodyPart in
-      if isInitial {
-        isInitial = false
-      } else {
+    for (index, bodyPart) in bodyParts.enumerated() {
+      if index > 0 {
         encoded.append(interstitialBoundaryData)
       }
-      try encoded.append(bodyPart.encoded(streamBufferSize: streamBufferSize))
+      encoded.append(try bodyPart.encoded(streamBufferSize: streamBufferSize))
     }
     encoded.append(finalBoundaryData)
     return encoded
@@ -161,7 +158,7 @@ extension MultipartForm {
   }
 
   func contentHeaders(withName name: String, fileName: String? = nil, mimeType: String? = nil) -> HTTPFields {
-    var disposition = KeyedItem(item: "form-data", parameters: ["name": name])
+    var disposition = KeyedItem(item: HTTPContentType.formData.rawValue, parameters: ["name": name])
     if let fileName {
       disposition["filename"] = fileName
     }
