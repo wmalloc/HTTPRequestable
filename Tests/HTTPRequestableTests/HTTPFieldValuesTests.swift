@@ -10,14 +10,14 @@ import XCTest
 
 final class StructuredFieldValuesTests: XCTestCase {
   func testKeyedItemFormData() throws {
-    let values = KeyedItem(item: "form-data", parameters: ["name": "name.png", "filename": "filename.txt"])
-    XCTAssertTrue(["form-data;name=name.png;filename=filename.txt", "form-data;filename=filename.txt;name=name.png"].contains(values.encoded))
+    let values = KeyedItem(item: "form-data", parameters: ["name": "\"name.png\"", "filename": "\"filename.txt\""])
+    XCTAssertTrue(["form-data; name=name.png; filename=\"filename.txt\"", "form-data; filename=\"filename.txt\"; name=\"name.png\""].contains(values.encoded))
   }
 
   func testKeyedItemBoundary() throws {
     let boundary = MultipartFormBoundaryType.boundary(forBoundaryType: .initial, boundary: "boundary")
     let values = KeyedItem(item: "multipart/form-data", parameters: ["boundary": boundary])
-    XCTAssertEqual("multipart/form-data;boundary=\(boundary)", values.encoded)
+    XCTAssertEqual("multipart/form-data; boundary=\(boundary)", values.encoded)
   }
 
   func testQuality() {
@@ -36,6 +36,6 @@ final class StructuredFieldValuesTests: XCTestCase {
   func testMultipartFormBodyHeader() throws {
     let boundary = "109AF0987D004171B0A8481D6401B62D"
     let multiformData = MultipartForm(boundary: boundary)
-    XCTAssertEqual("multipart/form-data;boundary=\(boundary)", multiformData.contentType.encoded)
+    XCTAssertEqual("multipart/form-data; boundary=\(boundary)", multiformData.contentType.encoded)
   }
 }

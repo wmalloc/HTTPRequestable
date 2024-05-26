@@ -9,11 +9,11 @@ import Foundation
 import HTTPTypes
 
 open class MultipartFormBodyPart: MultipartFormBody {
-  public let headers: HTTPFields
+  public let headers: [HTTPField]
   public let bodyStream: InputStream
   public let contentLength: UInt64
 
-  public init(headers: HTTPFields, bodyStream: InputStream, contentLength: UInt64) {
+  public init(headers: [HTTPField], bodyStream: InputStream, contentLength: UInt64) {
     self.headers = headers
     self.bodyStream = bodyStream
     self.contentLength = contentLength

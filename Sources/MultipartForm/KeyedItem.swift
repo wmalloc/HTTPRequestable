@@ -22,7 +22,7 @@ public struct KeyedItem<ItemType: Codable & Equatable & Sendable>: Equatable, Se
   }
 
   var encoded: String {
-    "\(item);" + parameters.map { "\($0.key)=\($0.value)" }.joined(separator: ";")
+    "\(item); " + parameters.map { "\($0.key)=\($0.value)" }.joined(separator: "; ")
   }
 }
 

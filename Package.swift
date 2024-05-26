@@ -37,6 +37,7 @@ let package = Package(
     .testTarget(name: "HTTPRequestableTests",
                 dependencies: ["HTTPRequestable", "MultipartForm",
                                .product(name: "HTTPTypes", package: "swift-http-types"),
-                               .product(name: "HTTPTypesFoundation", package: "swift-http-types")]),
+                               .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
+                resources: [.copy("TestData")]),
   ]
 )

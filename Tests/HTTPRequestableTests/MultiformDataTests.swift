@@ -14,13 +14,13 @@ final class MultiformDataTests: XCTestCase {
     let boundary = UUID().uuidString.replacingOccurrences(of: "-", with: "")
     let multipartData = MultipartForm(boundary: boundary)
     XCTAssertEqual(boundary, multipartData.boundary)
-    let initialBoudary = "--\(boundary)\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
+    let initialBoudary = "--\(boundary)\(EncodingCharacters.crlf)"
     XCTAssertEqual(multipartData.initialBoundary, initialBoudary)
     XCTAssertEqual(multipartData.initialBoundaryData, Data(initialBoudary.utf8))
-    let interstitialBoudary = "\(EncodingCharacters.crlf)--\(boundary)\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
+    let interstitialBoudary = "\(EncodingCharacters.crlf)--\(boundary)\(EncodingCharacters.crlf)"
     XCTAssertEqual(multipartData.interstitialBoundary, interstitialBoudary)
     XCTAssertEqual(multipartData.interstitialBoundaryData, Data(interstitialBoudary.utf8))
-    let finalBoundary = "\(EncodingCharacters.crlf)--\(boundary)--\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
+    let finalBoundary = "\(EncodingCharacters.crlf)--\(boundary)--\(EncodingCharacters.crlf)"
     XCTAssertEqual(multipartData.finalBoundary, finalBoundary)
     XCTAssertEqual(multipartData.finalBoundaryData, Data(finalBoundary.utf8))
   }
@@ -31,15 +31,17 @@ final class MultiformDataTests: XCTestCase {
     let profileData = profileDataString.data(using: .utf8)
     XCTAssertNotNil(profileData)
     let multiformData = MultipartForm(boundary: boundary)
-    multiformData.append(data: profileData!, withName: "Profile", mimeType: HTTPContentType.json.rawValue)
+    multiformData.append(data: profileData!, withName: "\"Profile\"", mimeType: HTTPContentType.json.rawValue)
     let imageDataString = "{\"homePage\": \"https://www.apple.com\"}"
     let imageString = imageDataString.data(using: .utf8)?.base64EncodedData()
     XCTAssertNotNil(imageString)
-    multiformData.append(data: imageString!, withName: "Image", mimeType: "application/octet-stream")
+    multiformData.append(data: imageString!, withName: "\"Image\"", mimeType: "application/octet-stream")
     //        let url = Bundle.module.url(forResource: "announce-hero", withExtension: "jpeg", subdirectory: "TestData")
     //        XCTAssertNotNil(url)
     //        try multiformData.append(fileURL: url!, withName: "Image", fileName: "announce-hero", mimeType: URLRequest.ContentType.jpeg)
     let encoedData = try multiformData.encoded()
-    try encoedData.write(to: URL(fileURLWithPath: "/tmp/MultipartFormData.txt"))
+    let url = Bundle.module.url(forResource: "MultipartFormData", withExtension: "txt", subdirectory: "TestData")
+    let data = try Data(contentsOf: url!)
+    XCTAssertEqual(data, encoedData)
   }
 }
