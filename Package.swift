@@ -2,16 +2,6 @@
 
 import PackageDescription
 
-let swiftSettings: [SwiftSetting] = [
-  .enableUpcomingFeature("BareSlashRegexLiterals"),
-  .enableUpcomingFeature("ConciseMagicFile"),
-  .enableUpcomingFeature("ExistentialAny"),
-  .enableUpcomingFeature("ForwardTrailingClosures"),
-  .enableUpcomingFeature("ImplicitOpenExistentials"),
-  .enableUpcomingFeature("StrictConcurrency"),
-  .unsafeFlags(["-warn-concurrency", "-enable-actor-data-race-checks"]),
-]
-
 let package = Package(
   name: "HTTPRequestable",
   defaultLocalization: "en",
@@ -28,12 +18,12 @@ let package = Package(
       .product(name: "HTTPTypes", package: "swift-http-types"),
       .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
             resources: [.process("Resources")],
-            swiftSettings: swiftSettings),
+            swiftSettings: []),
     .target(name: "MultipartForm", dependencies: ["HTTPRequestable",
                                                   .product(name: "HTTPTypes", package: "swift-http-types"),
                                                   .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
             resources: [.process("Resources")],
-            swiftSettings: swiftSettings),
+            swiftSettings: []),
     .testTarget(name: "HTTPRequestableTests",
                 dependencies: ["HTTPRequestable", "MultipartForm",
                                .product(name: "HTTPTypes", package: "swift-http-types"),
