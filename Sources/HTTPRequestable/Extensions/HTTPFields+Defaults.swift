@@ -11,6 +11,6 @@ import HTTPTypes
 
 public extension HTTPFields {
   static var defaultHeaders: HTTPFields {
-    HTTPFields([HTTPField.defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
+    HTTPFields([HTTPField.defaultUserAgent])
   }
 }

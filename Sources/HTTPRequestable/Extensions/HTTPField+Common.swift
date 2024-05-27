@@ -12,6 +12,10 @@ public extension HTTPField {
     .init(name: .accept, value: value)
   }
 
+  static func accept(_ value: HTTPContentType) -> Self {
+    .init(name: .accept, value: value.rawValue)
+  }
+
   static func acceptLanguage(_ value: String) -> Self {
     .init(name: .acceptLanguage, value: value)
   }
@@ -32,6 +36,10 @@ public extension HTTPField {
     .init(name: .contentType, value: value)
   }
 
+  static func contentType(_ value: HTTPContentType) -> Self {
+    contentType(value.rawValue)
+  }
+
   static func userAgent(_ value: String) -> Self {
     .init(name: .userAgent, value: value)
   }
@@ -43,13 +51,5 @@ public extension HTTPField {
   /// See the [User-Agent header](https://tools.ietf.org/html/rfc7231#section-5.5.3).
   static var defaultUserAgent: Self {
     .userAgent(String.url_userAgent)
-  }
-
-  static var defaultAcceptLanguage: Self {
-    .acceptLanguage(Locale.preferredLanguages.prefix(6).url_qualityEncoded())
-  }
-
-  static var defaultAcceptEncoding: Self {
-    .acceptEncoding(["br", "gzip", "deflate"].url_qualityEncoded())
   }
 }
