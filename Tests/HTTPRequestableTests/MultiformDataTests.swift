@@ -24,7 +24,7 @@ final class MultiformDataTests: XCTestCase {
     XCTAssertEqual(multipartData.finalBoundary, finalBoundary)
     XCTAssertEqual(multipartData.finalBoundaryData, Data(finalBoundary.utf8))
   }
-
+  
   func testOneItem() throws {
     let boundary = "109AF0987D004171B0A8481D6401B62D"
     let profileDataString = "{\"familyName\": \"Malik\", \"givenName\": \"Waqar\"}"
@@ -35,7 +35,7 @@ final class MultiformDataTests: XCTestCase {
     let imageDataString = "{\"homePage\": \"https://www.apple.com\"}"
     let imageString = imageDataString.data(using: .utf8)?.base64EncodedData()
     XCTAssertNotNil(imageString)
-    multiformData.append(data: imageString!, withName: "\"Image\"", mimeType: "application/octet-stream")
+    multiformData.append(data: imageString!, withName: "\"Image\"", mimeType: "application/jpeg;base64")
     //        let url = Bundle.module.url(forResource: "announce-hero", withExtension: "jpeg", subdirectory: "TestData")
     //        XCTAssertNotNil(url)
     //        try multiformData.append(fileURL: url!, withName: "Image", fileName: "announce-hero", mimeType: URLRequest.ContentType.jpeg)
