@@ -8,41 +8,31 @@
 import Foundation
 import HTTPTypes
 
-open class MultipartFormBodyPart {
-  static var streamBufferSize: Int = 1024
-  public let headers: HTTPFields
+open class MultipartFormBodyPart: MultipartFormBody {
+  public let headers: [HTTPField]
   public let bodyStream: InputStream
-  public let bodyContentLength: UInt64
+  public let contentLength: UInt64
 
-  public init(headers: HTTPFields, bodyStream: InputStream, bodyContentLength: UInt64) {
+  public init(headers: [HTTPField], bodyStream: InputStream, contentLength: UInt64) {
     self.headers = headers
     self.bodyStream = bodyStream
-    self.bodyContentLength = bodyContentLength
+    self.contentLength = contentLength
   }
 }
 
 public extension MultipartFormBodyPart {
-  func encoded() throws -> Data {
+  func encoded(streamBufferSize: Int) throws -> Data {
     var encoded = Data()
     let headerData = encodedHeaders()
     encoded.append(headerData)
-    let bodyStreamData = try encodedBodyStream()
+    let bodyStreamData = try encodedBodyStream(streamBufferSize: streamBufferSize)
     encoded.append(bodyStreamData)
     return encoded
   }
 }
 
 extension MultipartFormBodyPart {
-  func encodedHeaders() -> Data {
-    let headerText = headers.map { field in
-      "\(field.name.rawName): \(field.value)\(EncodingCharacters.crlf)"
-    }
-    .joined()
-    + EncodingCharacters.crlf
-    return Data(headerText.utf8)
-  }
-
-  private func encodedBodyStream() throws -> Data {
+  private func encodedBodyStream(streamBufferSize: Int) throws -> Data {
     let inputStream = bodyStream
     inputStream.open()
     defer {
@@ -52,8 +42,8 @@ extension MultipartFormBodyPart {
     var encoded = Data()
 
     while inputStream.hasBytesAvailable {
-      var buffer = [UInt8](repeating: 0, count: Self.streamBufferSize)
-      let bytesRead = inputStream.read(&buffer, maxLength: Self.streamBufferSize)
+      var buffer = [UInt8](repeating: 0, count: streamBufferSize)
+      let bytesRead = inputStream.read(&buffer, maxLength: streamBufferSize)
 
       if let error = inputStream.streamError {
         throw MultipartFormError.inputStreamReadFailed(error)
@@ -66,8 +56,8 @@ extension MultipartFormBodyPart {
       }
     }
 
-    guard UInt64(encoded.count) == bodyContentLength else {
-      let message = String(localized: "multipart_error_expected_length", bundle: .module) + " \(bodyContentLength), " +
+    guard UInt64(encoded.count) == contentLength else {
+      let message = String(localized: "multipart_error_expected_length", bundle: .module) + " \(contentLength), " +
         String(localized: "multipart_error_encoded_length", bundle: .module) + " \(encoded.count)"
       throw MultipartFormError.inputStreamLength(message)
     }
@@ -77,13 +67,13 @@ extension MultipartFormBodyPart {
 }
 
 extension MultipartFormBodyPart {
-  func write(to outputStream: OutputStream) throws {
+  func write(to outputStream: OutputStream, streamBufferSize: Int) throws {
     let headerData = encodedHeaders()
     try Data.write(data: headerData, to: outputStream)
-    try write(bodyStreamTo: outputStream)
+    try write(bodyStreamTo: outputStream, streamBufferSize: streamBufferSize)
   }
 
-  func write(bodyStreamTo outputStream: OutputStream) throws {
+  func write(bodyStreamTo outputStream: OutputStream, streamBufferSize: Int) throws {
     let inputStream = bodyStream
 
     inputStream.open()
@@ -92,8 +82,8 @@ extension MultipartFormBodyPart {
     }
 
     while inputStream.hasBytesAvailable {
-      var buffer = [UInt8](repeating: 0, count: Self.streamBufferSize)
-      let bytesRead = inputStream.read(&buffer, maxLength: Self.streamBufferSize)
+      var buffer = [UInt8](repeating: 0, count: streamBufferSize)
+      let bytesRead = inputStream.read(&buffer, maxLength: streamBufferSize)
 
       if let error = inputStream.streamError {
         throw MultipartFormError.inputStreamReadFailed(error)
