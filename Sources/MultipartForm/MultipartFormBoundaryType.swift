@@ -11,7 +11,7 @@ public enum EncodingCharacters: Sendable {
   public static let crlf = "\r\n"
 }
 
-public enum MultipartFormBoundaryType: Hashable, Identifiable, Sendable {
+public enum MultipartFormBoundaryType: Hashable, Identifiable, CaseIterable, Sendable {
   public var id: MultipartFormBoundaryType {
     self
   }
@@ -27,11 +27,11 @@ public enum MultipartFormBoundaryType: Hashable, Identifiable, Sendable {
   public static func boundary(forBoundaryType boundaryType: MultipartFormBoundaryType, boundary: String) -> String {
     let boundaryText = switch boundaryType {
     case .initial:
-      "--\(boundary)\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
+      "--\(boundary)\(EncodingCharacters.crlf)"
     case .interstitial:
-      "\(EncodingCharacters.crlf)--\(boundary)\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
+      "\(EncodingCharacters.crlf)--\(boundary)\(EncodingCharacters.crlf)"
     case .final:
-      "\(EncodingCharacters.crlf)--\(boundary)--\(EncodingCharacters.crlf)\(EncodingCharacters.crlf)"
+      "\(EncodingCharacters.crlf)--\(boundary)--\(EncodingCharacters.crlf)"
     }
 
     return boundaryText

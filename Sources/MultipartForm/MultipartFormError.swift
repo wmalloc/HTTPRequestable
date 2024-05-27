@@ -11,14 +11,14 @@ import Foundation
 public enum MultipartFormError: LocalizedError, Sendable {
   case badURL(URL)
   case invalidFilename(URL)
-  case fileNotFound(URL, Error?)
+  case fileNotFound(URL, (any Error)?)
   case fileAlreadyExists(URL)
   case accessDenied(URL)
   case fileIsDirectory(URL)
   case fileSizeNotAvailable(URL)
   case streamCreation(URL)
-  case outputStreamWriteFailed(Error)
-  case inputStreamReadFailed(Error)
+  case outputStreamWriteFailed(any Error)
+  case inputStreamReadFailed(any Error)
   case inputStreamLength(String)
 
   public var errorDescription: String? {

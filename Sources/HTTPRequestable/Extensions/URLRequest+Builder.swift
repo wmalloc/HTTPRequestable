@@ -166,6 +166,11 @@ public extension URLRequest {
   }
 
   @discardableResult
+  func setContentType(_ contentType: HTTPContentType) -> Self {
+    setHeader(.contentType(contentType))
+  }
+
+  @discardableResult
   func setUserAgent(_ userAgent: String) -> Self {
     setHeader(.userAgent(userAgent))
   }

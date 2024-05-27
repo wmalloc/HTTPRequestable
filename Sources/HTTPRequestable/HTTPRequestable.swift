@@ -10,9 +10,9 @@ import HTTPTypes
 import HTTPTypesFoundation
 
 public typealias HTTPMethod = HTTPRequest.Method
-public typealias Transformer<InputType, OutputType> = (InputType, HTTPURLResponse) throws -> OutputType
+public typealias Transformer<InputType, OutputType> = @Sendable (InputType, HTTPURLResponse) throws -> OutputType
 
-public protocol HTTPRequestable {
+public protocol HTTPRequestable: Sendable {
   associatedtype ResultType
 
   var scheme: String { get }
@@ -47,7 +47,7 @@ public extension HTTPRequestable {
   }
 
   var headerFields: HTTPFields? {
-    HTTPFields([.defaultUserAgent, .defaultAcceptEncoding, .defaultAcceptLanguage])
+    HTTPFields.defaultHeaders
   }
 
   var httpBody: Data? {
