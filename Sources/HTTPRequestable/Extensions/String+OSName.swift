@@ -8,7 +8,9 @@ import Foundation
 
 extension String {
   static var url_osName: String {
-    #if os(iOS)
+    #if targetEnvironment(simulator)
+    return "iOS(Simulator)"
+    #elseif os(iOS)
     #if targetEnvironment(macCatalyst)
     return "macOS(Catalyst)"
     #else
@@ -20,6 +22,8 @@ extension String {
     return "tvOS"
     #elseif os(macOS)
     return "macOS"
+    #elseif os(visionOS)
+    return "visionOS"
     #else
     return "Unknown"
     #endif

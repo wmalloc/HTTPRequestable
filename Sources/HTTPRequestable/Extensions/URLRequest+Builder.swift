@@ -43,7 +43,9 @@ public extension URLRequest {
       request.setValue(contentType, forHTTPField: .contentType)
     }
     request.httpBody = httpBody
-    request.setValue("\(httpBody?.count ?? 0)", forHTTPField: .contentLength)
+    if httpBody != nil {
+      request.setValue("\(httpBody?.count ?? 0)", forHTTPField: .contentLength)
+    }
     return request
   }
 
@@ -161,21 +163,31 @@ public extension URLRequest {
 
 public extension URLRequest {
   @discardableResult
+  @inline(__always)
   func setContentType(_ contentType: String) -> Self {
     setHeader(.contentType(contentType))
   }
 
   @discardableResult
+  @inline(__always)
   func setContentType(_ contentType: HTTPContentType) -> Self {
     setHeader(.contentType(contentType))
   }
 
   @discardableResult
+  @inline(__always)
+  func setHttpBody(_ httpBody: Data?, contentType: HTTPContentType? = nil) -> Self {
+    setHttpBody(httpBody, contentType: contentType?.rawValue)
+  }
+
+  @discardableResult
+  @inline(__always)
   func setUserAgent(_ userAgent: String) -> Self {
     setHeader(.userAgent(userAgent))
   }
 
   @discardableResult
+  @inline(__always)
   func setMethod(_ method: HTTPMethod?) -> Self {
     setHttpMethod(method?.rawValue)
   }
@@ -199,6 +211,7 @@ public extension URLRequest {
   }
 
   @discardableResult
+  @inline(__always)
   func addHeader(_ header: HTTPField) -> Self {
     addHttpHeader(header.value, forField: header.name)
   }
