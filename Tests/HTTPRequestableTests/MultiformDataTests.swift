@@ -24,7 +24,7 @@ final class MultiformDataTests: XCTestCase {
     XCTAssertEqual(multipartData.finalBoundary, finalBoundary)
     XCTAssertEqual(multipartData.finalBoundaryData, Data(finalBoundary.utf8))
   }
-  
+
   func testOneItem() throws {
     let boundary = "109AF0987D004171B0A8481D6401B62D"
     let profileDataString = "{\"familyName\": \"Malik\", \"givenName\": \"Waqar\"}"

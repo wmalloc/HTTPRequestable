@@ -52,12 +52,4 @@ public extension HTTPField {
   static var defaultUserAgent: Self {
     .userAgent(String.url_userAgent)
   }
-
-  static var defaultAcceptLanguage: Self {
-    .acceptLanguage(Locale.preferredLanguages.prefix(6).url_qualityEncoded())
-  }
-
-  static var defaultAcceptEncoding: Self {
-    .acceptEncoding(["br", "gzip", "deflate"].url_qualityEncoded())
-  }
 }
