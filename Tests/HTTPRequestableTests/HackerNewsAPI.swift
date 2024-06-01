@@ -31,8 +31,10 @@ struct StoryList: HTTPRequestable {
   let headerFields: HTTPFields? = .init([.accept(.json)])
   let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
 
-  var transformer: Transformer<Data, [Int]> = { data, _ in
-    try JSONDecoder().decode([Int].self, from: data)
+  var transformer: Transformer<Data, [Int]> {
+    { data, _ in
+      try JSONDecoder().decode([Int].self, from: data)
+    }
   }
 
   init(storyType: String) throws {
