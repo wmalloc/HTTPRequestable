@@ -12,6 +12,8 @@ import HTTPTypesFoundation
 public typealias HTTPMethod = HTTPRequest.Method
 public typealias Transformer<InputType, OutputType> = @Sendable (InputType, HTTPURLResponse) throws -> OutputType
 
+public typealias URLRequestable = HTTPRequestable
+
 public protocol HTTPRequestable: Sendable {
   associatedtype ResultType
 
@@ -76,10 +78,10 @@ public extension HTTPRequestable {
 
   func urlRequest(fields: HTTPFields? = nil, queryItems: [URLQueryItem]? = nil) throws -> URLRequest {
     let httpRequest = try httpRequest(fields: fields, queryItems: queryItems)
-    guard let urlRequest = URLRequest(httpRequest: httpRequest) else {
+    guard var urlRequest = URLRequest(httpRequest: httpRequest) else {
       throw URLError(.unsupportedURL)
     }
+    urlRequest.httpBody = httpBody
     return urlRequest
-      .setHttpBody(httpBody)
   }
 }
