@@ -2,13 +2,13 @@
 //  HTTPFieldValuesTests.swift
 //
 //
-//  Created by Waqar Malik on 5/10/24.
+//  Created by Waqar Malik on 5/10/24
 //
 
 @testable import MultipartForm
 import XCTest
 
-final class StructuredFieldValuesTests: XCTestCase {
+final class HTTPFieldValuesTests: XCTestCase {
   func testKeyedItemFormData() throws {
     let values = KeyedItem(item: "form-data", parameters: ["name": "\"name.png\"", "filename": "\"filename.txt\""])
     XCTAssertTrue(["form-data; name=name.png; filename=\"filename.txt\"", "form-data; filename=\"filename.txt\"; name=\"name.png\""].contains(values.encoded))
@@ -26,7 +26,7 @@ final class StructuredFieldValuesTests: XCTestCase {
       let items = [
         Quality.Item(item: "br", parameters: Quality.Parameter(q: 1.0)),
         Quality.Item(item: "gzip", parameters: Quality.Parameter(q: 0.9)),
-        Quality.Item(item: "deflate", parameters: Quality.Parameter(q: 0.8)),
+        Quality.Item(item: "deflate", parameters: Quality.Parameter(q: 0.8))
       ]
       return Quality(items)
     }

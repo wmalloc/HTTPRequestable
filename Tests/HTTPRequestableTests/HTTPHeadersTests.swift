@@ -2,8 +2,7 @@
 //  HTTPHeadersTests.swift
 //
 //
-//  Created by Waqar Malik on 1/15/23.
-//  Copyright © 2020 Waqar Malik All rights reserved.
+//  Created by Waqar Malik on 1/15/23
 //
 
 @testable import HTTPRequestable
@@ -11,8 +10,8 @@ import HTTPTypes
 import XCTest
 
 final class HTTPHeadersTests: XCTestCase {
-  static let baseURLString = "http://localhost:8080"
-  static let baseURL = URL(string: "http://localhost:8080")!
+  static private let baseURLString = "http://localhost:8080"
+  static private let baseURL = URL(string: "http://localhost:8080")!
 
   func testBaseHeaders() throws {
     var headers = HTTPFields()

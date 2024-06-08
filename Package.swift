@@ -15,13 +15,13 @@ let swiftSettings: [SwiftSetting] = [
 let package = Package(
   name: "HTTPRequestable",
   defaultLocalization: "en",
-  platforms: [.iOS(.v15), .tvOS(.v15), .macOS(.v11), .watchOS(.v8), .macCatalyst(.v15)],
+  platforms: [.iOS(.v16), .tvOS(.v16), .macOS(.v12), .watchOS(.v9), .macCatalyst(.v16), .visionOS(.v1)],
   products: [
     .library(name: "HTTPRequestable", targets: ["HTTPRequestable"]),
-    .library(name: "MultipartForm", targets: ["MultipartForm"]),
+    .library(name: "MultipartForm", targets: ["MultipartForm"])
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-http-types.git", from: "1.1.0"),
+    .package(url: "https://github.com/apple/swift-http-types.git", from: "1.1.0")
   ],
   targets: [
     .target(name: "HTTPRequestable", dependencies: [
@@ -38,6 +38,6 @@ let package = Package(
                 dependencies: ["HTTPRequestable", "MultipartForm",
                                .product(name: "HTTPTypes", package: "swift-http-types"),
                                .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
-                resources: [.copy("TestData")]),
+                resources: [.copy("TestData")])
   ]
 )

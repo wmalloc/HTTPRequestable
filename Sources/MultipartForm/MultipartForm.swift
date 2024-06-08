@@ -2,7 +2,6 @@
 //  MultipartForm.swift
 //
 //  Created by Waqar Malik on 1/15/23.
-//  Copyright © 2020 Waqar Malik All rights reserved.
 //
 
 import CoreServices
@@ -106,7 +105,9 @@ open class MultipartForm: MultipartFormBody {
   public func write(encodedDataTo fileURL: URL, streamBufferSize: Int) throws {
     if fileManager.fileExists(atPath: fileURL.path) {
       throw MultipartFormError.fileAlreadyExists(fileURL)
-    } else if !fileURL.isFileURL {
+    }
+
+    if !fileURL.isFileURL {
       throw MultipartFormError.invalidFilename(fileURL)
     }
 
@@ -188,8 +189,8 @@ extension MultipartForm: MutableCollection {
     bodyParts.endIndex
   }
 
-  public func index(after i: Int) -> Int {
-    bodyParts.index(after: i)
+  public func index(after index: Int) -> Int {
+    bodyParts.index(after: index)
   }
 
   public subscript(position: Int) -> MultipartFormBodyPart {

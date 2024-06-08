@@ -15,7 +15,6 @@ public extension String {
     let appBuild = infoDictionary?["CFBundleVersion"] as? String ?? "Unknown-Build"
     let os = String.url_osName + " " + ProcessInfo.processInfo.operatingSystemVersionString
     let package = "URLRequestable"
-    let userAgent = "\(appName)/\(appVersion) (\(bundle); build:\(appBuild); \(os)) \(package)"
-    return userAgent
+    return "\(appName)/\(appVersion) (\(bundle); build:\(appBuild); \(os)) \(package)"
   }
 }

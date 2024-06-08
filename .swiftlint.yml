@@ -1,20 +1,54 @@
 opt_in_rules: # some rules are only opt-in
+  - accessibility_label_for_image
+  - accessibility_trait_for_button
+  - anyobject_protocol
+  - direct_return
+  - discouraged_none_name
   - empty_count
+  - empty_string
+  - file_header
+  - file_name
+  - file_name_no_space
+  - function_default_parameter_at_end
+  - private_action
+  - private_outlet
+  - private_subject
+  - private_swiftui_state
+  - prohibited_interface_builder
+  - redundant_nil_coalescing
+  - redundant_self_in_closure
+  - redundant_type_annotation
+  - sorted_first_last
+  - sorted_imports
+  - superfluous_else
+  - test_case_accessibility
+  - toggle_bool
+  - unowned_variable_capture
+  - vertical_parameter_alignment_on_call
+  - vertical_whitespace_between_cases
+  - vertical_whitespace_closing_braces
+  - vertical_whitespace_opening_braces
+  - weak_delegate
+  - yoda_condition
+
   # Find all the available rules by running:
   # swiftlint rules
 #included: # paths to include during linting. `--path` is ignored if present.
 #  - Source
+
 excluded: # paths to ignore during linting. Takes precedence over `included`.
   - Carthage
   - Pods
-  - ../CareKit
-  - ../../CareKit
   - Package.swift
+  - .build
+  - .switpm
 #  - Source/ExcludedFolder
 #  - Source/ExcludedFile.swift
 #  - Source/*/ExcludedFile.swift # Exclude files with a wildcard
 analyzer_rules: # Rules run by `swiftlint analyze` (experimental)
   - explicit_self
+  - unused_imports
+
 # configurable rules can be customized from this configuration file
 # binary rules can set their severity level
 force_cast: warning # implicitly

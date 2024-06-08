@@ -2,7 +2,6 @@
 //  URL+QueryItems.swift
 //
 //  Created by Waqar Malik on 5/28/20.
-//  Copyright © 2020 Waqar Malik All rights reserved.
 //
 
 import Foundation
