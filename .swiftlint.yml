@@ -10,6 +10,8 @@ opt_in_rules: # some rules are only opt-in
   - file_name
   - file_name_no_space
   - function_default_parameter_at_end
+  - legacy_multiple
+  - let_var_whitespace
   - private_action
   - private_outlet
   - private_subject
@@ -23,6 +25,7 @@ opt_in_rules: # some rules are only opt-in
   - superfluous_else
   - test_case_accessibility
   - toggle_bool
+  - unhandled_throwing_task
   - unowned_variable_capture
   - vertical_parameter_alignment_on_call
   - vertical_whitespace_between_cases
@@ -45,6 +48,7 @@ excluded: # paths to ignore during linting. Takes precedence over `included`.
 #  - Source/ExcludedFolder
 #  - Source/ExcludedFile.swift
 #  - Source/*/ExcludedFile.swift # Exclude files with a wildcard
+
 analyzer_rules: # Rules run by `swiftlint analyze` (experimental)
   - explicit_self
   - unused_imports
@@ -56,20 +60,31 @@ force_try:
   severity: error # explicitly
 # rules that have both warning and error levels, can set just the warning level
 # implicitly
-#line_length: 230
+
 # they can set both implicitly with an array
 type_body_length:
   - 300 # warning
   - 400 # error
+
+line_length:
+  warning: 150
+  error: 200
+  ignores_urls: true
+  ignores_comments: true
+  ignores_interpolated_strings: true
+  ignores_function_declarations: true
+
 # or they can set both explicitly
 file_length:
   warning: 800
   error: 1200
+
 # naming rules can set warnings/errors for min_length and max_length
 # additionally they can set excluded names
 function_body_length:
   warning: 100
   error: 200
+
 type_name:
   min_length: 3 # only warning
   max_length: # warning and error
@@ -77,9 +92,12 @@ type_name:
     error: 50
   excluded: iPhone # excluded via string
   allowed_symbols: ["_"] # these are allowed in type names
+
 nesting:
   type_level:
     warning: 3
+    error: 5
+
 identifier_name:
   allowed_symbols: "_"
   min_length: 2 # only min_length
@@ -89,13 +107,14 @@ identifier_name:
     - id
     - URL
     - GlobalAPIKey
+
 reporter: "xcode" # reporter type (xcode, json, csv, checkstyle, junit, html, emoji, sonarqube, markdown)
 
 disabled_rules: # rule identifiers to exclude from running
  - cyclomatic_complexity
  - vertical_parameter_alignment
  - inclusive_language
- - line_length
+ #- line_length
  # - colon
  # - comma
  # - control_statement
