@@ -2,7 +2,7 @@
 //  KeyedItem.swift
 //
 //
-//  Created by Waqar Malik on 5/18/24.
+//  Created by Waqar Malik on 5/18/24
 //
 
 import Foundation
@@ -35,8 +35,8 @@ extension KeyedItem: Collection {
     parameters.endIndex
   }
 
-  public func index(after i: Dictionary<String, String>.Index) -> Dictionary<String, String>.Index {
-    parameters.index(after: i)
+  public func index(after index: Dictionary<String, String>.Index) -> Dictionary<String, String>.Index {
+    parameters.index(after: index)
   }
 
   public subscript(position: Dictionary<String, String>.Index) -> Dictionary<String, String>.Element {

@@ -2,7 +2,7 @@
 //  HTTPTransferable.swift
 //
 //
-//  Created by Waqar Malik on 11/17/23.
+//  Created by Waqar Malik on 11/17/23
 //
 
 import Combine
@@ -99,6 +99,7 @@ public extension HTTPTransferable {
         throw URLError(.badURL)
       }
       return try transformer(data, httpURLResponse)
+
     default:
       throw URLError(URLError.Code(rawValue: response.status.code))
     }

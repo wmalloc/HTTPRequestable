@@ -12,7 +12,6 @@ public extension Bundle {
     guard let url = url(forResource: forResource, withExtension: withExtension, subdirectory: subdirectory) else {
       throw URLError(.fileDoesNotExist)
     }
-    let data = try Data(contentsOf: url, options: [.mappedIfSafe])
-    return data
+    return try Data(contentsOf: url, options: [.mappedIfSafe])
   }
 }

@@ -1,8 +1,7 @@
 //
 //  FileManager+Size.swift
 //
-//  Created by Waqar Malik on 1/21/23.
-//  Copyright © 2020 Waqar Malik All rights reserved.
+//  Created by Waqar Malik on 1/21/23
 //
 
 import Foundation
