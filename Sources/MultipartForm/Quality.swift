@@ -2,7 +2,7 @@
 //  Quality.swift
 //
 //
-//  Created by Waqar Malik on 5/18/24.
+//  Created by Waqar Malik on 5/18/24
 //
 
 import Foundation
@@ -26,18 +26,20 @@ public struct Quality: Hashable, Sendable {
   }
 
   public struct Parameter: Codable, Hashable, Sendable {
+    // swiftlint:disable identifier_name
     public let q: Float?
 
     public init(q: Float? = nil) {
       self.q = q
     }
+    // swiftlint:enable identifier_name
   }
 
   var encoded: String {
     items.map { item in
       var string = item.item
-      if let q = item.parameters.q {
-        string += ";q=\(q)"
+      if let quality = item.parameters.q {
+        string += ";q=\(quality)"
       }
       return string
     }
@@ -60,8 +62,8 @@ extension Quality: MutableCollection {
     items.endIndex
   }
 
-  public func index(after i: Int) -> Int {
-    items.index(after: i)
+  public func index(after index: Int) -> Int {
+    items.index(after: index)
   }
 
   public subscript(position: Int) -> Item {

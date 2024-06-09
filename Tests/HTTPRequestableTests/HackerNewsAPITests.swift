@@ -9,7 +9,7 @@ import XCTest
 
 @available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
 final class HackerNewsAPITests: XCTestCase {
-  var api: HackerNewsAPI!
+  private var api: HackerNewsAPI!
 
   override func setUpWithError() throws {
     let configuration = URLSessionConfiguration.ephemeral
