@@ -10,5 +10,4 @@
 --stripunusedargs closure-only
 --tabwidth 2
 --indent 2
-
 # rules

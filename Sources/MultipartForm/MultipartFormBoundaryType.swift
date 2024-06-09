@@ -1,8 +1,7 @@
 //
 //  MultipartFormBoundaryType.swift
 //
-//  Created by Waqar Malik on 1/24/23.
-//  Copyright © 2020 Waqar Malik All rights reserved.
+//  Created by Waqar Malik on 1/24/23
 //
 
 import Foundation
@@ -25,7 +24,7 @@ public enum MultipartFormBoundaryType: Hashable, Identifiable, CaseIterable, Sen
   }
 
   public static func boundary(forBoundaryType boundaryType: MultipartFormBoundaryType, boundary: String) -> String {
-    let boundaryText = switch boundaryType {
+    switch boundaryType {
     case .initial:
       "--\(boundary)\(EncodingCharacters.crlf)"
     case .interstitial:
@@ -33,7 +32,5 @@ public enum MultipartFormBoundaryType: Hashable, Identifiable, CaseIterable, Sen
     case .final:
       "\(EncodingCharacters.crlf)--\(boundary)--\(EncodingCharacters.crlf)"
     }
-
-    return boundaryText
   }
 }
