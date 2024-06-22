@@ -26,8 +26,7 @@ class HackerNewsAPI: HTTPTransferable, @unchecked Sendable {
 struct StoryList: HTTPRequestable {
   typealias ResultType = [Int]
 
-  let authority: String = "hacker-news.firebaseio.com"
-  let path: String
+  var environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com")
   let headerFields: HTTPFields? = .init([.accept(.json)])
   let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
 
@@ -41,6 +40,6 @@ struct StoryList: HTTPRequestable {
     guard !storyType.isEmpty else {
       throw URLError(.badURL)
     }
-    self.path = "/v0/" + storyType
+    environment.path = "/v0/" + storyType
   }
 }

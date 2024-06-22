@@ -10,8 +10,8 @@ import HTTPTypes
 import XCTest
 
 final class HTTPHeadersTests: XCTestCase {
-  static private let baseURLString = "http://localhost:8080"
-  static private let baseURL = URL(string: "http://localhost:8080")!
+  private static let baseURLString = "http://localhost:8080"
+  private static let baseURL = URL(string: "http://localhost:8080")!
 
   func testBaseHeaders() throws {
     var headers = HTTPFields()
