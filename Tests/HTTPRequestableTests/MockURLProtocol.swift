@@ -1,5 +1,5 @@
 //
-//  URLProtocolMock.swift
+//  MockURLProtocol.swift
 //
 //
 //  Created by Waqar Malik on 5/31/24.

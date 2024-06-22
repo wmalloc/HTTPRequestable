@@ -1,7 +1,6 @@
 opt_in_rules: # some rules are only opt-in
   - accessibility_label_for_image
   - accessibility_trait_for_button
-  - anyobject_protocol
   - direct_return
   - discouraged_none_name
   - empty_count
