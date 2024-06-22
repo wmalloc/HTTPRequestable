@@ -7,6 +7,18 @@
 import Foundation
 
 public extension URLComponents {
+  init(scheme: String, authority: String, path: String = "") {
+    self.init()
+    self.scheme = scheme
+    self.host = authority
+    self.path = path
+  }
+
+  @discardableResult
+  func setAuthority(_ authority: String) -> Self {
+    setHost(authority)
+  }
+
   @discardableResult
   func setScheme(_ scheme: String) -> Self {
     var components = self

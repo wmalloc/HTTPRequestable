@@ -95,9 +95,10 @@ public extension HTTPTransferable {
     let (data, response) = try await session.data(for: request, delegate: delegate)
     switch response.status.kind {
     case .successful:
-      guard let url = request.url, let httpURLResponse = HTTPURLResponse(httpResponse: response, url: url) else {
+      guard let url = request.url else {
         throw URLError(.badURL)
       }
+      let httpURLResponse = HTTPURLResponse(httpResponse: response, url: url)
       return try transformer(data, httpURLResponse)
 
     default:
@@ -107,9 +108,7 @@ public extension HTTPTransferable {
 
   func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
     let (data, response) = try await session.data(for: request, delegate: delegate)
-    guard let httpURLResponse = response as? HTTPURLResponse else {
-      throw URLError(.badServerResponse)
-    }
+    let httpURLResponse = try? response.httpURLResponse
     return try transformer(data, httpURLResponse)
   }
 
@@ -128,10 +127,11 @@ public extension HTTPTransferable {
         return
       }
 
-      guard let data, let httpURLResponse = urlResponse as? HTTPURLResponse else {
-        completion?(.failure(URLError(.badServerResponse)))
+      guard let data else {
+        completion?(.failure(URLError(.fileDoesNotExist)))
         return
       }
+      let httpURLResponse = try? urlResponse?.httpURLResponse
       do {
         let mapped = try transformer(data, httpURLResponse)
         completion?(.success(mapped))
@@ -156,9 +156,7 @@ public extension HTTPTransferable {
   func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>) -> AnyPublisher<ObjectType, any Error> {
     session.dataTaskPublisher(for: request)
       .tryMap { result -> ObjectType in
-        guard let httpURLResponse = result.response as? HTTPURLResponse else {
-          throw URLError(.badServerResponse)
-        }
+        let httpURLResponse = try? result.response.httpURLResponse
         try result.data.url_validateNotEmptyData()
         return try transformer(result.data, httpURLResponse)
       }

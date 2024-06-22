@@ -10,17 +10,18 @@ import HTTPTypes
 import HTTPTypesFoundation
 
 public typealias HTTPMethod = HTTPRequest.Method
-public typealias Transformer<InputType, OutputType> = @Sendable (InputType, HTTPURLResponse) throws -> OutputType
-
+public typealias Transformer<InputType, OutputType> = @Sendable (InputType, HTTPURLResponse?) throws -> OutputType
+public typealias HTTPEnvironment = URLComponents
 public typealias URLRequestable = HTTPRequestable
 
 public protocol HTTPRequestable: Sendable {
   associatedtype ResultType
 
-  var scheme: String { get }
-  var authority: String { get }
+  var scheme: String? { get }
+  var authority: String? { get }
+  var environment: HTTPEnvironment { get }
   var method: HTTPMethod { get }
-  var path: String { get }
+  var path: String? { get }
   var queryItems: [URLQueryItem]? { get }
   var headerFields: HTTPFields? { get }
   var httpBody: Data? { get }
@@ -32,16 +33,20 @@ public protocol HTTPRequestable: Sendable {
 }
 
 public extension HTTPRequestable {
-  var scheme: String {
-    "https"
+  var scheme: String? {
+    nil
+  }
+
+  var authority: String? {
+    nil
   }
 
   var method: HTTPMethod {
     .get
   }
 
-  var path: String {
-    ""
+  var path: String? {
+    nil
   }
 
   var queryItems: [URLQueryItem]? {
@@ -57,11 +62,22 @@ public extension HTTPRequestable {
   }
 
   func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
-    var components = URLComponents()
-    components.scheme = scheme
-    components.host = authority
-    components.path = path
-    var items: [URLQueryItem] = self.queryItems ?? []
+    var components = environment
+    if let scheme {
+      components.scheme = scheme
+    }
+    if let authority {
+      components.host = authority
+    }
+    var paths = components.path.components(separatedBy: "/")
+    paths.append(contentsOf: path?.components(separatedBy: "/") ?? [])
+    paths = paths.filter { !$0.isEmpty }
+    if !paths.isEmpty {
+      paths.insert("", at: 0)
+    }
+    components.path = paths.joined(separator: "/")
+    var items: [URLQueryItem] = environment.queryItems ?? []
+    items.append(contentsOf: self.queryItems ?? [])
     items.append(contentsOf: queryItems ?? [])
     components.queryItems = items.isEmpty ? nil : Array(items)
     guard let url = components.url else {
