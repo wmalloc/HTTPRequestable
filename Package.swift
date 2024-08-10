@@ -21,7 +21,7 @@ let package = Package(
     .library(name: "MultipartForm", targets: ["MultipartForm"])
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-http-types.git", from: "1.2.0")
+    .package(url: "https://github.com/apple/swift-http-types.git", from: "1.3.0")
   ],
   targets: [
     .target(name: "HTTPRequestable", dependencies: [
