@@ -131,6 +131,7 @@ public extension HTTPTransferable {
         completion?(.failure(URLError(.fileDoesNotExist)))
         return
       }
+      let httpURLResponse = try? urlResponse?.httpURLResponse
       do {
         let httpURLResponse = try urlResponse?.httpURLResponse
         let mapped = try transformer(data, httpURLResponse)
