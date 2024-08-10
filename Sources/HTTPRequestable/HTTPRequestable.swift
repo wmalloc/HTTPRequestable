@@ -9,26 +9,66 @@ import Foundation
 import HTTPTypes
 import HTTPTypesFoundation
 
+/// Method
 public typealias HTTPMethod = HTTPRequest.Method
+
+/// How to transform the resulting data
 public typealias Transformer<InputType, OutputType> = @Sendable (InputType, HTTPURLResponse?) throws -> OutputType
+
+/// URL Components
 public typealias HTTPEnvironment = URLComponents
+
+/// HTTP Request
 public typealias URLRequestable = HTTPRequestable
 
+/// URL/HTTP Request builder
 public protocol HTTPRequestable: Sendable {
   associatedtype ResultType
 
+  /// URL Components to build the url
+  var environment: HTTPEnvironment { get set }
+
+  /// Override the scheme if needed, defaults to nil
   var scheme: String? { get }
+
+  /// Override the authority if needed, defaults to nil
   var authority: String? { get }
-  var environment: HTTPEnvironment { get }
+
+  /// Method defaults to .get
   var method: HTTPMethod { get }
+
+  /// Override the path if needed, defaults to nil
   var path: String? { get }
+
+  /// Additional query items if needed, defaults to nil
   var queryItems: [URLQueryItem]? { get }
+
+  /// Additional headers if needed, defaults to nil
   var headerFields: HTTPFields? { get }
+
+  /// Override the body if needed, defaults to nil
   var httpBody: Data? { get }
+
+  /// How to transform the resulting data
   var transformer: Transformer<Data, ResultType> { get }
 
+  /// builds the final url for request
+  /// - Parameter queryItems: additonal query items
+  /// - Returns: final url
   func url(queryItems: [URLQueryItem]?) throws -> URL
+
+  /// HTTP Request
+  /// - Parameters:
+  ///   - fields: additonal headers, defaults to nil
+  ///   - queryItems: additonal query items, defaults to nil
+  /// - Returns: HTTPRequest
   func httpRequest(fields: HTTPFields?, queryItems: [URLQueryItem]?) throws -> HTTPRequest
+
+  /// URL Request
+  /// - Parameters:
+  ///   - fields: additonal headers, defaults to nil
+  ///   - queryItems: additonal query items, defaults to nil
+  /// - Returns: URLRequest
   func urlRequest(fields: HTTPFields?, queryItems: [URLQueryItem]?) throws -> URLRequest
 }
 

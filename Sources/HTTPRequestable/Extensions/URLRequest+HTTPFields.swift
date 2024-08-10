@@ -42,7 +42,7 @@ public extension URLRequest {
 extension HTTPFields: RawRepresentable {
   public typealias RawValue = [String: String]
 
-  public init?(rawValue: [String: String]) {
+  public init?(rawValue: RawValue) {
     self.init()
     for (key, value) in rawValue {
       guard let name = HTTPField.Name(key) else {
@@ -52,8 +52,8 @@ extension HTTPFields: RawRepresentable {
     }
   }
 
-  public var rawValue: [String: String] {
-    var rawValues: [String: String] = [:]
+  public var rawValue: RawValue {
+    var rawValues: RawValue = [:]
     for field in self {
       if let existingValue = rawValues[field.name.rawName] {
         let separator = field.name == .cookie ? "; " : ", "
