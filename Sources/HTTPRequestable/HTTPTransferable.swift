@@ -108,7 +108,7 @@ public extension HTTPTransferable {
 
   func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
     let (data, response) = try await session.data(for: request, delegate: delegate)
-    let httpURLResponse = try? response.httpURLResponse
+    let httpURLResponse = try response.httpURLResponse
     return try transformer(data, httpURLResponse)
   }
 
@@ -133,6 +133,7 @@ public extension HTTPTransferable {
       }
       let httpURLResponse = try? urlResponse?.httpURLResponse
       do {
+        let httpURLResponse = try urlResponse?.httpURLResponse
         let mapped = try transformer(data, httpURLResponse)
         completion?(.success(mapped))
       } catch {
@@ -156,7 +157,7 @@ public extension HTTPTransferable {
   func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>) -> AnyPublisher<ObjectType, any Error> {
     session.dataTaskPublisher(for: request)
       .tryMap { result -> ObjectType in
-        let httpURLResponse = try? result.response.httpURLResponse
+        let httpURLResponse = try result.response.httpURLResponse
         try result.data.url_validateNotEmptyData()
         return try transformer(result.data, httpURLResponse)
       }

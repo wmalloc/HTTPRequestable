@@ -11,7 +11,7 @@ import XCTest
 final class HTTPFieldValuesTests: XCTestCase {
   func testKeyedItemFormData() throws {
     let values = KeyedItem(item: "form-data", parameters: ["name": "\"name.png\"", "filename": "\"filename.txt\""])
-    XCTAssertTrue(["form-data; name=name.png; filename=\"filename.txt\"", "form-data; filename=\"filename.txt\"; name=\"name.png\""]
+    XCTAssertTrue(["form-data; name=\"name.png\"; filename=\"filename.txt\"", "form-data; filename=\"filename.txt\"; name=\"name.png\""]
       .contains(values.encoded))
   }
 
