@@ -98,7 +98,7 @@ public extension HTTPTransferable {
   func object<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
     var updateRequest = request
     for interceptor in requestInterceptors {
-      updateRequest = try await interceptor.intercept(updateRequest)
+      updateRequest = try await interceptor.intercept(updateRequest, for: session)
     }
     let (data, response) = try await session.data(for: updateRequest, delegate: delegate)
     for interceptor in responseInterceptors {
@@ -120,7 +120,7 @@ public extension HTTPTransferable {
   func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
     var updateRequest = request
     for interceptor in requestInterceptors {
-      updateRequest = try await interceptor.intercept(updateRequest)
+      updateRequest = try await interceptor.intercept(updateRequest, for: session)
     }
     let (rawData, response) = try await session.data(for: request, delegate: delegate)
     let (data, httpURLResponse) = try (rawData, response.httpURLResponse)

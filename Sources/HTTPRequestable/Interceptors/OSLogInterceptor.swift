@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-public struct OSLogInterceptor: Sendable, RequestInterceptor, ResponseInterceptor {
+public struct OSLogInterceptor: Sendable {
   public let logType: OSLogType
   public let logger: OSLog
 
@@ -17,7 +17,9 @@ public struct OSLogInterceptor: Sendable, RequestInterceptor, ResponseIntercepto
     self.logType = logType
     self.logger = logger
   }
+}
 
+extension OSLogInterceptor: RequestInterceptor {
   public func intercept(_ request: HTTPRequest) async throws -> HTTPRequest {
     os_log(logType, log: logger, "%{private}@", request.debugDescription)
     return request
@@ -27,7 +29,9 @@ public struct OSLogInterceptor: Sendable, RequestInterceptor, ResponseIntercepto
     os_log(logType, log: logger, "%{private}@", request.description)
     return request
   }
+}
 
+extension OSLogInterceptor: ResponseInterceptor {
   public func intercept(data: Data, response: HTTPResponse) async throws {
     os_log(logType, log: logger, "%{private}@\n%{private}@", response.debugDescription, String(decoding: data, as: UTF8.self))
   }
