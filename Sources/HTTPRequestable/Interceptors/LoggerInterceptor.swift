@@ -9,7 +9,8 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-public struct LoggerInterceptor: Sendable {
+public struct LoggerInterceptor {
+  public let id: String = "LoggerInterceptor"
   public let level: OSLogType
   public let logger: Logger
 

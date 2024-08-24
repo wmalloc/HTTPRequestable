@@ -7,4 +7,5 @@
 
 import Foundation
 
-public protocol Interceptor {}
+public protocol Interceptor: Identifiable, Sendable {
+}
