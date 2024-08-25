@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-public struct OSLogInterceptor  {
+public struct OSLogInterceptor {
   public let id: String = "OSLogInterceptor"
   public let logType: OSLogType
   public let logger: OSLog

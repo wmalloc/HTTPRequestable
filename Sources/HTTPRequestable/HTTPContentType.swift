@@ -59,54 +59,54 @@ extension HTTPContentType: Decodable {
 
 public extension HTTPContentType {
   /// Any content type
-  static var any: Self { .init(rawValue: "*/*") }
+  static var any: Self { "*/*" }
 
   /// CSS content type
-  static var css: Self { .init(rawValue: "text/css") }
+  static var css: Self { "text/css" }
 
   /// Form Data
-  static var formData: Self { .init(rawValue: "form-data") }
+  static var formData: Self { "form-data" }
 
   /// URLencoded Form Data
-  static var formEncoded: Self { .init(rawValue: "application/x-www-form-urlencoded") }
+  static var formEncoded: Self { "application/x-www-form-urlencoded" }
 
   /// GIF
   /// https://www.rfc-editor.org/rfc/rfc2158.html
-  static var gif: Self { .init(rawValue: "image/gif") }
+  static var gif: Self { "image/gif" }
 
   /// HTML
-  static var html: Self { .init(rawValue: "text/html") }
+  static var html: Self { "text/html" }
 
   /// JPEG
   /// https://www.rfc-editor.org/rfc/rfc2158.html
-  static var jpeg: Self { .init(rawValue: "image/jpeg") }
+  static var jpeg: Self { "image/jpeg" }
 
   /// The application/json Media Type for JavaScript Object Notation (JSON) data
   /// https://datatracker.ietf.org/doc/html/rfc4627
-  static var json: Self { .init(rawValue: "application/json") }
+  static var json: Self { "application/json" }
 
   /// The application/json Media Type for JavaScript Object Notation (JSON) data
   /// https://datatracker.ietf.org/doc/html/rfc4627
-  static var jsonUTF8: Self { .init(rawValue: "application/json; charset=utf-8") }
+  static var jsonUTF8: Self { "application/json; charset=utf-8" }
 
   /// Multi-part form data
-  static var multipartForm: Self { .init(rawValue: "multipart/form-data") }
+  static var multipartForm: Self { "multipart/form-data" }
 
   /// Octet Stream
-  static var octetStream: Self { .init(rawValue: "application/octet-stream") }
+  static var octetStream: Self { "application/octet-stream" }
 
   /// Patch JSON
-  static var patchjson: Self { .init(rawValue: "application/json-patch+json") }
+  static var patchjson: Self { "application/json-patch+json" }
 
   /// PNG Media Type for Portable Network Graphics
-  static var png: Self { .init(rawValue: "image/png") }
+  static var png: Self { "image/png" }
 
   /// PDF Media Type for Portable Document Format
-  static var svg: Self { .init(rawValue: "image/svg+xml") }
+  static var svg: Self { "image/svg+xml" }
 
   /// Plain Text
-  static var textPlain: Self { .init(rawValue: "text/plain") }
+  static var textPlain: Self { "text/plain" }
 
   /// XML
-  static var xml: Self { .init(rawValue: "application/xml") }
+  static var xml: Self { "application/xml" }
 }

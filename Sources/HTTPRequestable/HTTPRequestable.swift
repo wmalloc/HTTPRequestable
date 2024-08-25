@@ -15,9 +15,6 @@ public typealias HTTPMethod = HTTPRequest.Method
 /// How to transform the resulting data
 public typealias Transformer<InputType, OutputType> = @Sendable (InputType, HTTPURLResponse?) throws -> OutputType
 
-/// URL Components
-public typealias HTTPEnvironment = URLComponents
-
 /// HTTP Request
 public typealias URLRequestable = HTTPRequestable
 
@@ -73,33 +70,25 @@ public protocol HTTPRequestable: Sendable {
 }
 
 public extension HTTPRequestable {
-  var scheme: String? {
-    nil
-  }
+  @inlinable
+  var scheme: String? { nil }
 
-  var authority: String? {
-    nil
-  }
+  @inlinable
+  var authority: String? { nil }
 
-  var method: HTTPMethod {
-    .get
-  }
+  @inlinable
+  var method: HTTPMethod { .get }
 
-  var path: String? {
-    nil
-  }
+  @inlinable
+  var path: String? { nil }
 
-  var queryItems: [URLQueryItem]? {
-    nil
-  }
+  @inlinable
+  var queryItems: [URLQueryItem]? { nil }
 
-  var headerFields: HTTPFields? {
-    HTTPFields.defaultHeaders
-  }
+  var headerFields: HTTPFields? { HTTPFields.defaultHeaders }
 
-  var httpBody: Data? {
-    nil
-  }
+  @inlinable
+  var httpBody: Data? { nil }
 
   func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
     var components = environment
