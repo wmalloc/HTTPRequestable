@@ -10,7 +10,16 @@ import Foundation
 ///  A type that can be initialized with a string literal.
 extension URLError.Code: @retroactive ExpressibleByIntegerLiteral {
   public init(integerLiteral value: Int) {
+    precondition((0 ... 999).contains(value), "Invalid status code")
     self.init(rawValue: value)
+  }
+  
+  static public func == (lhs: URLError.Code, rhs: IntegerLiteralType) -> Bool {
+    lhs.rawValue == rhs
+  }
+  
+  static public func == (lhs: IntegerLiteralType, rhs: URLError.Code) -> Bool {
+    rhs.rawValue == lhs
   }
 }
 

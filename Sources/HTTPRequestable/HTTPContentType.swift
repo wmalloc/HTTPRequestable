@@ -6,9 +6,9 @@
 
 import Foundation
 
-/// <#Description#>
+/// Request Content types
 public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
-  public var rawValue: String
+  public var rawValue: String // ISOLatin1String
 
   public init(rawValue: String) {
     self.rawValue = rawValue
@@ -54,6 +54,18 @@ extension HTTPContentType: Decodable {
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
     self.rawValue = try container.decode(String.self)
+  }
+}
+
+extension HTTPContentType {
+  /// Allow Comparison of raw string
+  static public func == (lhs: HTTPContentType, rhs: StringLiteralType) -> Bool {
+    lhs.rawValue == rhs
+  }
+  
+  /// Allow Comparison of raw string
+  static public func == (lhs: StringLiteralType, rhs: HTTPContentType) -> Bool {
+    rhs.rawValue == lhs
   }
 }
 
