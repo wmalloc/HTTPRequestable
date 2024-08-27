@@ -52,21 +52,21 @@ public protocol HTTPRequestable: Sendable {
   /// builds the final url for request
   /// - Parameter queryItems: additonal query items
   /// - Returns: final url
-  func url(queryItems: [URLQueryItem]?) throws -> URL
+  func url() throws -> URL
 
   /// HTTP Request
   /// - Parameters:
   ///   - fields: additonal headers, defaults to nil
   ///   - queryItems: additonal query items, defaults to nil
   /// - Returns: HTTPRequest
-  func httpRequest(fields: HTTPFields?, queryItems: [URLQueryItem]?) throws -> HTTPRequest
+  func httpRequest() throws -> HTTPRequest
 
   /// URL Request
   /// - Parameters:
   ///   - fields: additonal headers, defaults to nil
   ///   - queryItems: additonal query items, defaults to nil
   /// - Returns: URLRequest
-  func urlRequest(fields: HTTPFields?, queryItems: [URLQueryItem]?) throws -> URLRequest
+  func urlRequest() throws -> URLRequest
 }
 
 public extension HTTPRequestable {
@@ -90,7 +90,7 @@ public extension HTTPRequestable {
   @inlinable
   var httpBody: Data? { nil }
 
-  func url(queryItems: [URLQueryItem]? = nil) throws -> URL {
+  func url() throws -> URL {
     var components = environment
     if let scheme {
       components.scheme = scheme
@@ -106,8 +106,9 @@ public extension HTTPRequestable {
     }
     components.path = paths.joined(separator: "/")
     var items: [URLQueryItem] = environment.queryItems ?? []
-    items.append(contentsOf: self.queryItems ?? [])
-    items.append(contentsOf: queryItems ?? [])
+    if let queryItems {
+      items.append(contentsOf: queryItems)
+    }
     components.queryItems = items.isEmpty ? nil : Array(items)
     guard let url = components.url else {
       throw URLError(.badURL)
@@ -115,14 +116,12 @@ public extension HTTPRequestable {
     return url
   }
 
-  func httpRequest(fields: HTTPFields? = nil, queryItems: [URLQueryItem]? = nil) throws -> HTTPRequest {
-    var allHeaderFields = headerFields ?? HTTPFields()
-    allHeaderFields.append(contentsOf: fields ?? [:])
-    return try HTTPRequest(method: method, url: url(queryItems: queryItems), headerFields: allHeaderFields)
+  func httpRequest() throws -> HTTPRequest {
+    try HTTPRequest(method: method, url: url(), headerFields: headerFields ?? HTTPFields())
   }
 
-  func urlRequest(fields: HTTPFields? = nil, queryItems: [URLQueryItem]? = nil) throws -> URLRequest {
-    let httpRequest = try httpRequest(fields: fields, queryItems: queryItems)
+  func urlRequest() throws -> URLRequest {
+    let httpRequest = try httpRequest()
     guard var urlRequest = URLRequest(httpRequest: httpRequest) else {
       throw URLError(.unsupportedURL)
     }

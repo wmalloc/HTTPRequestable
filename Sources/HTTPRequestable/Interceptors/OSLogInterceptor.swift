@@ -9,15 +9,11 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-public struct OSLogInterceptor {
-  public let id: String = "OSLogInterceptor"
-  public let logType: OSLogType
-  public let logger: OSLog
+public final class OSLogInterceptor {
+  public var logger: OSLog = .default
+  public var logType: OSLogType = .default
 
-  public init(logType: OSLogType = .info, logger: OSLog = .default) {
-    self.logType = logType
-    self.logger = logger
-  }
+  public init() {}
 }
 
 extension OSLogInterceptor: RequestInterceptor {

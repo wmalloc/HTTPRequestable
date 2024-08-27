@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 
 /// Interceptor is a middleware component that can intercept, modify, or observe network requests and responses.
-public protocol RequestInterceptor: Interceptor {
+public protocol RequestInterceptor {
   func intercept(_ request: HTTPRequest, for session: URLSession) async throws -> HTTPRequest
   func intercept(_ request: URLRequest, for session: URLSession) async throws -> URLRequest
 }

@@ -57,14 +57,14 @@ extension HTTPContentType: Decodable {
   }
 }
 
-extension HTTPContentType {
+public extension HTTPContentType {
   /// Allow Comparison of raw string
-  static public func == (lhs: HTTPContentType, rhs: StringLiteralType) -> Bool {
+  static func == (lhs: HTTPContentType, rhs: StringLiteralType) -> Bool {
     lhs.rawValue == rhs
   }
-  
+
   /// Allow Comparison of raw string
-  static public func == (lhs: StringLiteralType, rhs: HTTPContentType) -> Bool {
+  static func == (lhs: StringLiteralType, rhs: HTTPContentType) -> Bool {
     rhs.rawValue == lhs
   }
 }
