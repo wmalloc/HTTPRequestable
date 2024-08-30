@@ -41,8 +41,6 @@ public extension URLRequest {
 
 public extension HTTPFields {
   init?(rawValue: [String: String]) {
-
-  public init?(rawValue: RawValue) {
     self.init()
     for (key, value) in rawValue {
       guard let name = HTTPField.Name(key) else {
