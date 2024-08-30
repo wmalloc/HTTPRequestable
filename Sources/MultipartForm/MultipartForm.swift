@@ -9,6 +9,13 @@ import Foundation
 import HTTPRequestable
 import HTTPTypes
 import UniformTypeIdentifiers
+import OSLog
+
+#if DEBUG
+private let logger: OSLog = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "MultipartForm")
+#else
+private let logger: OSLog = .disabled
+#endif
 
 /// https://datatracker.ietf.org/doc/html/rfc7578
 open class MultipartForm: MultipartFormBody {
@@ -33,16 +40,19 @@ open class MultipartForm: MultipartFormBody {
   public private(set) var bodyParts: [MultipartFormBodyPart] = []
 
   public func append(stream: InputStream, withLength length: UInt64, headers: [HTTPField]) {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     let bodyPart = MultipartFormBodyPart(headers: headers, bodyStream: stream, contentLength: length)
     bodyParts.append(bodyPart)
   }
 
   public func append(stream: InputStream, withLength length: UInt64, name: String, fileName: String, mimeType: String) {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     let headers = contentHeaders(withName: name, fileName: fileName, mimeType: mimeType)
     append(stream: stream, withLength: length, headers: headers)
   }
 
   public func append(data: Data, withName name: String, fileName: String? = nil, mimeType: String? = nil) {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     let headers = contentHeaders(withName: name, fileName: fileName, mimeType: mimeType)
     let stream = InputStream(data: data)
     let length = UInt64(data.count)
@@ -50,6 +60,7 @@ open class MultipartForm: MultipartFormBody {
   }
 
   public func append(fileURL: URL, withName name: String) throws {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     let fileName = fileURL.lastPathComponent
     let pathExtension = fileURL.pathExtension
 
@@ -62,6 +73,7 @@ open class MultipartForm: MultipartFormBody {
   }
 
   public func append(fileURL: URL, withName name: String, fileName: String, mimeType: String) throws {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     let headers = contentHeaders(withName: name, fileName: fileName, mimeType: mimeType)
 
     guard fileURL.isFileURL else {
@@ -88,6 +100,7 @@ open class MultipartForm: MultipartFormBody {
   }
 
   public func encoded(streamBufferSize: Int = 1024) throws -> Data {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     headers.append(HTTPField(name: .contentLength, value: String(contentLength)))
     var encoded = Data()
     encoded.append(encodedHeaders())
@@ -103,6 +116,7 @@ open class MultipartForm: MultipartFormBody {
   }
 
   public func write(encodedDataTo fileURL: URL, streamBufferSize: Int) throws {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     if fileManager.fileExists(atPath: fileURL.path) {
       throw MultipartFormError.fileAlreadyExists(fileURL)
     }
@@ -157,6 +171,7 @@ extension MultipartForm {
   }
 
   func contentHeaders(withName name: String, fileName: String? = nil, mimeType: String? = nil) -> [HTTPField] {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     var disposition = KeyedItem(item: HTTPContentType.formData.rawValue, parameters: ["name": name])
     if let fileName {
       disposition["filename"] = fileName
@@ -173,6 +188,7 @@ extension MultipartForm {
 
 extension MultipartForm {
   func mimeType(forPathExtension pathExtension: String) -> String {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     if let id = UTType(filenameExtension: pathExtension), let contentType = id.preferredMIMEType {
       return contentType
     }
