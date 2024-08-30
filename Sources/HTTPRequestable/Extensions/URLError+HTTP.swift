@@ -10,6 +10,14 @@ import Foundation
 /// Success 200
 
 public extension URLError {
+  static func == (lhs: URLError, rhs: URLError.Code) -> Bool {
+    lhs.code == rhs
+  }
+
+  static func == (lhs: URLError, rhs: IntegerLiteralType) -> Bool {
+    lhs.code == rhs
+  }
+
   /**
    The request succeeded. The result meaning of "success" depends on the HTTP method:
 

@@ -17,10 +17,6 @@ extension URLError.Code: @retroactive ExpressibleByIntegerLiteral {
   public static func == (lhs: URLError.Code, rhs: IntegerLiteralType) -> Bool {
     lhs.rawValue == rhs
   }
-
-  public static func == (lhs: IntegerLiteralType, rhs: URLError.Code) -> Bool {
-    rhs.rawValue == lhs
-  }
 }
 
 /// Success Codes

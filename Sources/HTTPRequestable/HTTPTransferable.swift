@@ -9,6 +9,13 @@ import Combine
 import Foundation
 import HTTPTypes
 import HTTPTypesFoundation
+import OSLog
+
+#if DEBUG
+private let logger: OSLog = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "HTTPTransferable")
+#else
+private let logger: OSLog = .disabled
+#endif
 
 public typealias DataHandler<T> = @Sendable (Result<T, any Error>) -> Void
 
@@ -96,6 +103,7 @@ public protocol HTTPTransferable: Sendable {
 
 public extension HTTPTransferable {
   func object<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     var updateRequest = request
     for interceptor in requestInterceptors {
       updateRequest = try await interceptor.intercept(updateRequest, for: session)
@@ -118,6 +126,7 @@ public extension HTTPTransferable {
   }
 
   func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     var updateRequest = request
     for interceptor in requestInterceptors {
       updateRequest = try await interceptor.intercept(updateRequest, for: session)
@@ -131,14 +140,14 @@ public extension HTTPTransferable {
   }
 
   func object<Route: HTTPRequestable>(for route: Route, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Route.ResultType {
-    let request = try route.urlRequest()
-    return try await object(for: request, transformer: route.responseTransformer, delegate: delegate)
+    try await object(for: route.urlRequest(), transformer: route.responseTransformer, delegate: delegate)
   }
 }
 
 public extension HTTPTransferable {
   @discardableResult
   func dataTask<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, completion: DataHandler<ObjectType>?) -> URLSessionDataTask? {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     let dataTask = session.dataTask(with: request) { data, urlResponse, error in
       if let error {
         completion?(.failure(error))
@@ -163,6 +172,7 @@ public extension HTTPTransferable {
 
   @discardableResult
   func dataTask<Route: HTTPRequestable>(for route: Route, completion: DataHandler<Route.ResultType>?) -> URLSessionDataTask? {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     guard let urlRequest = try? route.urlRequest() else {
       return nil
     }
@@ -172,7 +182,8 @@ public extension HTTPTransferable {
 
 public extension HTTPTransferable {
   func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>) -> AnyPublisher<ObjectType, any Error> {
-    session.dataTaskPublisher(for: request)
+    os_log(.debug, log: logger, "[IN]: %@", #function)
+    return session.dataTaskPublisher(for: request)
       .tryMap { result -> URLSession.DataTaskPublisher.Output in
         let httpURLResponse = try result.response.httpURLResponse
         return (result.data, httpURLResponse)
@@ -186,6 +197,7 @@ public extension HTTPTransferable {
   }
 
   func dataPublisher<Route: HTTPRequestable>(for route: Route) -> AnyPublisher<Route.ResultType, any Error> {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     guard let urlRequest = try? route.urlRequest() else {
       return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
     }

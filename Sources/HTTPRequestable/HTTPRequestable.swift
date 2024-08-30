@@ -8,6 +8,13 @@
 import Foundation
 import HTTPTypes
 import HTTPTypesFoundation
+import OSLog
+
+#if DEBUG
+private let logger: OSLog = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "HTTPRequestable")
+#else
+private let logger: OSLog = .disabled
+#endif
 
 /// Method
 public typealias HTTPMethod = HTTPRequest.Method
@@ -91,6 +98,7 @@ public extension HTTPRequestable {
   var httpBody: Data? { nil }
 
   func url() throws -> URL {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     var components = environment
     if let scheme {
       components.scheme = scheme
@@ -121,6 +129,7 @@ public extension HTTPRequestable {
   }
 
   func urlRequest() throws -> URLRequest {
+    os_log(.debug, log: logger, "[IN]: %@", #function)
     let httpRequest = try httpRequest()
     guard var urlRequest = URLRequest(httpRequest: httpRequest) else {
       throw URLError(.unsupportedURL)

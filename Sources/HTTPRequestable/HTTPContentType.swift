@@ -62,11 +62,6 @@ public extension HTTPContentType {
   static func == (lhs: HTTPContentType, rhs: StringLiteralType) -> Bool {
     lhs.rawValue == rhs
   }
-
-  /// Allow Comparison of raw string
-  static func == (lhs: StringLiteralType, rhs: HTTPContentType) -> Bool {
-    rhs.rawValue == lhs
-  }
 }
 
 public extension HTTPContentType {
