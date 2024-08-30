@@ -1,12 +1,15 @@
 //
-//  URLComponents+Builder.swift
+//  HTTPEnvironment.swift
 //
 //  Created by Waqar Malik on 4/28/23.
 //
 
 import Foundation
 
-public extension URLComponents {
+/// URL Components
+public typealias HTTPEnvironment = URLComponents
+
+public extension HTTPEnvironment {
   init(scheme: String, authority: String, path: String = "") {
     self.init()
     self.scheme = scheme

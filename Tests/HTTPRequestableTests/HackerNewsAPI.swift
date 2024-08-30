@@ -11,10 +11,16 @@ import HTTPTypes
 
 @available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
 class HackerNewsAPI: HTTPTransferable, @unchecked Sendable {
+  var requestInterceptors: [any RequestInterceptor] = []
+  var responseInterceptors: [any ResponseInterceptor] = []
+
   let session: URLSession
 
   required init(session: URLSession = .shared) {
     self.session = session
+    let logger = LoggerInterceptor()
+    requestInterceptors.append(logger)
+    responseInterceptors.append(logger)
   }
 
   func storyList(type: String) async throws -> StoryList.ResultType {
@@ -30,7 +36,7 @@ struct StoryList: HTTPRequestable {
   let headerFields: HTTPFields? = .init([.accept(.json)])
   let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
 
-  var transformer: Transformer<Data, [Int]> {
+  var responseTransformer: Transformer<Data, [Int]> {
     { data, _ in
       try JSONDecoder().decode([Int].self, from: data)
     }
