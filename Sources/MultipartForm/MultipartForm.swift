@@ -8,8 +8,15 @@ import CoreServices
 import Foundation
 import HTTPRequestable
 import HTTPTypes
+import OSLog
 import UniformTypeIdentifiers
 import OSLog
+
+#if DEBUG
+private let logger: OSLog = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "MultipartForm")
+#else
+private let logger: OSLog = .disabled
+#endif
 
 #if DEBUG
 private let logger: OSLog = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "MultipartForm")
