@@ -8,7 +8,7 @@
 import Foundation
 
 public extension Bundle {
-  func data(forResource: String, withExtension: String, subdirectory: String = "TestData") throws -> Data {
+  func data(forResource: String, withExtension: String, subdirectory: String = "MockData") throws -> Data {
     guard let url = url(forResource: forResource, withExtension: withExtension, subdirectory: subdirectory) else {
       throw URLError(.fileDoesNotExist)
     }

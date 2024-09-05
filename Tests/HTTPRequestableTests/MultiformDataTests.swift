@@ -7,6 +7,7 @@
 
 @testable import HTTPRequestable
 @testable import MultipartForm
+import MockURLProtocol
 import XCTest
 
 final class MultiformDataTests: XCTestCase {
@@ -40,8 +41,7 @@ final class MultiformDataTests: XCTestCase {
     //        XCTAssertNotNil(url)
     //        try multiformData.append(fileURL: url!, withName: "Image", fileName: "announce-hero", mimeType: URLRequest.ContentType.jpeg)
     let encoedData = try multiformData.encoded()
-    let url = Bundle.module.url(forResource: "MultipartFormData", withExtension: "txt", subdirectory: "TestData")
-    let data = try Data(contentsOf: url!)
+    let data = try Bundle.module.data(forResource: "MultipartFormData", withExtension: "txt")
     XCTAssertEqual(data, encoedData)
   }
 }
