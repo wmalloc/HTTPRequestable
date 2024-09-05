@@ -5,9 +5,9 @@
 //  Created by Waqar Malik on 7/15/23.
 //
 
-import XCTest
-import MockURLProtocol
 @testable import HTTPRequestable
+import MockURLProtocol
+import XCTest
 
 final class HackerNewsAPITests: XCTestCase {
   private var api: HackerNews!
@@ -22,7 +22,7 @@ final class HackerNewsAPITests: XCTestCase {
   override func tearDownWithError() throws {
     api = nil
   }
-  
+
   func testTopStories() async throws {
     let hackerNews = HackerNews()
     let topStories = try await hackerNews.storyList(type: "topstories.json")
@@ -36,7 +36,7 @@ final class HackerNewsAPITests: XCTestCase {
       let data = try Bundle.module.data(forResource: "topstories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
     }
-    
+
     let topStories = try await api.storyList(type: "topstories.json")
     XCTAssertEqual(topStories.count, 466)
   }

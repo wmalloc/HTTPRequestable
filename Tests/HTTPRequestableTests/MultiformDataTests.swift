@@ -6,8 +6,8 @@
 //
 
 @testable import HTTPRequestable
-@testable import MultipartForm
 import MockURLProtocol
+@testable import MultipartForm
 import XCTest
 
 final class MultiformDataTests: XCTestCase {

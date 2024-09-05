@@ -1,5 +1,5 @@
 //
-//  HackerNewsAPI.swift
+//  HackerNews.swift
 //
 //
 //  Created by Waqar Malik on 7/15/23.
@@ -46,6 +46,6 @@ struct StoryList: HTTPRequestable {
     guard !storyType.isEmpty else {
       throw URLError(.badURL)
     }
-    path = "/v0/" + storyType
+    self.path = "/v0/" + storyType
   }
 }
