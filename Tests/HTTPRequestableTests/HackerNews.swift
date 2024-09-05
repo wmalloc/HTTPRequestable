@@ -46,6 +46,6 @@ struct StoryList: HTTPRequestable {
     guard !storyType.isEmpty else {
       throw URLError(.badURL)
     }
-    self.path = "/v0/" + storyType
+    path = "/v0/" + storyType
   }
 }
