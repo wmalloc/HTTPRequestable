@@ -30,7 +30,7 @@ public protocol HTTPRequestable: Sendable {
   associatedtype ResultType
 
   /// URL Components to build the url
-  var environment: HTTPEnvironment { get set }
+  var environment: HTTPEnvironment { get }
 
   /// Override the scheme if needed, defaults to nil
   var scheme: String? { get }
@@ -92,7 +92,8 @@ public extension HTTPRequestable {
   @inlinable
   var queryItems: [URLQueryItem]? { nil }
 
-  var headerFields: HTTPFields? { HTTPFields.defaultHeaders }
+  @inlinable
+  var headerFields: HTTPFields? { nil }
 
   @inlinable
   var httpBody: Data? { nil }

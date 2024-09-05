@@ -9,7 +9,6 @@ import Foundation
 @testable import HTTPRequestable
 import HTTPTypes
 
-@available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
 class HackerNews: HTTPTransferable, @unchecked Sendable {
   var requestInterceptors: [any RequestInterceptor] = []
   var responseInterceptors: [any ResponseInterceptor] = []
@@ -32,9 +31,10 @@ class HackerNews: HTTPTransferable, @unchecked Sendable {
 struct StoryList: HTTPRequestable {
   typealias ResultType = [Int]
 
-  var environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com")
+  let environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com")
   let headerFields: HTTPFields? = .init([.accept(.json)])
   let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
+  let path: String?
 
   var responseTransformer: Transformer<Data, ResultType> {
     { data, _ in
@@ -46,6 +46,6 @@ struct StoryList: HTTPRequestable {
     guard !storyType.isEmpty else {
       throw URLError(.badURL)
     }
-    environment.path = "/v0/" + storyType
+    path = "/v0/" + storyType
   }
 }
