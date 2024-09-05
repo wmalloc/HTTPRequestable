@@ -9,9 +9,9 @@ import HTTPTypes
 import OSLog
 
 #if DEBUG
-private let logger: OSLog = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "MultipartForm")
+private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable.MultipartForm", category: "MultipartFormBodyPart"))
 #else
-private let logger: OSLog = .disabled
+private let logger = Logger(.disabled)
 #endif
 
 open class MultipartFormBodyPart: MultipartFormBody {
@@ -20,7 +20,7 @@ open class MultipartFormBodyPart: MultipartFormBody {
   public let contentLength: UInt64
 
   public init(headers: [HTTPField], bodyStream: InputStream, contentLength: UInt64) {
-    os_log(.debug, log: logger, "[IN]: %@", #function)
+    logger.trace("[IN]: \(#function)")
     self.headers = headers
     self.bodyStream = bodyStream
     self.contentLength = contentLength
@@ -29,7 +29,7 @@ open class MultipartFormBodyPart: MultipartFormBody {
 
 public extension MultipartFormBodyPart {
   func encoded(streamBufferSize: Int) throws -> Data {
-    os_log(.debug, log: logger, "[IN]: %@", #function)
+    logger.trace("[IN]: \(#function)")
     var encoded = Data()
     let headerData = encodedHeaders()
     encoded.append(headerData)
@@ -41,7 +41,7 @@ public extension MultipartFormBodyPart {
 
 extension MultipartFormBodyPart {
   private func encodedBodyStream(streamBufferSize: Int) throws -> Data {
-    os_log(.debug, log: logger, "[IN]: %@", #function)
+    logger.trace("[IN]: \(#function)")
     let inputStream = bodyStream
     inputStream.open()
     defer {
@@ -77,14 +77,14 @@ extension MultipartFormBodyPart {
 
 extension MultipartFormBodyPart {
   func write(to outputStream: OutputStream, streamBufferSize: Int) throws {
-    os_log(.debug, log: logger, "[IN]: %@", #function)
+    logger.trace("[IN]: \(#function)")
     let headerData = encodedHeaders()
     try Data.write(data: headerData, to: outputStream)
     try write(bodyStreamTo: outputStream, streamBufferSize: streamBufferSize)
   }
 
   func write(bodyStreamTo outputStream: OutputStream, streamBufferSize: Int) throws {
-    os_log(.debug, log: logger, "[IN]: %@", #function)
+    logger.trace("[IN]: \(#function)")
     let inputStream = bodyStream
 
     inputStream.open()

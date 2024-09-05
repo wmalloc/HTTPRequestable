@@ -11,9 +11,9 @@ import HTTPTypesFoundation
 import OSLog
 
 #if DEBUG
-private let logger: OSLog = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "HTTPRequestable")
+private let logger = Logger(.init(category: "HTTPRequestable"))
 #else
-private let logger: OSLog = .disabled
+private let logger = Logger(.disabled)
 #endif
 
 /// Method
@@ -30,7 +30,7 @@ public protocol HTTPRequestable: Sendable {
   associatedtype ResultType
 
   /// URL Components to build the url
-  var environment: HTTPEnvironment { get set }
+  var environment: HTTPEnvironment { get }
 
   /// Override the scheme if needed, defaults to nil
   var scheme: String? { get }
@@ -63,14 +63,14 @@ public protocol HTTPRequestable: Sendable {
 
   /// HTTP Request
   /// - Parameters:
-  ///   - fields: additonal headers, defaults to nil
+  ///   - fields:     additonal headers, defaults to nil
   ///   - queryItems: additonal query items, defaults to nil
   /// - Returns: HTTPRequest
   func httpRequest() throws -> HTTPRequest
 
   /// URL Request
   /// - Parameters:
-  ///   - fields: additonal headers, defaults to nil
+  ///   - fields:     additonal headers, defaults to nil
   ///   - queryItems: additonal query items, defaults to nil
   /// - Returns: URLRequest
   func urlRequest() throws -> URLRequest
@@ -92,13 +92,14 @@ public extension HTTPRequestable {
   @inlinable
   var queryItems: [URLQueryItem]? { nil }
 
-  var headerFields: HTTPFields? { HTTPFields.defaultHeaders }
+  @inlinable
+  var headerFields: HTTPFields? { nil }
 
   @inlinable
   var httpBody: Data? { nil }
 
   func url() throws -> URL {
-    os_log(.debug, log: logger, "[IN]: %@", #function)
+    logger.trace("[IN]: \(#function)")
     var components = environment
     if let scheme {
       components.scheme = scheme
@@ -129,7 +130,7 @@ public extension HTTPRequestable {
   }
 
   func urlRequest() throws -> URLRequest {
-    os_log(.debug, log: logger, "[IN]: %@", #function)
+    logger.trace("[IN]: \(#function)")
     let httpRequest = try httpRequest()
     guard var urlRequest = URLRequest(httpRequest: httpRequest) else {
       throw URLError(.unsupportedURL)

@@ -10,7 +10,7 @@ import HTTPTypes
 import OSLog
 
 public final class LoggerInterceptor {
-  let logger: Logger = .init(subsystem: "HTTPRequestable", category: "LoggerInterceptor")
+  let logger: Logger = .init(category: "LoggerInterceptor")
   public var logLevel: OSLogType = .default
 
   public init() {}

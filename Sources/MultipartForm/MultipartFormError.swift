@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Errors thrown by multipart form
 public enum MultipartFormError: LocalizedError, Sendable {
   case badURL(URL)
   case invalidFilename(URL)
