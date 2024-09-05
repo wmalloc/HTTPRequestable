@@ -1,5 +1,5 @@
 //
-//  HackerNewsAPI.swift
+//  HackerNews.swift
 //
 //
 //  Created by Waqar Malik on 7/15/23.

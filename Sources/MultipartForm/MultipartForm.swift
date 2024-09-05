@@ -18,6 +18,12 @@ private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable.Mul
 private let logger = Logger(.disabled)
 #endif
 
+#if DEBUG
+private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable.MultipartForm", category: "MultipartForm"))
+#else
+private let logger = Logger(.disabled)
+#endif
+
 /// https://datatracker.ietf.org/doc/html/rfc7578
 open class MultipartForm: MultipartFormBody {
   public let boundary: String
