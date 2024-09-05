@@ -9,13 +9,13 @@ import XCTest
 
 @available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
 final class HackerNewsAPITests: XCTestCase {
-  private var api: HackerNewsAPI!
+  private var api: HackerNews!
 
   override func setUpWithError() throws {
     let configuration = URLSessionConfiguration.ephemeral
     configuration.protocolClasses = [MockURLProtocol.self]
     let session = URLSession(configuration: configuration)
-    api = HackerNewsAPI(session: session)
+    api = HackerNews(session: session)
   }
 
   override func tearDownWithError() throws {

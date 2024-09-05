@@ -10,7 +10,7 @@ import Foundation
 import HTTPTypes
 
 @available(macOS 12, iOS 15, tvOS 15, macCatalyst 15, watchOS 8, *)
-class HackerNewsAPI: HTTPTransferable, @unchecked Sendable {
+class HackerNews: HTTPTransferable, @unchecked Sendable {
   var requestInterceptors: [any RequestInterceptor] = []
   var responseInterceptors: [any ResponseInterceptor] = []
 
@@ -36,9 +36,9 @@ struct StoryList: HTTPRequestable {
   let headerFields: HTTPFields? = .init([.accept(.json)])
   let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
 
-  var responseTransformer: Transformer<Data, [Int]> {
+  var responseTransformer: Transformer<Data, ResultType> {
     { data, _ in
-      try JSONDecoder().decode([Int].self, from: data)
+      try JSONDecoder().decode(ResultType.self, from: data)
     }
   }
 
