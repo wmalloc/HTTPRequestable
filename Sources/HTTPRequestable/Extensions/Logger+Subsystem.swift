@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Logger+Subsystem.swift
 //  HTTPRequestable
 //
 //  Created by Waqar Malik on 9/4/24.
@@ -11,7 +11,7 @@ import OSLog
 extension OSLog {
   @inlinable
   static var subsystem: String { "com.waqarmalik.HTTPRequestable" }
-  
+
   @inlinable
   convenience init(category: String) {
     self.init(subsystem: Self.subsystem, category: category)
@@ -21,7 +21,7 @@ extension OSLog {
 extension Logger {
   @inlinable
   static var subsystem: String { OSLog.subsystem }
-  
+
   @inlinable
   init(category: String) {
     self.init(subsystem: Self.subsystem, category: category)

@@ -26,14 +26,14 @@ public protocol HTTPTransferable: Sendable {
 
   var requestInterceptors: [any RequestInterceptor] { get set }
   var responseInterceptors: [any ResponseInterceptor] { get set }
-  
+
   /// Request data from server
   /// - Parameters:
   ///   - request:  Request where to get the data from
   ///   - delegate: Delegate to handle the request
   /// - Returns: Data, and HTTPResponse
   func data(for request: HTTPRequest, delegate: (any URLSessionTaskDelegate)?) async throws -> (Data, HTTPResponse)
-  
+
   /**
    Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
@@ -126,7 +126,7 @@ public extension HTTPTransferable {
       throw URLError(URLError.Code(rawValue: response.status.code))
     }
   }
-  
+
   func object<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
     logger.trace("[IN]: \(#function)")
     let response = try await data(for: request, delegate: delegate)
@@ -153,8 +153,8 @@ public extension HTTPTransferable {
 
   func object<Route: HTTPRequestable>(for route: Route, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Route.ResultType {
     try await route.method == .get ?
-    object(for: route.httpRequest(), transformer: route.responseTransformer, delegate: nil) :
-    object(for: route.urlRequest(), transformer: route.responseTransformer, delegate: delegate)
+      object(for: route.httpRequest(), transformer: route.responseTransformer, delegate: nil) :
+      object(for: route.urlRequest(), transformer: route.responseTransformer, delegate: delegate)
   }
 }
 

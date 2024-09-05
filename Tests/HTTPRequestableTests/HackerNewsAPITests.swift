@@ -5,6 +5,8 @@
 //  Created by Waqar Malik on 7/15/23.
 //
 
+@testable import HTTPRequestable
+import MockURLProtocol
 import XCTest
 import MockURLProtocol
 @testable import HTTPRequestable
