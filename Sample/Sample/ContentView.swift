@@ -8,17 +8,25 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+  @EnvironmentObject var viewModel: SampleViewModel
+
+  var body: some View {
+    NavigationStack {
+      Section("Top Stotes") {
+        List(viewModel.items) { item in
+          Text(item.title)
         }
-        .padding()
+        .listStyle(.plain)
+      }
+      .navigationTitle("Hacker News")
+      .onAppear {
+        viewModel.topStories()
+      }
     }
+  }
 }
 
 #Preview {
-    ContentView()
+  ContentView()
+    .environmentObject(SampleViewModel())
 }
