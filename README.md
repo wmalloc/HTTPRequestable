@@ -101,4 +101,6 @@ let topStories = try await api.storyList(type: "topstories.json")
 
 ## Support
 
-If you would like to support this project, please consider donating at [Bitcoin: bc1qzxs3wk29vfxIr9e4frq9cdmgkvrp62m5xhm931](./Images/bitcoin_qr_code.jpeg) or [Ethereum: Oxa824353280d2A0F32b2d258904509EFAEaE6603d](./Images/ethereum_qr_code.jpeg).
+If you would like to support this project, please consider donating.\
+Bitcoin: [bc1qzxs3wk29vfxlr9e4frq9cdmgkvrp62m5xhm93l](./Images/bitcoin_qr_code.jpeg)\
+Ethereum: [0xa824353280d2A0F32b2d258904509EFAEaE6603d](./Images/ethereum_qr_code.jpeg)
