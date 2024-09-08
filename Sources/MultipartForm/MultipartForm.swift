@@ -10,13 +10,6 @@ import HTTPRequestable
 import HTTPTypes
 import OSLog
 import UniformTypeIdentifiers
-import OSLog
-
-#if DEBUG
-private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable.MultipartForm", category: "MultipartForm"))
-#else
-private let logger = Logger(.disabled)
-#endif
 
 #if DEBUG
 private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable.MultipartForm", category: "MultipartForm"))
