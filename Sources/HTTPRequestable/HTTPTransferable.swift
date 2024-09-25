@@ -113,7 +113,7 @@ public extension HTTPTransferable {
     logger.trace("[IN]: \(#function)")
     var updateRequest = request
     for interceptor in requestInterceptors {
-      updateRequest = try await interceptor.intercept(updateRequest, for: session)
+      try await interceptor.intercept(&updateRequest, for: session)
     }
     let (data, response) = try await session.data(for: updateRequest, delegate: delegate)
     for interceptor in responseInterceptors {
@@ -140,9 +140,10 @@ public extension HTTPTransferable {
   func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
     logger.trace("[IN]: \(#function)")
     var updateRequest = request
-    for interceptor in requestInterceptors {
-      updateRequest = try await interceptor.intercept(updateRequest, for: session)
+    for interceptor in self.requestInterceptors {
+      try await interceptor.intercept(&updateRequest, for: session)
     }
+    
     let (rawData, response) = try await session.data(for: updateRequest, delegate: delegate)
     let (data, httpURLResponse) = try (rawData, response.httpURLResponse)
     for interceptor in responseInterceptors {

@@ -17,14 +17,14 @@ public final class LoggerInterceptor {
 }
 
 extension LoggerInterceptor: RequestInterceptor {
-  public func intercept(_ request: HTTPRequest, for session: URLSession) async throws -> HTTPRequest {
-    logger.log(level: logLevel, "\(request.debugDescription, privacy: .private)")
-    return request
+  public func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {
+    let debugDescription = request.debugDescription
+    logger.log(level: logLevel, "\(debugDescription, privacy: .private)")
   }
 
-  public func intercept(_ request: URLRequest, for session: URLSession) async throws -> URLRequest {
-    logger.log(level: logLevel, "\(request.debugDescription, privacy: .private)")
-    return request
+  public func intercept(_ request: inout URLRequest, for session: URLSession) async throws {
+    let debugDescription = request.debugDescription
+    logger.log(level: logLevel, "\(debugDescription, privacy: .private)")
   }
 }
 

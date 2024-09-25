@@ -17,14 +17,12 @@ public final class OSLogInterceptor {
 }
 
 extension OSLogInterceptor: RequestInterceptor {
-  public func intercept(_ request: HTTPRequest) async throws -> HTTPRequest {
+  public func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {
     os_log(logType, log: logger, "%{private}@", request.debugDescription)
-    return request
   }
-
-  public func intercept(_ request: URLRequest) async throws -> URLRequest {
+  
+  public func intercept(_ request: inout URLRequest, for session: URLSession) async throws {
     os_log(logType, log: logger, "%{private}@", request.description)
-    return request
   }
 }
 
