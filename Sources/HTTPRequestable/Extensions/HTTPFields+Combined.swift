@@ -10,16 +10,7 @@ import HTTPTypes
 
 public extension HTTPFields {
   var combinedFields: [HTTPField.Name: String] {
-    var combinedFields = [HTTPField.Name: String](minimumCapacity: count)
-    for field in self {
-      if let existingValue = combinedFields[field.name] {
-        let separator = field.name == .cookie ? "; " : ", "
-        combinedFields[field.name] = "\(existingValue)\(separator)\(field.value)"
-      } else {
-        combinedFields[field.name] = field.value
-      }
-    }
-    return combinedFields
+    reduce(into: [:]) { $0[$1.name] = self[$1.name] }
   }
 
   var headerFields: [String: String] {
