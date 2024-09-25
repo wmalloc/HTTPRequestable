@@ -8,7 +8,7 @@
 import Foundation
 
 ///  A type that can be initialized with a string literal.
-extension URLError.Code: ExpressibleByIntegerLiteral {
+extension URLError.Code: @retroactive ExpressibleByIntegerLiteral {
   public init(integerLiteral value: Int) {
     precondition((0 ... 999).contains(value), "Invalid status code")
     self.init(rawValue: value)

@@ -17,6 +17,13 @@ final class HackerNewsAPITests: XCTestCase {
     configuration.protocolClasses = [MockURLProtocol.self]
     let session = URLSession(configuration: configuration)
     api = HackerNews(session: session)
+    let logger = LoggerInterceptor()
+    api.requestInterceptors.append(logger)
+    api.responseInterceptors.append(logger)
+    let statusValidator = ResponseStatusValidator()
+    api.responseInterceptors.append(statusValidator)
+    let contentTypeValiator = ContentTypeValidator(acceptableContentTypes: ["application/json"])
+    api.responseInterceptors.append(contentTypeValiator)
   }
 
   override func tearDownWithError() throws {
