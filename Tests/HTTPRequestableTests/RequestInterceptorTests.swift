@@ -10,7 +10,7 @@ import Testing
 import HTTPTypes
 import Foundation
 
-struct Test {
+struct RequestInterceptorTests {
   @Test func modifyHTTPRequest() async throws {
     let request = try StoryList(storyType: "topstories.json")
     var httpRequst = try request.httpRequest()
