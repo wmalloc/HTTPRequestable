@@ -64,47 +64,6 @@ public protocol HTTPTransferable: Sendable {
    - returns: Transformed Object
    */
   func object<Route: HTTPRequestable>(for route: Route, delegate: (any URLSessionTaskDelegate)?) async throws -> Route.ResultType
-
-  /**
-   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
-
-   - Parameters:
-     - request:    Request where to get the data from
-     - transform:  Transformer how to convert the data to different type
-     - completion: completion handler
-   - returns: URLSessionDataTask
-   */
-  func dataTask<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, completion: DataHandler<ObjectType>?) -> URLSessionDataTask?
-
-  /**
-   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
-
-   - Parameters:
-     - route:      Route to create URLRequest
-     - completion: completion handler
-   - returns: URLSessionDataTask
-   */
-  func dataTask<Route: HTTPRequestable>(for route: Route, completion: DataHandler<Route.ResultType>?) -> URLSessionDataTask?
-
-  /**
-   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
-
-   - Parameters:
-     - request:    Request where to get the data from
-     - transform:  Transformer how to convert the data to different type
-   - returns: Publisher with decoded response
-   */
-  func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>) -> AnyPublisher<ObjectType, any Error>
-
-  /**
-   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
-
-   - Parameters:
-     - route:    Route to create URLRequest
-     - transform:  Transformer how to convert the data to different type
-   - returns: Publisher with decoded response
-   */
-  func dataPublisher<Route: HTTPRequestable>(for route: Route) -> AnyPublisher<Route.ResultType, any Error>
 }
 
 public extension HTTPTransferable {
@@ -155,67 +114,5 @@ public extension HTTPTransferable {
     try await route.method == .get ?
       object(for: route.httpRequest, transformer: route.responseTransformer, delegate: nil) :
       object(for: route.urlRequest, transformer: route.responseTransformer, delegate: delegate)
-  }
-}
-
-public extension HTTPTransferable {
-  @discardableResult
-  func dataTask<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, completion: DataHandler<ObjectType>?) -> URLSessionDataTask? {
-    logger.trace("[IN]: \(#function)")
-    let dataTask = session.dataTask(with: request) { data, urlResponse, error in
-      if let error {
-        completion?(.failure(error))
-        return
-      }
-
-      guard let data else {
-        completion?(.failure(URLError(.fileDoesNotExist)))
-        return
-      }
-      do {
-        let httpURLResponse = try urlResponse?.httpURLResponse
-        let mapped = try transformer(data, httpURLResponse)
-        completion?(.success(mapped))
-      } catch {
-        completion?(.failure(error))
-      }
-    }
-    dataTask.resume()
-    return dataTask
-  }
-
-  @discardableResult
-  func dataTask<Route: HTTPRequestable>(for route: Route, completion: DataHandler<Route.ResultType>?) -> URLSessionDataTask? {
-    logger.trace("[IN]: \(#function)")
-    guard let urlRequest = try? route.urlRequest else {
-      return nil
-    }
-    return dataTask(for: urlRequest, transformer: route.responseTransformer, completion: completion)
-  }
-}
-
-public extension HTTPTransferable {
-  func dataPublisher<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>) -> AnyPublisher<ObjectType, any Error> {
-    logger.trace("[IN]: \(#function)")
-    return session.dataTaskPublisher(for: request)
-      .tryMap { result -> URLSession.DataTaskPublisher.Output in
-        let httpURLResponse = try result.response.httpURLResponse
-        return (result.data, httpURLResponse)
-      }
-      .tryMap { result -> ObjectType in
-        let httpURLResponse = try result.response.httpURLResponse
-        try result.data.url_validateNotEmptyData()
-        return try transformer(result.data, httpURLResponse)
-      }
-      .eraseToAnyPublisher()
-  }
-
-  func dataPublisher<Route: HTTPRequestable>(for route: Route) -> AnyPublisher<Route.ResultType, any Error> {
-    logger.trace("[IN]: \(#function)")
-    guard let urlRequest = try? route.urlRequest else {
-      return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
-    }
-
-    return dataPublisher(for: urlRequest, transformer: route.responseTransformer)
   }
 }
