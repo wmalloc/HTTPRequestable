@@ -32,12 +32,6 @@ public protocol HTTPRequestable: Sendable {
   /// URL Components to build the url
   var environment: HTTPEnvironment { get }
 
-  /// Override the scheme if needed, defaults to nil
-  var scheme: String? { get }
-
-  /// Override the authority if needed, defaults to nil
-  var authority: String? { get }
-
   /// Method defaults to .get
   var method: HTTPMethod { get }
 
@@ -59,30 +53,24 @@ public protocol HTTPRequestable: Sendable {
   /// builds the final url for request
   /// - Parameter queryItems: additonal query items
   /// - Returns: final url
-  func url() throws -> URL
+  var url: URL { get throws }
 
   /// HTTP Request
   /// - Parameters:
   ///   - fields:     additonal headers, defaults to nil
   ///   - queryItems: additonal query items, defaults to nil
   /// - Returns: HTTPRequest
-  func httpRequest() throws -> HTTPRequest
+  var httpRequest: HTTPRequest { get throws }
 
   /// URL Request
   /// - Parameters:
   ///   - fields:     additonal headers, defaults to nil
   ///   - queryItems: additonal query items, defaults to nil
   /// - Returns: URLRequest
-  func urlRequest() throws -> URLRequest
+  var urlRequest: URLRequest { get throws }
 }
 
 public extension HTTPRequestable {
-  @inlinable
-  var scheme: String? { nil }
-
-  @inlinable
-  var authority: String? { nil }
-
   @inlinable
   var method: HTTPMethod { .get }
 
@@ -98,44 +86,44 @@ public extension HTTPRequestable {
   @inlinable
   var httpBody: Data? { nil }
 
-  func url() throws -> URL {
-    logger.trace("[IN]: \(#function)")
-    var components = environment
-    if let scheme {
-      components.scheme = scheme
+  var url: URL {
+    get throws {
+      logger.trace("[IN]: \(#function)")
+      var components = environment
+      var paths = components.path.components(separatedBy: "/")
+      paths.append(contentsOf: path?.components(separatedBy: "/") ?? [])
+      paths = paths.filter { !$0.isEmpty }
+      if !paths.isEmpty {
+        paths.insert("", at: 0)
+      }
+      components.path = paths.joined(separator: "/")
+      var items: [URLQueryItem] = environment.queryItems ?? []
+      if let queryItems {
+        items.append(contentsOf: queryItems)
+      }
+      components.queryItems = items.isEmpty ? nil : Array(items)
+      guard let url = components.url else {
+        throw URLError(.badURL)
+      }
+      return url
     }
-    if let authority {
-      components.host = authority
-    }
-    var paths = components.path.components(separatedBy: "/")
-    paths.append(contentsOf: path?.components(separatedBy: "/") ?? [])
-    paths = paths.filter { !$0.isEmpty }
-    if !paths.isEmpty {
-      paths.insert("", at: 0)
-    }
-    components.path = paths.joined(separator: "/")
-    var items: [URLQueryItem] = environment.queryItems ?? []
-    if let queryItems {
-      items.append(contentsOf: queryItems)
-    }
-    components.queryItems = items.isEmpty ? nil : Array(items)
-    guard let url = components.url else {
-      throw URLError(.badURL)
-    }
-    return url
   }
 
-  func httpRequest() throws -> HTTPRequest {
-    try HTTPRequest(method: method, url: url(), headerFields: headerFields ?? HTTPFields())
+  var httpRequest: HTTPRequest {
+    get throws {
+      try HTTPRequest(method: method, url: url, headerFields: headerFields ?? HTTPFields())
+    }
   }
 
-  func urlRequest() throws -> URLRequest {
-    logger.trace("[IN]: \(#function)")
-    let httpRequest = try httpRequest()
-    guard var urlRequest = URLRequest(httpRequest: httpRequest) else {
-      throw URLError(.unsupportedURL)
+  var urlRequest: URLRequest {
+    get throws {
+      logger.trace("[IN]: \(#function)")
+      let httpRequest = try httpRequest
+      guard var urlRequest = URLRequest(httpRequest: httpRequest) else {
+        throw URLError(.unsupportedURL)
+      }
+      urlRequest.httpBody = httpBody
+      return urlRequest
     }
-    urlRequest.httpBody = httpBody
-    return urlRequest
   }
 }

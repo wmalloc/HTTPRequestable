@@ -27,11 +27,11 @@ extension OSLogInterceptor: RequestInterceptor {
 }
 
 extension OSLogInterceptor: ResponseInterceptor {
-  public func intercept(data: Data, response: HTTPResponse) async throws {
+  public func intercept(request: HTTPRequest, data: Data, response: HTTPTypes.HTTPResponse) async throws {
     os_log(logType, log: logger, "%{private}@\n%{private}@", response.debugDescription, String(decoding: data, as: UTF8.self))
   }
 
-  public func intercept(data: Data, response: HTTPURLResponse) async throws {
+  public func intercept(request: URLRequest, data: Data, response: HTTPURLResponse) async throws {
     os_log(logType, log: logger, "%{private}@\n%{private}@", response.debugDescription, String(decoding: data, as: UTF8.self))
   }
 }

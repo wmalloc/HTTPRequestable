@@ -21,7 +21,6 @@ public typealias DataHandler<T> = @Sendable (Result<T, any Error>) -> Void
 
 public protocol HTTPTransferable: Sendable {
   var session: URLSession { get }
-
   init(session: URLSession)
 
   var requestInterceptors: [any RequestInterceptor] { get set }
@@ -117,7 +116,7 @@ public extension HTTPTransferable {
     }
     let (data, response) = try await session.data(for: updateRequest, delegate: delegate)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(data: data, response: response)
+      try await interceptor.intercept(request: request, data: data, response: response)
     }
     switch response.status.kind {
     case .successful:
@@ -147,15 +146,15 @@ public extension HTTPTransferable {
     let (rawData, response) = try await session.data(for: updateRequest, delegate: delegate)
     let (data, httpURLResponse) = try (rawData, response.httpURLResponse)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(data: data, response: httpURLResponse)
+      try await interceptor.intercept(request: request, data: data, response: httpURLResponse)
     }
     return try transformer(data, httpURLResponse)
   }
 
   func object<Route: HTTPRequestable>(for route: Route, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Route.ResultType {
     try await route.method == .get ?
-      object(for: route.httpRequest(), transformer: route.responseTransformer, delegate: nil) :
-      object(for: route.urlRequest(), transformer: route.responseTransformer, delegate: delegate)
+      object(for: route.httpRequest, transformer: route.responseTransformer, delegate: nil) :
+      object(for: route.urlRequest, transformer: route.responseTransformer, delegate: delegate)
   }
 }
 
@@ -188,7 +187,7 @@ public extension HTTPTransferable {
   @discardableResult
   func dataTask<Route: HTTPRequestable>(for route: Route, completion: DataHandler<Route.ResultType>?) -> URLSessionDataTask? {
     logger.trace("[IN]: \(#function)")
-    guard let urlRequest = try? route.urlRequest() else {
+    guard let urlRequest = try? route.urlRequest else {
       return nil
     }
     return dataTask(for: urlRequest, transformer: route.responseTransformer, completion: completion)
@@ -213,7 +212,7 @@ public extension HTTPTransferable {
 
   func dataPublisher<Route: HTTPRequestable>(for route: Route) -> AnyPublisher<Route.ResultType, any Error> {
     logger.trace("[IN]: \(#function)")
-    guard let urlRequest = try? route.urlRequest() else {
+    guard let urlRequest = try? route.urlRequest else {
       return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
     }
 
