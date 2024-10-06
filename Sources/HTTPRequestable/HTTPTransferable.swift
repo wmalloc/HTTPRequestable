@@ -17,8 +17,6 @@ private let logger = Logger(.init(category: "HTTPTransferable"))
 private let logger = Logger(.disabled)
 #endif
 
-public typealias DataHandler<T> = @Sendable (Result<T, any Error>) -> Void
-
 public protocol HTTPTransferable: Sendable {
   var session: URLSession { get }
   init(session: URLSession)
@@ -111,8 +109,8 @@ public extension HTTPTransferable {
   }
 
   func object<Route: HTTPRequestable>(for route: Route, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Route.ResultType {
-    try await route.method == .get ?
-      object(for: route.httpRequest, transformer: route.responseTransformer, delegate: nil) :
-      object(for: route.urlRequest, transformer: route.responseTransformer, delegate: delegate)
+    try await route.httpBody == nil ?
+    object(for: route.httpRequest, transformer: route.responseTransformer, delegate: delegate) :
+    object(for: route.urlRequest, transformer: route.responseTransformer, delegate: delegate)
   }
 }
