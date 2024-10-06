@@ -29,11 +29,11 @@ extension LoggerInterceptor: RequestInterceptor {
 }
 
 extension LoggerInterceptor: ResponseInterceptor {
-  public func intercept(data: Data, response: HTTPResponse) async throws {
+  public func intercept(request: HTTPRequest, data: Data, response: HTTPTypes.HTTPResponse) async throws {
     logger.log(level: logLevel, "\(response.debugDescription, privacy: .private)\n\(String(decoding: data, as: UTF8.self), privacy: .private)")
   }
 
-  public func intercept(data: Data, response: HTTPURLResponse) async throws {
+  public func intercept(request: URLRequest, data: Data, response: HTTPURLResponse) async throws {
     logger.log(level: logLevel, "\(response.debugDescription, privacy: .private)\n\(String(decoding: data, as: UTF8.self), privacy: .private)")
   }
 }

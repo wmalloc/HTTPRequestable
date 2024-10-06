@@ -48,4 +48,4 @@ struct StoryList: HTTPRequestable {
     }
     self.path = "/v0/" + storyType
   }
-}
+ }
