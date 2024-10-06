@@ -15,7 +15,7 @@ public struct ContentTypeValidator: ResponseInterceptor {
     self.acceptableContentTypes = acceptableContentTypes
   }
   
-  public func intercept(data: Data, response: HTTPResponse) async throws {
+  public func intercept(request: HTTPRequest, data: Data, response: HTTPTypes.HTTPResponse) async throws {
     guard let acceptableContentTypes else {
       return
     }
@@ -29,7 +29,7 @@ public struct ContentTypeValidator: ResponseInterceptor {
     }
   }
   
-  public func intercept(data: Data, response: HTTPURLResponse) async throws {
+  public func intercept(request: URLRequest, data: Data, response: HTTPURLResponse) async throws {
     guard let acceptableContentTypes else {
       return
     }

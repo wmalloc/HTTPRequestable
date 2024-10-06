@@ -38,28 +38,3 @@ public extension URLRequest {
     }
   }
 }
-
-public extension HTTPFields {
-  init?(rawValue: [String: String]) {
-    self.init()
-    for (key, value) in rawValue {
-      guard let name = HTTPField.Name(key) else {
-        continue
-      }
-      self[name] = value
-    }
-  }
-
-  var rawValue: [String: String] {
-    var rawValues: [String: String] = [:]
-    for field in self {
-      if let existingValue = rawValues[field.name.rawName] {
-        let separator = field.name == .cookie ? "; " : ", "
-        rawValues[field.name.rawName] = "\(existingValue)\(separator)\(field.value)"
-      } else {
-        rawValues[field.name.rawName] = field.value
-      }
-    }
-    return rawValues
-  }
-}

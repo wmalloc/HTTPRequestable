@@ -60,7 +60,7 @@ final class HTTPHeadersTests: XCTestCase {
     XCTAssertEqual(rawValue.count, 1)
 
     let newFields = HTTPFields(rawValue: rawValue)
-    XCTAssertEqual(newFields?.count, 1)
+    XCTAssertEqual(newFields.count, 1)
   }
 
   func testURLRequestHeaders() throws {

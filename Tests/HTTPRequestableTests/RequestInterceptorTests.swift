@@ -10,10 +10,10 @@ import Testing
 import HTTPTypes
 import Foundation
 
-struct Test {
+struct RequestInterceptorTests {
   @Test func modifyHTTPRequest() async throws {
     let request = try StoryList(storyType: "topstories.json")
-    var httpRequst = try request.httpRequest()
+    var httpRequst = try request.httpRequest
     #expect(httpRequst.url?.absoluteString == "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
     #expect(httpRequst.method == .get)
     let modifier = AddContentTypeModifier()
@@ -24,7 +24,7 @@ struct Test {
   @Test func modifyURLRequest() async throws {
     let request = try StoryList(storyType: "topstories.json")
     let modifier = AddContentTypeModifier()
-    var urlRequest = try request.urlRequest()
+    var urlRequest = try request.urlRequest
     #expect(urlRequest.url?.absoluteString == "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
     #expect(urlRequest.httpMethod == "GET")
     try await modifier.intercept(&urlRequest, for: URLSession.shared)
