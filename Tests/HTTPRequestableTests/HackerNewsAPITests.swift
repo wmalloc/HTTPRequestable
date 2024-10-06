@@ -38,7 +38,7 @@ final class HackerNewsAPITests: XCTestCase {
 
   func testMockTopStories() async throws {
     let request = try StoryList(storyType: "topstories.json")
-    let url = try request.url()
+    let url = try request.url
     MockURLProtocol.requestHandlers[url] = { _ in
       let data = try Bundle.module.data(forResource: "topstories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
@@ -56,7 +56,7 @@ final class HackerNewsAPITests: XCTestCase {
 
   func testMockNewStories() async throws {
     let request = try StoryList(storyType: "newstories.json")
-    let url = try request.url()
+    let url = try request.url
     MockURLProtocol.requestHandlers[url] = { _ in
       let data = try Bundle.module.data(forResource: "newstories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
@@ -73,7 +73,7 @@ final class HackerNewsAPITests: XCTestCase {
 
   func testMockBestStories() async throws {
     let request = try StoryList(storyType: "beststories.json")
-    let url = try request.url()
+    let url = try request.url
     MockURLProtocol.requestHandlers[url] = { _ in
       let data = try Bundle.module.data(forResource: "beststories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
