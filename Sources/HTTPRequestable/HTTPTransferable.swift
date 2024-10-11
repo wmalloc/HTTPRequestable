@@ -31,6 +31,13 @@ public protocol HTTPTransferable: Sendable {
   /// - Returns: Data, and HTTPResponse
   func data(for request: HTTPRequest, delegate: (any URLSessionTaskDelegate)?) async throws -> (Data, HTTPResponse)
 
+  /// Request data from server
+  /// - Parameters:
+  ///   - request:  Request where to get the data from
+  ///   - delegate: Delegate to handle the request
+  /// - Returns: Data, and HTTPURLResponse
+  func data(for request: URLRequest, delegate: (any URLSessionTaskDelegate)?) async throws -> (Data, HTTPURLResponse)
+
   /**
    Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
@@ -83,6 +90,21 @@ public extension HTTPTransferable {
     }
   }
 
+  func data(for request: URLRequest, delegate: (any URLSessionTaskDelegate)?) async throws -> (Data, HTTPURLResponse) {
+    logger.trace("[IN]: \(#function)")
+    var updateRequest = request
+    for interceptor in self.requestInterceptors {
+      try await interceptor.intercept(&updateRequest, for: session)
+    }
+    
+    let (rawData, response) = try await session.data(for: updateRequest, delegate: delegate)
+    let (data, httpURLResponse) = try (rawData, response.httpURLResponse)
+    for interceptor in responseInterceptors {
+      try await interceptor.intercept(request: request, data: data, response: httpURLResponse)
+    }
+    return (data, httpURLResponse)
+  }
+
   func object<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
     logger.trace("[IN]: \(#function)")
     let response = try await data(for: request, delegate: delegate)
@@ -95,17 +117,8 @@ public extension HTTPTransferable {
 
   func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
     logger.trace("[IN]: \(#function)")
-    var updateRequest = request
-    for interceptor in self.requestInterceptors {
-      try await interceptor.intercept(&updateRequest, for: session)
-    }
-    
-    let (rawData, response) = try await session.data(for: updateRequest, delegate: delegate)
-    let (data, httpURLResponse) = try (rawData, response.httpURLResponse)
-    for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: request, data: data, response: httpURLResponse)
-    }
-    return try transformer(data, httpURLResponse)
+    let (rawData, httpURLResponse) = try await data(for: request, delegate: delegate)
+    return try transformer(rawData, httpURLResponse)
   }
 
   func object<Route: HTTPRequestable>(for route: Route, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Route.ResultType {
