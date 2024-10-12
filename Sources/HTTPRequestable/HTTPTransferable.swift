@@ -72,7 +72,7 @@ public protocol HTTPTransferable: Sendable {
 }
 
 public extension HTTPTransferable {
-  func data(for request: HTTPRequest, delegate: (any URLSessionTaskDelegate)?) async throws -> (Data, HTTPResponse) {
+  func data(for request: HTTPRequest, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (Data, HTTPResponse) {
     logger.trace("[IN]: \(#function)")
     var updateRequest = request
     for interceptor in requestInterceptors {
@@ -90,7 +90,7 @@ public extension HTTPTransferable {
     }
   }
 
-  func data(for request: URLRequest, delegate: (any URLSessionTaskDelegate)?) async throws -> (Data, HTTPURLResponse) {
+  func data(for request: URLRequest, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (Data, HTTPURLResponse) {
     logger.trace("[IN]: \(#function)")
     var updateRequest = request
     for interceptor in self.requestInterceptors {
@@ -102,7 +102,12 @@ public extension HTTPTransferable {
     for interceptor in responseInterceptors {
       try await interceptor.intercept(request: request, data: data, response: httpURLResponse)
     }
-    return (data, httpURLResponse)
+    switch httpURLResponse.status.kind {
+    case .successful:
+      return (data, httpURLResponse)
+    default:
+      throw URLError(URLError.Code(rawValue: httpURLResponse.status.code))
+    }
   }
 
   func object<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
