@@ -21,19 +21,16 @@ extension LoggerInterceptor: RequestInterceptor {
     let debugDescription = request.debugDescription
     logger.log(level: logLevel, "\(debugDescription, privacy: .private)")
   }
-
-  public func intercept(_ request: inout URLRequest, for session: URLSession) async throws {
-    let debugDescription = request.debugDescription
-    logger.log(level: logLevel, "\(debugDescription, privacy: .private)")
-  }
 }
 
 extension LoggerInterceptor: ResponseInterceptor {
-  public func intercept(request: HTTPRequest, data: Data, response: HTTPTypes.HTTPResponse) async throws {
-    logger.log(level: logLevel, "\(response.debugDescription, privacy: .private)\n\(String(decoding: data, as: UTF8.self), privacy: .private)")
-  }
-
-  public func intercept(request: URLRequest, data: Data, response: HTTPURLResponse) async throws {
-    logger.log(level: logLevel, "\(response.debugDescription, privacy: .private)\n\(String(decoding: data, as: UTF8.self), privacy: .private)")
+  public func intercept(request: HTTPRequest, data: Data?, url: URL?, response: HTTPTypes.HTTPResponse) async throws {
+    logger.log(level: logLevel, "\(response.debugDescription, privacy: .private)")
+    if let data {
+      logger.log(level: logLevel, "\n\(String(decoding: data, as: UTF8.self), privacy: .private)")
+    }
+    if let url {
+      logger.log(level: logLevel, "\n\(url.absoluteString, privacy: .private)")
+    }
   }
 }

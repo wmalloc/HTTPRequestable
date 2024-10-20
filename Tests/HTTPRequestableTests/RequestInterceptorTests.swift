@@ -1,14 +1,14 @@
 //
-//  Test.swift
+//  RequestInterceptorTests.swift
 //  HTTPRequestable
 //
 //  Created by Waqar Malik on 9/24/24.
 //
 
-@testable import HTTPRequestable
-import Testing
-import HTTPTypes
 import Foundation
+@testable import HTTPRequestable
+import HTTPTypes
+import Testing
 
 struct RequestInterceptorTests {
   @Test func modifyHTTPRequest() async throws {
@@ -17,10 +17,10 @@ struct RequestInterceptorTests {
     #expect(httpRequst.url?.absoluteString == "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
     #expect(httpRequst.method == .get)
     let modifier = AddContentTypeModifier()
-    try await  modifier.intercept(&httpRequst, for: URLSession.shared)
+    try await modifier.intercept(&httpRequst, for: URLSession.shared)
     #expect(httpRequst.headerFields[.contentType] == HTTPContentType.json.rawValue)
   }
-  
+
   @Test func modifyURLRequest() async throws {
     let request = try StoryList(storyType: "topstories.json")
     let modifier = AddContentTypeModifier()
@@ -35,7 +35,7 @@ struct RequestInterceptorTests {
     func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {
       request.headerFields.append(HTTPField(name: .contentType, value: "application/json"))
     }
-    
+
     func intercept(_ reqeust: inout URLRequest, for session: URLSession) async throws {
       reqeust.setValue(HTTPContentType.jsonUTF8.rawValue, forHTTPField: .contentType)
     }

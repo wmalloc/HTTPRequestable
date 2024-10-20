@@ -24,7 +24,7 @@ class HackerNews: HTTPTransferable, @unchecked Sendable {
 
   func storyList(type: String) async throws -> StoryList.ResultType {
     let request = try StoryList(storyType: type)
-    return try await object(for: request, delegate: nil)
+    return try await object(for: request, delegate: nil).0
   }
 }
 
@@ -46,4 +46,4 @@ struct StoryList: HTTPRequestable {
     }
     self.path = "/v0/" + storyType
   }
- }
+}
