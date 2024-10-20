@@ -80,7 +80,7 @@ public extension HTTPTransferable {
     }
     let (data, response) = try await session.data(for: updateRequest, delegate: delegate)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: request, data: data, response: response)
+      try await interceptor.intercept(request: updateRequest, data: data, response: response)
     }
     switch response.status.kind {
     case .successful:
@@ -100,7 +100,7 @@ public extension HTTPTransferable {
     let (rawData, response) = try await session.data(for: updateRequest, delegate: delegate)
     let (data, httpURLResponse) = try (rawData, response.httpURLResponse)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: request, data: data, response: httpURLResponse)
+      try await interceptor.intercept(request: updateRequest, data: data, response: httpURLResponse)
     }
     switch httpURLResponse.status.kind {
     case .successful:
@@ -113,17 +113,13 @@ public extension HTTPTransferable {
   func object<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
     logger.trace("[IN]: \(#function)")
     let response = try await data(for: request, delegate: delegate)
-    guard let url = request.url else {
-      throw URLError(.badURL)
-    }
-    let httpURLResponse = HTTPURLResponse(httpResponse: response.1, url: url)
-    return try transformer(response.0, httpURLResponse)
+    return try transformer(response.0)
   }
 
   func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
     logger.trace("[IN]: \(#function)")
-    let (rawData, httpURLResponse) = try await data(for: request, delegate: delegate)
-    return try transformer(rawData, httpURLResponse)
+    let (rawData, _) = try await data(for: request, delegate: delegate)
+    return try transformer(rawData)
   }
 
   func object<Route: HTTPRequestable>(for route: Route, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Route.ResultType {

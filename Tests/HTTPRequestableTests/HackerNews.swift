@@ -37,9 +37,7 @@ struct StoryList: HTTPRequestable {
   let path: String?
 
   var responseTransformer: Transformer<Data, ResultType> {
-    { data, _ in
-      try JSONDecoder().decode(ResultType.self, from: data)
-    }
+    Self.jsonDecoder
   }
 
   init(storyType: String) throws {

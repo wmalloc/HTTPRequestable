@@ -20,14 +20,14 @@ private let logger = Logger(.disabled)
 public typealias HTTPMethod = HTTPRequest.Method
 
 /// How to transform the resulting data
-public typealias Transformer<InputType, OutputType> = @Sendable (InputType, HTTPURLResponse?) throws -> OutputType
+public typealias Transformer<InputType: Sendable, OutputType: Sendable> = @Sendable (InputType) throws -> OutputType
 
 /// HTTP Request
 public typealias URLRequestable = HTTPRequestable
 
 /// URL/HTTP Request builder
 public protocol HTTPRequestable: Sendable {
-  associatedtype ResultType
+  associatedtype ResultType: Sendable
 
   /// URL Components to build the url
   var environment: HTTPEnvironment { get }
@@ -124,6 +124,14 @@ public extension HTTPRequestable {
       }
       urlRequest.httpBody = httpBody
       return urlRequest
+    }
+  }
+}
+
+extension HTTPRequestable where ResultType: Decodable {
+  static var jsonDecoder: Transformer<Data, ResultType> {
+    { data in
+      try JSONDecoder().decode(ResultType.self, from: data)
     }
   }
 }
