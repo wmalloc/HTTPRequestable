@@ -20,18 +20,16 @@ extension OSLogInterceptor: RequestInterceptor {
   public func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {
     os_log(logType, log: logger, "%{private}@", request.debugDescription)
   }
-  
-  public func intercept(_ request: inout URLRequest, for session: URLSession) async throws {
-    os_log(logType, log: logger, "%{private}@", request.description)
-  }
 }
 
 extension OSLogInterceptor: ResponseInterceptor {
-  public func intercept(request: HTTPRequest, data: Data, response: HTTPTypes.HTTPResponse) async throws {
-    os_log(logType, log: logger, "%{private}@\n%{private}@", response.debugDescription, String(decoding: data, as: UTF8.self))
-  }
-
-  public func intercept(request: URLRequest, data: Data, response: HTTPURLResponse) async throws {
-    os_log(logType, log: logger, "%{private}@\n%{private}@", response.debugDescription, String(decoding: data, as: UTF8.self))
+  public func intercept(request: HTTPRequest, data: Data?, url: URL?, response: HTTPTypes.HTTPResponse) async throws {
+    os_log(logType, log: logger, "%{private}@", response.debugDescription)
+    if let data {
+      os_log(logType, log: logger, "\n%{private}@", String(decoding: data, as: UTF8.self))
+    }
+    if let url {
+      os_log(logType, log: logger, "\n%{private}@", url.absoluteString)
+    }
   }
 }

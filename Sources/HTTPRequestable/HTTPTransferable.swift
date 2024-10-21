@@ -21,7 +21,10 @@ public protocol HTTPTransferable: Sendable {
   var session: URLSession { get }
   init(session: URLSession)
 
+  /// Request Modifiers
   var requestInterceptors: [any RequestInterceptor] { get set }
+
+  /// Response Interceptors
   var responseInterceptors: [any ResponseInterceptor] { get set }
 
   /// Request data from server
@@ -29,36 +32,37 @@ public protocol HTTPTransferable: Sendable {
   ///   - request:  Request where to get the data from
   ///   - delegate: Delegate to handle the request
   /// - Returns: Data, and HTTPResponse
-  func data(for request: HTTPRequest, delegate: (any URLSessionTaskDelegate)?) async throws -> (Data, HTTPResponse)
+  func data(for request: any HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> (Data, HTTPResponse)
 
-  /// Request data from server
+  /// Convenience method to upload data using an `HTTPRequestable`; creates and resumes a `URLSessionUploadTask` internally.
   /// - Parameters:
-  ///   - request:  Request where to get the data from
-  ///   - delegate: Delegate to handle the request
-  /// - Returns: Data, and HTTPURLResponse
-  func data(for request: URLRequest, delegate: (any URLSessionTaskDelegate)?) async throws -> (Data, HTTPURLResponse)
+  ///   - request: The `HTTPRequestable` for which to upload data.
+  ///   - fileURL: File to upload.
+  ///   - delegate: Task-specific delegate.
+  /// - Returns: Data and response.
+  func upload<Request: HTTPRequestable>(for request: Request, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)?) async throws -> (Request.ResultType, HTTPResponse)
 
-  /**
-   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
+  /// Convenience method to upload data using an `HTTPRequestable`, creates and resumes a `URLSessionUploadTask` internally.
+  /// - Parameters:
+  ///   - request: The `HTTPRequestable` for which to upload data.
+  ///   - bodyData: Data to upload.
+  ///   - delegate: Task-specific delegate.
+  /// - Returns: Data and response.
+  func upload<Request: HTTPRequestable>(for request: Request, from bodyData: Data, delegate: (any URLSessionTaskDelegate)?) async throws -> (Request.ResultType, HTTPResponse)
 
-   - Parameters:
-     - request:    Request where to get the data from
-     - transform:  Transformer how to convert the data to different type
-     - delegate:   Delegate to handle the request
-   - returns: Transformed Object
-   */
-  func object<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)?) async throws -> ObjectType
+  /// Convenience method to download using an `HTTPRequestable`; creates and resumes a `URLSessionDownloadTask` internally.
+  /// - Parameters:
+  ///   - request: The `HTTPRequestable` for which to download.
+  ///   - delegate: Task-specific delegate.
+  /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
+  func download<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> (URL, HTTPResponse)
 
-  /**
-   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
-
-   - Parameters:
-     - request:    Request where to get the data from
-     - transform:  Transformer how to convert the data to different type
-     - delegate:   Delegate to handle the request
-   - returns: Transformed Object
-   */
-  func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)?) async throws -> ObjectType
+  /// Returns a byte stream that conforms to AsyncSequence protocol.
+  /// - Parameters:
+  ///   - request: The `HTTPRequestable` for which to load data.
+  ///   - delegate: Task-specific delegate.
+  /// - Returns: Data stream and response.
+  func bytes<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse)
 
   /**
    Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -68,63 +72,118 @@ public protocol HTTPTransferable: Sendable {
      - delegate: Delegate to handle the request
    - returns: Transformed Object
    */
-  func object<Route: HTTPRequestable>(for route: Route, delegate: (any URLSessionTaskDelegate)?) async throws -> Route.ResultType
+  func object<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> (Request.ResultType, HTTPResponse)
 }
 
 public extension HTTPTransferable {
-  func data(for request: HTTPRequest, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (Data, HTTPResponse) {
+  func data(for request: any HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (Data, HTTPResponse) {
     logger.trace("[IN]: \(#function)")
-    var updateRequest = request
+    var updateRequest = try request.httpRequest
     for interceptor in requestInterceptors {
       try await interceptor.intercept(&updateRequest, for: session)
     }
-    let (data, response) = try await session.data(for: updateRequest, delegate: delegate)
+    let result: (Data, HTTPResponse)
+    if let httpBody = request.httpBody {
+      guard var urlRequest = URLRequest(httpRequest: updateRequest) else {
+        throw URLError(.badRequest)
+      }
+      urlRequest.httpBody = httpBody
+      let (rawData, response) = try await session.data(for: urlRequest, delegate: delegate)
+      result = try (rawData, response.httpResponse)
+    } else {
+      result = try await session.data(for: updateRequest, delegate: delegate)
+    }
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: updateRequest, data: data, response: response)
+      try await interceptor.intercept(request: updateRequest, data: result.0, url: nil, response: result.1)
     }
-    switch response.status.kind {
-    case .successful:
-      return (data, response)
-    default:
-      throw URLError(URLError.Code(rawValue: response.status.code))
-    }
+    return result
   }
 
-  func data(for request: URLRequest, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (Data, HTTPURLResponse) {
+  /// Convenience method to upload data using an `HTTPRequestable`; creates and resumes a `URLSessionUploadTask` internally.
+  /// - Parameters:
+  ///   - request: The `HTTPRequestable` for which to upload data.
+  ///   - fileURL: File to upload.
+  ///   - delegate: Task-specific delegate.
+  /// - Returns: Data and response.
+  func upload<Request: HTTPRequestable>(for request: Request, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (Request.ResultType, HTTPResponse) {
     logger.trace("[IN]: \(#function)")
-    var updateRequest = request
-    for interceptor in self.requestInterceptors {
+    var updateRequest = try request.httpRequest
+    for interceptor in requestInterceptors {
       try await interceptor.intercept(&updateRequest, for: session)
     }
-    
-    let (rawData, response) = try await session.data(for: updateRequest, delegate: delegate)
-    let (data, httpURLResponse) = try (rawData, response.httpURLResponse)
+    let (data, response) = try await session.upload(for: updateRequest, fromFile: fileURL, delegate: delegate)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: updateRequest, data: data, response: httpURLResponse)
+      try await interceptor.intercept(request: updateRequest, data: data, url: nil, response: response)
     }
-    switch httpURLResponse.status.kind {
+    return try (request.responseTransformer(data), response)
+  }
+
+  /// Convenience method to upload data using an `HTTPRequestable`, creates and resumes a `URLSessionUploadTask` internally.
+  /// - Parameters:
+  ///   - request: The `HTTPRequestable` for which to upload data.
+  ///   - bodyData: Data to upload.
+  ///   - delegate: Task-specific delegate.
+  /// - Returns: Data and response.
+  func upload<Request: HTTPRequestable>(for request: Request, from bodyData: Data, delegate: (any URLSessionTaskDelegate)?) async throws -> (Request.ResultType, HTTPResponse) {
+    logger.trace("[IN]: \(#function)")
+    var updateRequest = try request.httpRequest
+    for interceptor in requestInterceptors {
+      try await interceptor.intercept(&updateRequest, for: session)
+    }
+    let (data, response) = try await session.upload(for: updateRequest, from: bodyData, delegate: delegate)
+    for interceptor in responseInterceptors {
+      try await interceptor.intercept(request: updateRequest, data: data, url: nil, response: response)
+    }
+    return try (request.responseTransformer(data), response)
+  }
+
+  /// Convenience method to download using an `HTTPRequestable`; creates and resumes a `URLSessionDownloadTask` internally.
+  /// - Parameters:
+  ///   - request: The `HTTPRequestable` for which to download.
+  ///   - delegate: Task-specific delegate.
+  /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
+  func download(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (URL, HTTPResponse) {
+    logger.trace("[IN]: \(#function)")
+    var updateRequest = try request.httpRequest
+    for interceptor in requestInterceptors {
+      try await interceptor.intercept(&updateRequest, for: session)
+    }
+    let (url, response) = try await session.download(for: updateRequest, delegate: delegate)
+    for interceptor in responseInterceptors {
+      try await interceptor.intercept(request: updateRequest, data: nil, url: url, response: response)
+    }
+    return (url, response)
+  }
+
+  /// Returns a byte stream that conforms to AsyncSequence protocol.
+  /// - Parameters:
+  ///   - request: The `HTTPRequestable` for which to load data.
+  ///   - delegate: Task-specific delegate.
+  /// - Returns: Data stream and response.
+  func bytes(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
+    logger.trace("[IN]: \(#function)")
+    var updateRequest = try request.httpRequest
+    for interceptor in requestInterceptors {
+      try await interceptor.intercept(&updateRequest, for: session)
+    }
+    return try await session.bytes(for: updateRequest, delegate: delegate)
+  }
+
+  /**
+   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
+
+   - Parameters:
+   - route:    Request where to get the data from
+   - delegate: Delegate to handle the request
+   - returns: Transformed Object
+   */
+  func object<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (Request.ResultType, HTTPResponse) {
+    let (data, response) = try await data(for: request, delegate: delegate)
+    switch response.status.kind {
     case .successful:
-      return (data, httpURLResponse)
+      return try (request.responseTransformer(data), response)
     default:
-      throw URLError(URLError.Code(rawValue: httpURLResponse.status.code))
+      throw URLError(URLError.Code(integerLiteral: response.status.code))
     }
-  }
-
-  func object<ObjectType>(for request: HTTPRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
-    logger.trace("[IN]: \(#function)")
-    let response = try await data(for: request, delegate: delegate)
-    return try transformer(response.0)
-  }
-
-  func object<ObjectType>(for request: URLRequest, transformer: @escaping Transformer<Data, ObjectType>, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> ObjectType {
-    logger.trace("[IN]: \(#function)")
-    let (rawData, _) = try await data(for: request, delegate: delegate)
-    return try transformer(rawData)
-  }
-
-  func object<Route: HTTPRequestable>(for route: Route, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Route.ResultType {
-    try await route.httpBody == nil ?
-    object(for: route.httpRequest, transformer: route.responseTransformer, delegate: delegate) :
-    object(for: route.urlRequest, transformer: route.responseTransformer, delegate: delegate)
   }
 }
