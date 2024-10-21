@@ -13,7 +13,7 @@ A lightweight WebService API for [Apple](https://www.apple.com) devices, written
 Add the following dependency clause to your Package.swift:
 
 ```swift
-// swift-tools-version:5.9
+// swift-tools-version:5.10
 import PackageDescription
 
 let package = Package(
@@ -44,19 +44,22 @@ let package = Package(
 ### Creating an API
 
 ```swift
-class HackerNews: HTTPTransferable {
-  let session: URLSession
-
+class HackerNews: HTTPTransferable, @unchecked Sendable {
   var requestInterceptors: [any RequestInterceptor] = []
   var responseInterceptors: [any ResponseInterceptor] = []
 
+  let session: URLSession
+
   required init(session: URLSession = .shared) {
     self.session = session
+    let logger = LoggerInterceptor()
+    requestInterceptors.append(logger)
+    responseInterceptors.append(logger)
   }
 
   func storyList(type: String) async throws -> StoryList.ResultType {
     let request = try StoryList(storyType: type)
-    return try await object(for: request, delegate: nil)
+    return try await object(for: request, delegate: nil).0
   }
 }
 ```
@@ -66,26 +69,23 @@ class HackerNews: HTTPTransferable {
 ```swift
 struct StoryList: HTTPRequestable {
   typealias ResultType = [Int]
-
+  
   let environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com")
   let headerFields: HTTPFields? = .init([.accept(.json)])
   let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
   let path: String?
-
+  
   var responseTransformer: Transformer<Data, ResultType> {
-    { data, _ in
-      try JSONDecoder().decode(ResultType.self, from: data)
-    }
+    Self.jsonDecoder
   }
-
+  
   init(storyType: String) throws {
     guard !storyType.isEmpty else {
       throw URLError(.badURL)
     }
-    path = "/v0/" + storyType
+    self.path = "/v0/" + storyType
   }
 }
-
 ```
 
 Then you can create an instantiate your API object to make calls

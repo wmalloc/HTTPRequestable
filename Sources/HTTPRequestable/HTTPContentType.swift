@@ -15,6 +15,11 @@ public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
   }
 }
 
+///  A type that can be Identified
+extension HTTPContentType: Identifiable {
+  public var id: String { rawValue }
+}
+
 ///  A type that can be initialized with a string literal.
 extension HTTPContentType: ExpressibleByStringLiteral {
   public init(stringLiteral value: String) {

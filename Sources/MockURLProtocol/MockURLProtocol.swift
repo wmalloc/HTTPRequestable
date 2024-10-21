@@ -10,7 +10,7 @@ import Foundation
 public class MockURLProtocol: URLProtocol {
   public typealias RequestHandler = (URLRequest) throws -> (HTTPURLResponse, Data?)
 
-  nonisolated(unsafe) public static var requestHandlers: [URL: RequestHandler] = [:]
+  public nonisolated(unsafe) static var requestHandlers: [URL: RequestHandler] = [:]
 
   override public class func canInit(with _: URLRequest) -> Bool { true }
   override public class func canInit(with _: URLSessionTask) -> Bool { true }
