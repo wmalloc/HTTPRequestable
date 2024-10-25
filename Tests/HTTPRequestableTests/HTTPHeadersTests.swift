@@ -29,7 +29,7 @@ final class HTTPHeadersTests: XCTestCase {
     XCTAssertEqual(session.httpAdditionalHeaders?.count, 1)
 
     let headers = session.httpFields
-    XCTAssertEqual(headers?.count, 1)
+    XCTAssertEqual(headers.count, 1)
   }
 
   func testHeaderFieldsCounts() throws {
