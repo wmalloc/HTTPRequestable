@@ -114,7 +114,7 @@ public extension HTTPTransferable {
       return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .failure(error))
     }
     guard let decoded = try request.responseDataTransformer?(data) else {
-      throw URLError(.cannotDecodeRawData)
+      throw URLError(.cannotDecodeContentData)
     }
     return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .success(decoded))
   }
@@ -139,7 +139,7 @@ public extension HTTPTransferable {
       return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .failure(error))
     }
     guard let decoded = try request.responseDataTransformer?(data) else {
-      throw URLError(.cannotDecodeRawData)
+      throw URLError(.cannotDecodeContentData)
     }
     return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .success(decoded))
   }
@@ -193,7 +193,7 @@ public extension HTTPTransferable {
       return HTTPDataResponse(request: response.request, data: response.data, response: response.response, result: .failure(error))
     }
     guard let decoded = try request.responseDataTransformer?(response.data) else {
-      throw URLError(.cannotDecodeRawData)
+      throw URLError(.cannotDecodeContentData)
     }
     return HTTPDataResponse(request: response.request, data: response.data, response: response.response, result: .success(decoded))
   }
