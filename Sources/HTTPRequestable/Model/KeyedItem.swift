@@ -16,12 +16,12 @@ public struct KeyedItem<ItemType: Codable & Equatable & Sendable>: Equatable, Se
     self.parameters = parameters
   }
 
-  subscript(key: String) -> String? {
+  public subscript(key: String) -> String? {
     get { parameters[key] }
     set { parameters[key] = newValue }
   }
 
-  var encoded: String {
+  public var encoded: String {
     "\(item); " + parameters.map { "\($0.key)=\($0.value)" }.joined(separator: "; ")
   }
 }
