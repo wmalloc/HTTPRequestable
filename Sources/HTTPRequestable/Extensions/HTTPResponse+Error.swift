@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  HTTPResponse+Error.swift
 //  HTTPRequestable
 //
 //  Created by Waqar Malik on 10/24/24.

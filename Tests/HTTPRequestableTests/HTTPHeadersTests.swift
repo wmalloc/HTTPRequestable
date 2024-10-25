@@ -26,20 +26,22 @@ final class HTTPHeadersTests: XCTestCase {
   func testURLSessionConfiguration() throws {
     let session = URLSessionConfiguration.default
     session.httpFields = HTTPFields.defaultHeaders
-    XCTAssertEqual(session.httpAdditionalHeaders?.count, 1)
+    XCTAssertEqual(session.httpAdditionalHeaders?.count, 3)
 
     let headers = session.httpFields
-    XCTAssertEqual(headers.count, 1)
+    XCTAssertEqual(headers.count, 3)
   }
 
   func testHeaderFieldsCounts() throws {
     var fields = HTTPFields.defaultHeaders
     fields.append(HTTPField.accept(.json))
-    XCTAssertEqual(fields.count, 2)
-    XCTAssertEqual(fields[0].name, .userAgent)
-    XCTAssertEqual(fields[1].name, .accept)
+    XCTAssertEqual(fields.count, 4)
+    XCTAssertEqual(fields[0].name, .acceptEncoding)
+    XCTAssertEqual(fields[1].name, .acceptLanguage)
+    XCTAssertEqual(fields[2].name, .userAgent)
+    XCTAssertEqual(fields[3].name, .accept)
     fields[.accept] = HTTPContentType.xml.rawValue
-    XCTAssertEqual(fields.count, 2)
+    XCTAssertEqual(fields.count, 4)
   }
 
   func testURLRequestHTTPFields() throws {
@@ -51,16 +53,16 @@ final class HTTPHeadersTests: XCTestCase {
     XCTAssertEqual(request.allHTTPHeaderFields?.count, 1)
 
     request = request.setHttpHeaderFields(HTTPFields.defaultHeaders)
-    XCTAssertEqual(request.allHTTPHeaderFields?.count, 1)
+    XCTAssertEqual(request.allHTTPHeaderFields?.count, 3)
   }
 
   func testHTTPFieldsRewValues() throws {
     let fields = HTTPFields.defaultHeaders
     let rawValue = fields.rawValue
-    XCTAssertEqual(rawValue.count, 1)
+    XCTAssertEqual(rawValue.count, 3)
 
     let newFields = HTTPFields(rawValue: rawValue)
-    XCTAssertEqual(newFields.count, 1)
+    XCTAssertEqual(newFields.count, 3)
   }
 
   func testURLRequestHeaders() throws {
@@ -72,7 +74,7 @@ final class HTTPHeadersTests: XCTestCase {
 
     let headers = request.headerFields
     XCTAssertNotNil(headers)
-    XCTAssertEqual(headers?.count, 2)
+    XCTAssertEqual(headers?.count, 4)
     XCTAssertFalse(headers!.contains(.contentType(.xml)))
   }
 

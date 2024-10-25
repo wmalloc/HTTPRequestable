@@ -9,7 +9,7 @@ import HTTPTypes
 
 public extension URLSessionConfiguration {
   var httpFields: HTTPFields {
-    get { HTTPFields(rawValue: httpAdditionalHeaders as? [String: String] ?? [:])}
+    get { HTTPFields(rawValue: httpAdditionalHeaders as? [String: String] ?? [:]) }
     set { httpAdditionalHeaders = newValue.rawValue }
   }
 }

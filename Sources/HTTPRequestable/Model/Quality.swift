@@ -32,10 +32,14 @@ public struct Quality: Hashable, Sendable {
     public init(q: Float? = nil) {
       self.q = q
     }
+
+    public init(double: Double) {
+      self.q = Float(double)
+    }
     // swiftlint:enable identifier_name
   }
 
-  var encoded: String {
+  public var encoded: String {
     items.map { item in
       var string = item.item
       if let quality = item.parameters.q {

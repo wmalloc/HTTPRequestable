@@ -82,11 +82,10 @@ public extension HTTPTransferable {
     for interceptor in requestInterceptors {
       try await interceptor.intercept(&updateRequest, for: session)
     }
-    let result: (Data, HTTPResponse)
-    if let httpBody = request.httpBody {
-      result = try await session.upload(for: updateRequest, from: httpBody, delegate: delegate)
+    let result: (Data, HTTPResponse) = if let httpBody = request.httpBody {
+      try await session.upload(for: updateRequest, from: httpBody, delegate: delegate)
     } else {
-      result = try await session.data(for: updateRequest, delegate: delegate)
+      try await session.data(for: updateRequest, delegate: delegate)
     }
     for interceptor in responseInterceptors {
       try await interceptor.intercept(request: updateRequest, data: result.0, url: nil, response: result.1)
@@ -150,7 +149,7 @@ public extension HTTPTransferable {
   ///   - request: The `HTTPRequestable` for which to download.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
-  func download<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDownloadResponse<URL> {
+  func download(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDownloadResponse<URL> {
     logger.trace("[IN]: \(#function)")
     var updateRequest = try request.httpRequest
     for interceptor in requestInterceptors {
@@ -164,7 +163,7 @@ public extension HTTPTransferable {
       return HTTPDownloadResponse(request: updateRequest, fileURL: url, response: response, result: .failure(error))
     }
     return HTTPDownloadResponse(request: updateRequest, fileURL: url, response: response, result: .success(url))
-   }
+  }
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.
   /// - Parameters:
