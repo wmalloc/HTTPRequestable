@@ -47,9 +47,4 @@ public extension HTTPField {
   static func contentDisposition(_ value: String) -> Self {
     .init(name: .contentDisposition, value: value)
   }
-
-  /// See the [User-Agent header](https://tools.ietf.org/html/rfc7231#section-5.5.3).
-  static var defaultUserAgent: Self {
-    .userAgent(String.url_userAgent)
-  }
 }

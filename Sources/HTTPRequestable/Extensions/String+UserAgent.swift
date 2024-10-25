@@ -14,7 +14,7 @@ public extension String {
     let appVersion = infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown-AppVersion"
     let appBuild = infoDictionary?["CFBundleVersion"] as? String ?? "Unknown-Build"
     let os = String.url_osName + " " + ProcessInfo.processInfo.operatingSystemVersionString
-    let package = "URLRequestable"
+    let package = "HTTPRequestable"
     return "\(appName)/\(appVersion) (\(bundle); build:\(appBuild); \(os)) \(package)"
   }
 }

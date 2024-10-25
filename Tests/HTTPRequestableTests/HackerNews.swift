@@ -24,7 +24,7 @@ class HackerNews: HTTPTransferable, @unchecked Sendable {
 
   func storyList(type: String) async throws -> StoryList.ResultType {
     let request = try StoryList(storyType: type)
-    return try await object(for: request, delegate: nil).0
+    return try await object(for: request, delegate: nil).value ?? []
   }
 }
 
@@ -36,7 +36,7 @@ struct StoryList: HTTPRequestable {
   let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
   let path: String?
 
-  var responseTransformer: Transformer<Data, ResultType> {
+  var responseDataTransformer: Transformer<Data, ResultType>? {
     Self.jsonDecoder
   }
 

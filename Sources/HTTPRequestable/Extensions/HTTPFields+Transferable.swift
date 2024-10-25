@@ -1,5 +1,5 @@
 //
-//  HTTPFields+Combined.swift
+//  HTTPFields+Transferable.swift
 //
 //
 //  Created by Waqar Malik on 5/18/24.

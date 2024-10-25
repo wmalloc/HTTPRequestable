@@ -48,7 +48,7 @@ public protocol HTTPRequestable: Sendable {
   var httpBody: Data? { get }
 
   /// How to transform the resulting data
-  var responseTransformer: Transformer<Data, ResultType> { get }
+  var responseDataTransformer: Transformer<Data, ResultType>? { get }
 
   /// builds the final url for request
   /// - Parameter queryItems: additonal query items

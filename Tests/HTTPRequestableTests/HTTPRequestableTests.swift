@@ -9,7 +9,7 @@ final class HTTPRequestableTests: XCTestCase {
     XCTAssertEqual(userAgent.name, HTTPField.Name.userAgent)
     XCTAssertEqual(userAgent.value.contains("com.apple.dt.xctest.tool"), true)
     XCTAssertEqual(userAgent.value.hasPrefix("xctest"), true)
-    XCTAssertEqual(userAgent.value.hasSuffix("URLRequestable"), true)
+    XCTAssertEqual(userAgent.value.hasSuffix("HTTPRequestable"), true)
     XCTAssertEqual(userAgent.value, String.url_userAgent)
   }
 }
