@@ -16,10 +16,8 @@ struct ItemRequest: HTTPRequestable {
   let headerFields: HTTPFields? = .init([.accept(.json)])
   let path: String?
 
-  var responseTransformer: Transformer<Data, ResultType> {
-    { data, _ in
-      try JSONDecoder().decode(ResultType.self, from: data)
-    }
+  var responseDataTransformer: Transformer<Data, ResultType>? {
+    Self.jsonDecoder
   }
 
   init(environment: HTTPEnvironment, item: Int) throws {

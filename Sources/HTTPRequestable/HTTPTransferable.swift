@@ -73,6 +73,16 @@ public protocol HTTPTransferable: Sendable {
    - returns: Transformed Object
    */
   func object<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse<Request.ResultType>
+  
+  /**
+   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
+   
+   - Parameters:
+   - route:    Request where to get the data from
+   - delegate: Delegate to handle the request
+   - returns: Transformed Object
+   */
+  func decoded<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> Request.ResultType
 }
 
 public extension HTTPTransferable {
@@ -114,7 +124,7 @@ public extension HTTPTransferable {
       return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .failure(error))
     }
     guard let decoded = try request.responseDataTransformer?(data) else {
-      throw URLError(.cannotDecodeContentData)
+      return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .failure(URLError(.cannotDecodeContentData)))
     }
     return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .success(decoded))
   }
@@ -139,7 +149,7 @@ public extension HTTPTransferable {
       return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .failure(error))
     }
     guard let decoded = try request.responseDataTransformer?(data) else {
-      throw URLError(.cannotDecodeContentData)
+      return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .failure(URLError(.cannotDecodeContentData)))
     }
     return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .success(decoded))
   }
@@ -193,8 +203,26 @@ public extension HTTPTransferable {
       return HTTPDataResponse(request: response.request, data: response.data, response: response.response, result: .failure(error))
     }
     guard let decoded = try request.responseDataTransformer?(response.data) else {
-      throw URLError(.cannotDecodeContentData)
+      return HTTPDataResponse(request: response.request, data: response.data, response: response.response, result: .failure(URLError(.cannotDecodeContentData)))
     }
     return HTTPDataResponse(request: response.request, data: response.data, response: response.response, result: .success(decoded))
+  }
+  
+  /**
+   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
+   
+   - Parameters:
+   - route:    Request where to get the data from
+   - delegate: Delegate to handle the request
+   - returns: Transformed Object
+   */
+  func decoded<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Request.ResultType {
+    let response = try await object(for: request, delegate: delegate)
+    switch response.result {
+    case .success(let value):
+      return value
+    case .failure(let error):
+      throw error
+    }
   }
 }
