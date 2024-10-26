@@ -128,7 +128,7 @@ public extension HTTPRequestable {
   }
 }
 
-extension HTTPRequestable where ResultType: Decodable {
+public extension HTTPRequestable where ResultType: Decodable {
   static var jsonDecoder: Transformer<Data, ResultType> {
     { data in
       try JSONDecoder().decode(ResultType.self, from: data)

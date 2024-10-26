@@ -16,5 +16,7 @@ struct ItemDetailView: View {
 }
 
 #Preview {
-  ItemDetailView(item: Item(id: 349483, by: "Turing", descendants: 0, kids: [], score: 10, time: Date(), title: "New Idea for Automata", type: "story", url: URL(string: "https://en.wikipedia.org/wiki/Alan_Turing")!))
+  ItemDetailView(item: Item(id: 349483, by: "Turing", descendants: 0, kids: [], score: 10, time: Date(),
+                            title: "New Idea for Automata", type: "story",
+                            url: URL(string: "https://en.wikipedia.org/wiki/Alan_Turing")!))
 }
