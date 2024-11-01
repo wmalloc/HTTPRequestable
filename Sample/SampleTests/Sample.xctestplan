@@ -1,0 +1,31 @@
+{
+  "configurations" : [
+    {
+      "id" : "6C80AE70-C4DC-4546-8819-F424F2E3CAFC",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Sample.xcodeproj",
+        "identifier" : "47C3021D2C8D458E00C2EC97",
+        "name" : "SampleTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Sample.xcodeproj",
+        "identifier" : "47C302272C8D458E00C2EC97",
+        "name" : "SampleUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

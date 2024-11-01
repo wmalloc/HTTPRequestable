@@ -8,9 +8,9 @@
 import Foundation
 import OSLog
 
-@MainActor
-class SampleViewModel: ObservableObject {
-  @Published var items: [Item] = []
+@MainActor @Observable
+class SampleViewModel {
+  var items: [Item] = []
 
   let hackerNews = HackerNews()
 
