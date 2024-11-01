@@ -23,7 +23,7 @@ let package = Package(
     .executable(name: "MyApp", targets: ["MyApp"])
   ],
   dependencies: [
-    .package(url: "https://github.com/wmalloc/HTTPRequestable.git", from: "0.7.11")
+    .package(url: "https://github.com/wmalloc/HTTPRequestable.git", from: "0.10.1")
   ],
   targets: [
     .target(name: "MyApp", dependencies: 
@@ -37,7 +37,7 @@ let package = Package(
 | Protocol |Features |
 |--------------------------|------------------------------------------|
 |`HTTPRequstable` | Define your request|
-|`URLTransferable` | To create your API client|
+|`HTTPTransferable` | To create your API client|
 
 ## Usage
 
@@ -57,9 +57,9 @@ class HackerNews: HTTPTransferable, @unchecked Sendable {
     responseInterceptors.append(logger)
   }
 
-  func storyList(type: String) async throws -> StoryList.ResultType {
-    let request = try StoryList(storyType: type)
-    return try await object(for: request, delegate: nil).0
+ func storyList(type: String) async throws -> StoryList.ResultType {
+    let request = try StoryListRequest(environment: environment, storyType: type)
+    return try await object(for: request, delegate: nil).value ?? []
   }
 }
 ```
@@ -67,23 +67,22 @@ class HackerNews: HTTPTransferable, @unchecked Sendable {
 ### To defineing a request
 
 ```swift
-struct StoryList: HTTPRequestable {
+struct StoryListRequest: HTTPRequestable {
   typealias ResultType = [Int]
   
-  let environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com")
+  let environment: HTTPEnvironment
   let headerFields: HTTPFields? = .init([.accept(.json)])
   let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
   let path: String?
   
-  var responseTransformer: Transformer<Data, ResultType> {
+  var responseDataTransformer: Transformer<Data, ResultType>? {
     Self.jsonDecoder
   }
   
-  init(storyType: String) throws {
-    guard !storyType.isEmpty else {
-      throw URLError(.badURL)
-    }
-    self.path = "/v0/" + storyType
+  init(environment: HTTPEnvironment, storyType: String) throws {
+    precondition(!storyType.isEmpty, "Story type cannot be empty")
+    self.environment = environment
+    self.path = "/\(storyType).json"
   }
 }
 ```

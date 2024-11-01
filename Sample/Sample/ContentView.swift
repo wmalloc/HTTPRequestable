@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-  @EnvironmentObject var viewModel: SampleViewModel
+  @Environment(SampleViewModel.self) var viewModel: SampleViewModel
 
   var body: some View {
     NavigationStack {
@@ -19,6 +19,7 @@ struct ContentView: View {
         .listStyle(.plain)
       }
       .navigationTitle("Hacker News")
+      .navigationBarTitleDisplayMode(.inline)
       .onAppear {
         viewModel.topStories()
       }
@@ -28,5 +29,5 @@ struct ContentView: View {
 
 #Preview {
   ContentView()
-    .environmentObject(SampleViewModel())
+    .environment(SampleViewModel())
 }
