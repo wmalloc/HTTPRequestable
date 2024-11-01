@@ -14,6 +14,8 @@ class HackerNews: HTTPTransferable, @unchecked Sendable {
   var responseInterceptors: [any ResponseInterceptor] = []
 
   let session: URLSession
+  
+  private(set) var environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com", path: "/v0")
 
   required init(session: URLSession = .shared) {
     self.session = session
@@ -21,29 +23,11 @@ class HackerNews: HTTPTransferable, @unchecked Sendable {
     requestInterceptors.append(logger)
     responseInterceptors.append(logger)
   }
-
-  func storyList(type: String) async throws -> StoryList.ResultType {
-    let request = try StoryList(storyType: type)
-    return try await object(for: request, delegate: nil).value ?? []
-  }
 }
 
-struct StoryList: HTTPRequestable {
-  typealias ResultType = [Int]
-
-  let environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com")
-  let headerFields: HTTPFields? = .init([.accept(.json)])
-  let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
-  let path: String?
-
-  var responseDataTransformer: Transformer<Data, ResultType>? {
-    Self.jsonDecoder
-  }
-
-  init(storyType: String) throws {
-    guard !storyType.isEmpty else {
-      throw URLError(.badURL)
-    }
-    self.path = "/v0/" + storyType
+extension HackerNews {
+  func storyList(type: String) async throws -> StoryListRequest.ResultType {
+    let request = try StoryListRequest(environment: environment, storyType: type)
+    return try await object(for: request, delegate: nil).value ?? []
   }
 }

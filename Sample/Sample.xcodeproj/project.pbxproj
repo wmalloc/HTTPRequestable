@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		47385CDC2CD590B30015E6B5 /* HTTPRequestable in Frameworks */ = {isa = PBXBuildFile; productRef = 47385CDB2CD590B30015E6B5 /* HTTPRequestable */; };
+		47385CDE2CD590B30015E6B5 /* MockURLProtocol in Frameworks */ = {isa = PBXBuildFile; productRef = 47385CDD2CD590B30015E6B5 /* MockURLProtocol */; };
+		47385CE02CD590B30015E6B5 /* MultipartForm in Frameworks */ = {isa = PBXBuildFile; productRef = 47385CDF2CD590B30015E6B5 /* MultipartForm */; };
 		473B4F632C8D4B390038409E /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473B4F622C8D4B390038409E /* Item.swift */; };
 		473B4F652C8D4BA50038409E /* SampleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473B4F642C8D4BA50038409E /* SampleViewModel.swift */; };
 		473B4F672C8D4ED30038409E /* ItemDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473B4F662C8D4ED30038409E /* ItemDetailView.swift */; };
@@ -42,6 +45,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		47385CD92CD590440015E6B5 /* Sample.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Sample.xctestplan; sourceTree = "<group>"; };
 		473B4F622C8D4B390038409E /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
 		473B4F642C8D4BA50038409E /* SampleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleViewModel.swift; sourceTree = "<group>"; };
 		473B4F662C8D4ED30038409E /* ItemDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailView.swift; sourceTree = "<group>"; };
@@ -65,8 +69,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				47385CDC2CD590B30015E6B5 /* HTTPRequestable in Frameworks */,
 				473EBFAE2C8D466C004FB1B2 /* HTTPRequestable in Frameworks */,
 				473EBFB02C8D466C004FB1B2 /* MultipartForm in Frameworks */,
+				47385CE02CD590B30015E6B5 /* MultipartForm in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				47385CDE2CD590B30015E6B5 /* MockURLProtocol in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,6 +150,7 @@
 		47C302212C8D458E00C2EC97 /* SampleTests */ = {
 			isa = PBXGroup;
 			children = (
+				47385CD92CD590440015E6B5 /* Sample.xctestplan */,
 				47C302222C8D458E00C2EC97 /* SampleTests.swift */,
 			);
 			path = SampleTests;
@@ -173,9 +181,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				47E19CD22CA3C2AA00CFB890 /* PBXTargetDependency */,
-				47E19CD42CA3C2AA00CFB890 /* PBXTargetDependency */,
-				47E19CD62CA3C2AA00CFB890 /* PBXTargetDependency */,
 			);
 			name = Sample;
 			productName = Sample;
@@ -251,7 +256,7 @@
 			);
 			mainGroup = 47C302052C8D458D00C2EC97;
 			packageReferences = (
-				473EBFAC2C8D466C004FB1B2 /* XCLocalSwiftPackageReference "../../HTTPRequestable" */,
+				47385CDA2CD590B30015E6B5 /* XCLocalSwiftPackageReference "../../HTTPRequestable" */,
 			);
 			productRefGroup = 47C3020F2C8D458D00C2EC97 /* Products */;
 			projectDirPath = "";
@@ -312,6 +317,7 @@
 		};
 		4721B9512CCC6A3700B712BF /* Swift Format */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -375,18 +381,6 @@
 			isa = PBXTargetDependency;
 			target = 47C3020D2C8D458D00C2EC97 /* Sample */;
 			targetProxy = 47C302292C8D458E00C2EC97 /* PBXContainerItemProxy */;
-		};
-		47E19CD22CA3C2AA00CFB890 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 47E19CD12CA3C2AA00CFB890 /* HTTPRequestable */;
-		};
-		47E19CD42CA3C2AA00CFB890 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 47E19CD32CA3C2AA00CFB890 /* MockURLProtocol */;
-		};
-		47E19CD62CA3C2AA00CFB890 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 47E19CD52CA3C2AA00CFB890 /* MultipartForm */;
 		};
 /* End PBXTargetDependency section */
 
@@ -684,34 +678,31 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		473EBFAC2C8D466C004FB1B2 /* XCLocalSwiftPackageReference "../../HTTPRequestable" */ = {
+		47385CDA2CD590B30015E6B5 /* XCLocalSwiftPackageReference "../../HTTPRequestable" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../HTTPRequestable;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		47385CDB2CD590B30015E6B5 /* HTTPRequestable */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HTTPRequestable;
+		};
+		47385CDD2CD590B30015E6B5 /* MockURLProtocol */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MockURLProtocol;
+		};
+		47385CDF2CD590B30015E6B5 /* MultipartForm */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MultipartForm;
+		};
 		473EBFAD2C8D466C004FB1B2 /* HTTPRequestable */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = HTTPRequestable;
 		};
 		473EBFAF2C8D466C004FB1B2 /* MultipartForm */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = MultipartForm;
-		};
-		47E19CD12CA3C2AA00CFB890 /* HTTPRequestable */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 473EBFAC2C8D466C004FB1B2 /* XCLocalSwiftPackageReference "../../HTTPRequestable" */;
-			productName = HTTPRequestable;
-		};
-		47E19CD32CA3C2AA00CFB890 /* MockURLProtocol */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 473EBFAC2C8D466C004FB1B2 /* XCLocalSwiftPackageReference "../../HTTPRequestable" */;
-			productName = MockURLProtocol;
-		};
-		47E19CD52CA3C2AA00CFB890 /* MultipartForm */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 473EBFAC2C8D466C004FB1B2 /* XCLocalSwiftPackageReference "../../HTTPRequestable" */;
 			productName = MultipartForm;
 		};
 /* End XCSwiftPackageProductDependency section */

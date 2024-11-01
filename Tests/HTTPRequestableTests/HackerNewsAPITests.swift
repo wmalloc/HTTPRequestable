@@ -32,53 +32,53 @@ final class HackerNewsAPITests: XCTestCase {
 
   func testTopStories() async throws {
     let hackerNews = HackerNews()
-    let topStories = try await hackerNews.storyList(type: "topstories.json")
+    let topStories = try await hackerNews.storyList(type: "topstories")
     XCTAssertFalse(topStories.isEmpty)
   }
 
   func testMockTopStories() async throws {
-    let request = try StoryList(storyType: "topstories.json")
+    let request = try StoryListRequest(environment: api.environment, storyType: "topstories")
     let url = try request.url
     MockURLProtocol.requestHandlers[url] = { _ in
       let data = try Bundle.module.data(forResource: "topstories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
     }
 
-    let topStories = try await api.storyList(type: "topstories.json")
+    let topStories = try await api.storyList(type: "topstories")
     XCTAssertEqual(topStories.count, 466)
   }
 
   func testNewtories() async throws {
     let hackerNews = HackerNews()
-    let topStories = try await hackerNews.storyList(type: "newstories.json")
+    let topStories = try await hackerNews.storyList(type: "newstories")
     XCTAssertFalse(topStories.isEmpty)
   }
 
   func testMockNewStories() async throws {
-    let request = try StoryList(storyType: "newstories.json")
+    let request = try StoryListRequest(environment: api.environment, storyType: "newstories")
     let url = try request.url
     MockURLProtocol.requestHandlers[url] = { _ in
       let data = try Bundle.module.data(forResource: "newstories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
     }
-    let newStories = try await api.storyList(type: "newstories.json")
+    let newStories = try await api.storyList(type: "newstories")
     XCTAssertEqual(newStories.count, 500)
   }
 
   func testBesttories() async throws {
     let hackerNews = HackerNews()
-    let topStories = try await hackerNews.storyList(type: "beststories.json")
+    let topStories = try await hackerNews.storyList(type: "beststories")
     XCTAssertFalse(topStories.isEmpty)
   }
 
   func testMockBestStories() async throws {
-    let request = try StoryList(storyType: "beststories.json")
+    let request = try StoryListRequest(environment: api.environment, storyType: "beststories")
     let url = try request.url
     MockURLProtocol.requestHandlers[url] = { _ in
       let data = try Bundle.module.data(forResource: "beststories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
     }
-    let bestStories = try await api.storyList(type: "beststories.json")
+    let bestStories = try await api.storyList(type: "beststories")
     XCTAssertEqual(bestStories.count, 200)
   }
 }
