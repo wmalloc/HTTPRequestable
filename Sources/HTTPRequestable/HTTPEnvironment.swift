@@ -163,7 +163,7 @@ public extension HTTPEnvironment {
   }
 
   @discardableResult
-  func setAppendPercentEncodedQueryItems(_ percentEncodedQueryItems: [URLQueryItem]) -> Self {
+  func appendPercentEncodedQueryItems(_ percentEncodedQueryItems: [URLQueryItem]) -> Self {
     var existingQueryItems = self.percentEncodedQueryItems ?? []
     existingQueryItems.append(contentsOf: percentEncodedQueryItems)
     return setPercentEncodedQueryItems(existingQueryItems)
