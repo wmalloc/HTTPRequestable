@@ -16,13 +16,13 @@ public final class OSLogInterceptor {
   public init() {}
 }
 
-extension OSLogInterceptor: RequestInterceptor {
+extension OSLogInterceptor: HTTPRequestInterceptor {
   public func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {
     os_log(logType, log: logger, "%{private}@", request.debugDescription)
   }
 }
 
-extension OSLogInterceptor: ResponseInterceptor {
+extension OSLogInterceptor: HTTPResponseInterceptor {
   public func intercept(request: HTTPRequest, data: Data?, url: URL?, response: HTTPTypes.HTTPResponse) async throws {
     os_log(logType, log: logger, "%{private}@", response.debugDescription)
     if let data {

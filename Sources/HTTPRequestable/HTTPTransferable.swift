@@ -22,10 +22,10 @@ public protocol HTTPTransferable: Sendable {
   init(session: URLSession)
 
   /// Request Modifiers
-  var requestInterceptors: [any RequestInterceptor] { get set }
+  var requestInterceptors: [any HTTPRequestInterceptor] { get set }
 
   /// Response Interceptors
-  var responseInterceptors: [any ResponseInterceptor] { get set }
+  var responseInterceptors: [any HTTPResponseInterceptor] { get set }
 
   /// Request data from server
   /// - Parameters:
@@ -100,8 +100,7 @@ public extension HTTPTransferable {
     for interceptor in responseInterceptors {
       try await interceptor.intercept(request: updateRequest, data: result.0, url: nil, response: result.1)
     }
-    let dataResponse = HTTPDataResponse(request: updateRequest, data: result.0, response: result.1, result: .success(result.0))
-    return dataResponse
+    return try HTTPDataResponse(request: updateRequest, data: result.0, response: result.1, result: .success(result.0)).validateStatus()
   }
 
   /// Convenience method to upload data using an `HTTPRequestable`; creates and resumes a `URLSessionUploadTask` internally.
@@ -126,7 +125,7 @@ public extension HTTPTransferable {
     guard let decoded = try request.responseDataTransformer?(data) else {
       return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .failure(URLError(.cannotDecodeContentData)))
     }
-    return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .success(decoded))
+    return try HTTPDataResponse(request: updateRequest, data: data, response: response, result: .success(decoded)).validateStatus()
   }
 
   /// Convenience method to upload data using an `HTTPRequestable`, creates and resumes a `URLSessionUploadTask` internally.
@@ -151,7 +150,7 @@ public extension HTTPTransferable {
     guard let decoded = try request.responseDataTransformer?(data) else {
       return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .failure(URLError(.cannotDecodeContentData)))
     }
-    return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .success(decoded))
+    return try HTTPDataResponse(request: updateRequest, data: data, response: response, result: .success(decoded)).validateStatus()
   }
 
   /// Convenience method to download using an `HTTPRequestable`; creates and resumes a `URLSessionDownloadTask` internally.
@@ -172,7 +171,7 @@ public extension HTTPTransferable {
     if let error = response.error {
       return HTTPDownloadResponse(request: updateRequest, fileURL: url, response: response, result: .failure(error))
     }
-    return HTTPDownloadResponse(request: updateRequest, fileURL: url, response: response, result: .success(url))
+    return try HTTPDownloadResponse(request: updateRequest, fileURL: url, response: response, result: .success(url)).validateStatus()
   }
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.

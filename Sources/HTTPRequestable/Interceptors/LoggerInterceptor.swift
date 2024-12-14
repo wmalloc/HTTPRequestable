@@ -16,14 +16,14 @@ public final class LoggerInterceptor {
   public init() {}
 }
 
-extension LoggerInterceptor: RequestInterceptor {
+extension LoggerInterceptor: HTTPRequestInterceptor {
   public func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {
     let debugDescription = request.debugDescription
     logger.log(level: logLevel, "\(debugDescription, privacy: .private)")
   }
 }
 
-extension LoggerInterceptor: ResponseInterceptor {
+extension LoggerInterceptor: HTTPResponseInterceptor {
   public func intercept(request: HTTPRequest, data: Data?, url: URL?, response: HTTPTypes.HTTPResponse) async throws {
     logger.log(level: logLevel, "\(response.debugDescription, privacy: .private)")
     if let data {
