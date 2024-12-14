@@ -8,10 +8,10 @@
 import Foundation
 import HTTPTypes
 
-public protocol RequestInterceptor {
+public protocol HTTPRequestInterceptor {
   func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws
 }
 
-public extension RequestInterceptor {
+public extension HTTPRequestInterceptor {
   func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {}
 }

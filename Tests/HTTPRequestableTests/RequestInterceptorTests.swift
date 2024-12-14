@@ -20,10 +20,6 @@ struct RequestInterceptorTests {
     let logger = LoggerInterceptor()
     api.requestInterceptors.append(logger)
     api.responseInterceptors.append(logger)
-    let statusValidator = ResponseStatusValidator()
-    api.responseInterceptors.append(statusValidator)
-    let contentTypeValiator = ContentTypeValidator(acceptableContentTypes: ["application/json"])
-    api.responseInterceptors.append(contentTypeValiator)
     return api
   }()
   
@@ -47,7 +43,7 @@ struct RequestInterceptorTests {
     #expect(urlRequest.value(forHTTPHeaderField: HTTPField.Name.contentType.rawName) == HTTPContentType.jsonUTF8.rawValue)
   }
 
-  class AddContentTypeModifier: RequestInterceptor {
+  class AddContentTypeModifier: HTTPRequestInterceptor {
     func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {
       request.headerFields.append(HTTPField(name: .contentType, value: "application/json"))
     }
