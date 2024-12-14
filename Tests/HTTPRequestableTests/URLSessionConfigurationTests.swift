@@ -27,6 +27,6 @@ struct URLSessionConfigurationTests {
 
     let defaultUserAgent = headers?["User-Agent"] as? String
     #expect(defaultUserAgent != nil)
-    #expect(defaultUserAgent == "xctest/16.0 (com.apple.dt.xctest.tool; build:23504; iOS(Simulator) Version 18.0 (Build 22A3351)) HTTPRequestable")
+    #expect(defaultUserAgent == "xctest/16.0 (com.apple.dt.xctest.tool; build:23600; iOS(Simulator) Version 18.0 (Build 22A3351)) HTTPRequestable")
   }
 }

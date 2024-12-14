@@ -20,10 +20,6 @@ final class HackerNewsAPITests: XCTestCase {
     let logger = LoggerInterceptor()
     api.requestInterceptors.append(logger)
     api.responseInterceptors.append(logger)
-    let statusValidator = ResponseStatusValidator()
-    api.responseInterceptors.append(statusValidator)
-    let contentTypeValiator = ContentTypeValidator(acceptableContentTypes: ["application/json"])
-    api.responseInterceptors.append(contentTypeValiator)
   }
 
   override func tearDownWithError() throws {

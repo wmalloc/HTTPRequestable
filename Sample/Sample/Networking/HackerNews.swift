@@ -11,8 +11,8 @@ import HTTPTypes
 import OSLog
 
 class HackerNews: HTTPTransferable, @unchecked Sendable {
-  var requestInterceptors: [any RequestInterceptor] = []
-  var responseInterceptors: [any ResponseInterceptor] = []
+  var requestInterceptors: [any HTTPRequestInterceptor] = []
+  var responseInterceptors: [any HTTPResponseInterceptor] = []
 
   private(set) var environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com", path: "/v0")
 
