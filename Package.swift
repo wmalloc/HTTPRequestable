@@ -12,7 +12,7 @@ let package = Package(
     .library(name: "MockURLProtocol", targets: ["MockURLProtocol"])
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-http-types.git", from: "1.3.0")
+    .package(url: "https://github.com/apple/swift-http-types.git", from: "1.3.1")
   ],
   targets: [
     .target(name: "HTTPRequestable", dependencies: [.product(name: "HTTPTypes", package: "swift-http-types"),
