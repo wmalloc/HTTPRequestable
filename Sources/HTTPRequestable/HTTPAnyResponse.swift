@@ -8,37 +8,26 @@
 import Foundation
 import HTTPTypes
 
-public struct HTTPAnyResponse<ValueType> {
+public struct HTTPAnyResponse {
   public let request: HTTPRequest
   public let response: HTTPResponse
   public let data: Data?
   public let fileURL: URL?
-  public let result: Result<ValueType, Error>?
-
-  public init(request: HTTPRequest, response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil, result: Result<ValueType, Error>? = nil) {
+  
+  public init(request: HTTPRequest, response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil) {
     self.request = request
     self.data = data
     self.fileURL = nil
     self.response = response
-    self.result = result
   }
 }
 
 public extension HTTPAnyResponse {
-  var value: ValueType? {
-    if case .success(let value) = result {
-      return value
-    }
-    return nil
-  }
-
+  @inlinable
   var error: Error? {
-    if case .failure(let error) = result {
-      return error
-    }
-    return nil
+    response.error
   }
-
+  
   @inlinable
   var status: HTTPResponse.Status {
     response.status
