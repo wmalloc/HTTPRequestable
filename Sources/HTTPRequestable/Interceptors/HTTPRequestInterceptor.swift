@@ -1,5 +1,5 @@
 //
-//  RequestInterceptor.swift
+//  HTTPRequestInterceptor.swift
 //  HTTPRequestable
 //
 //  Created by Waqar Malik on 9/24/24.
