@@ -1,5 +1,5 @@
 //
-//  ResponseInterceptor.swift
+//  HTTPResponseInterceptor.swift
 //  HTTPRequestable
 //
 //  Created by Waqar Malik on 8/23/24.
@@ -10,10 +10,14 @@ import HTTPTypes
 
 /// Interceptor is a middleware component that can intercept, modify, or observe network requests and responses.
 public protocol HTTPResponseInterceptor {
-  func intercept(request: HTTPRequest, data: Data?, url: URL?, response: HTTPResponse) async throws
+  /// Response interceptor
+  /// - Parameters:
+  ///   - response: Response objec that containes all items need
+  ///   - session: Session that was used to make the call
+  func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws
 }
 
 public extension HTTPResponseInterceptor {
   @inlinable
-  func intercept(request: HTTPRequest, data: Data?, url: URL?, response: HTTPResponse) async throws {}
+  func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws {}
 }

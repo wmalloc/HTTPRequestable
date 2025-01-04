@@ -32,7 +32,7 @@ public protocol HTTPTransferable: Sendable {
   ///   - request:  Request where to get the data from
   ///   - delegate: Delegate to handle the request
   /// - Returns: Data, and HTTPResponse
-  func data(for request: any HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse<Data>
+  func data(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Convenience method to upload data using an `HTTPRequestable`; creates and resumes a `URLSessionUploadTask` internally.
   /// - Parameters:
@@ -40,7 +40,7 @@ public protocol HTTPTransferable: Sendable {
   ///   - fileURL: File to upload.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  func upload<Request: HTTPRequestable>(for request: Request, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse<Request.ResultType>
+  func upload(for request: some HTTPRequestable, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Convenience method to upload data using an `HTTPRequestable`, creates and resumes a `URLSessionUploadTask` internally.
   /// - Parameters:
@@ -48,45 +48,35 @@ public protocol HTTPTransferable: Sendable {
   ///   - bodyData: Data to upload.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  func upload<Request: HTTPRequestable>(for request: Request, from bodyData: Data, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse<Request.ResultType>
+  func upload(for request: some HTTPRequestable, from bodyData: Data, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Convenience method to download using an `HTTPRequestable`; creates and resumes a `URLSessionDownloadTask` internally.
   /// - Parameters:
   ///   - request: The `HTTPRequestable` for which to download.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
-  func download<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDownloadResponse<URL>
+  func download(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.
   /// - Parameters:
   ///   - request: The `HTTPRequestable` for which to load data.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data stream and response.
-  func bytes<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse)
+  func bytes(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse)
 
   /**
    Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
-   - Parameters:
-     - route:    Request where to get the data from
-     - delegate: Delegate to handle the request
-   - returns: Transformed Object
-   */
-  func object<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse<Request.ResultType>
-  
-  /**
-   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
-   
    - Parameters:
    - route:    Request where to get the data from
    - delegate: Delegate to handle the request
    - returns: Transformed Object
    */
-  func decoded<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> Request.ResultType
+  func object<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> Request.ResultType
 }
 
 public extension HTTPTransferable {
-  func data(for request: any HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse<Data> {
+  func data(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     var updateRequest = try request.httpRequest
     for interceptor in requestInterceptors {
@@ -97,10 +87,11 @@ public extension HTTPTransferable {
     } else {
       try await session.data(for: updateRequest, delegate: delegate)
     }
+    var response = try HTTPAnyResponse(request: updateRequest, response: result.1, data: result.0)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: updateRequest, data: result.0, url: nil, response: result.1)
+      try await interceptor.intercept(&response, for: session)
     }
-    return try HTTPDataResponse(request: updateRequest, data: result.0, response: result.1, result: .success(result.0)).validateStatus()
+    return response
   }
 
   /// Convenience method to upload data using an `HTTPRequestable`; creates and resumes a `URLSessionUploadTask` internally.
@@ -109,23 +100,18 @@ public extension HTTPTransferable {
   ///   - fileURL: File to upload.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  func upload<Request: HTTPRequestable>(for request: Request, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse<Request.ResultType> {
+  func upload(for request: some HTTPRequestable, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     var updateRequest = try request.httpRequest
     for interceptor in requestInterceptors {
       try await interceptor.intercept(&updateRequest, for: session)
     }
     let (data, response) = try await session.upload(for: updateRequest, fromFile: fileURL, delegate: delegate)
+    var result = HTTPAnyResponse(request: updateRequest, response: response, data: data)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: updateRequest, data: data, url: nil, response: response)
+      try await interceptor.intercept(&result, for: session)
     }
-    if let error = response.error {
-      return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .failure(error))
-    }
-    guard let decoded = try request.responseDataTransformer?(data) else {
-      return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .failure(URLError(.cannotDecodeContentData)))
-    }
-    return try HTTPDataResponse(request: updateRequest, data: data, response: response, result: .success(decoded)).validateStatus()
+    return result
   }
 
   /// Convenience method to upload data using an `HTTPRequestable`, creates and resumes a `URLSessionUploadTask` internally.
@@ -134,23 +120,18 @@ public extension HTTPTransferable {
   ///   - bodyData: Data to upload.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  func upload<Request: HTTPRequestable>(for request: Request, from bodyData: Data, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse<Request.ResultType> {
+  func upload(for request: some HTTPRequestable, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     var updateRequest = try request.httpRequest
     for interceptor in requestInterceptors {
       try await interceptor.intercept(&updateRequest, for: session)
     }
     let (data, response) = try await session.upload(for: updateRequest, from: bodyData, delegate: delegate)
+    var result = HTTPAnyResponse(request: updateRequest, response: response, data: data)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: updateRequest, data: data, url: nil, response: response)
+      try await interceptor.intercept(&result, for: session)
     }
-    if let error = response.error {
-      return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .failure(error))
-    }
-    guard let decoded = try request.responseDataTransformer?(data) else {
-      return HTTPDataResponse(request: updateRequest, data: data, response: response, result: .failure(URLError(.cannotDecodeContentData)))
-    }
-    return try HTTPDataResponse(request: updateRequest, data: data, response: response, result: .success(decoded)).validateStatus()
+    return result
   }
 
   /// Convenience method to download using an `HTTPRequestable`; creates and resumes a `URLSessionDownloadTask` internally.
@@ -158,20 +139,18 @@ public extension HTTPTransferable {
   ///   - request: The `HTTPRequestable` for which to download.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
-  func download(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDownloadResponse<URL> {
+  func download(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     var updateRequest = try request.httpRequest
     for interceptor in requestInterceptors {
       try await interceptor.intercept(&updateRequest, for: session)
     }
     let (url, response) = try await session.download(for: updateRequest, delegate: delegate)
+    var result = HTTPAnyResponse(request: updateRequest, response: response, fileURL: url)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: updateRequest, data: nil, url: url, response: response)
+      try await interceptor.intercept(&result, for: session)
     }
-    if let error = response.error {
-      return HTTPDownloadResponse(request: updateRequest, fileURL: url, response: response, result: .failure(error))
-    }
-    return try HTTPDownloadResponse(request: updateRequest, fileURL: url, response: response, result: .success(url)).validateStatus()
+    return result
   }
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.
@@ -179,7 +158,7 @@ public extension HTTPTransferable {
   ///   - request: The `HTTPRequestable` for which to load data.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data stream and response.
-  func bytes(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
+  func bytes(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
     logger.trace("[IN]: \(#function)")
     var updateRequest = try request.httpRequest
     for interceptor in requestInterceptors {
@@ -196,32 +175,12 @@ public extension HTTPTransferable {
    - delegate: Delegate to handle the request
    - returns: Transformed Object
    */
-  func object<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse<Request.ResultType> {
+  func object<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Request.ResultType {
     let response = try await data(for: request, delegate: delegate)
-    if let error = response.error {
-      return HTTPDataResponse(request: response.request, data: response.data, response: response.response, result: .failure(error))
-    }
-    guard let decoded = try request.responseDataTransformer?(response.data) else {
-      return HTTPDataResponse(request: response.request, data: response.data, response: response.response, result: .failure(URLError(.cannotDecodeContentData)))
-    }
-    return HTTPDataResponse(request: response.request, data: response.data, response: response.response, result: .success(decoded))
-  }
-  
-  /**
-   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
-   
-   - Parameters:
-   - route:    Request where to get the data from
-   - delegate: Delegate to handle the request
-   - returns: Transformed Object
-   */
-  func decoded<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Request.ResultType {
-    let response = try await object(for: request, delegate: delegate)
-    switch response.result {
-    case .success(let value):
-      return value
-    case .failure(let error):
+    guard let data = response.data, let result = try request.responseDataTransformer?(data) else {
+      let error = response.error ?? URLError(.cannotDecodeContentData)
       throw error
     }
+    return result
   }
 }
