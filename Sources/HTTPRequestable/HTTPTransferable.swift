@@ -87,10 +87,11 @@ public extension HTTPTransferable {
     } else {
       try await session.data(for: updateRequest, delegate: delegate)
     }
+    var response = try HTTPAnyResponse(request: updateRequest, response: result.1, data: result.0)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: updateRequest, data: result.0, url: nil, response: result.1)
+      try await interceptor.intercept(&response, for: session)
     }
-    return try HTTPAnyResponse(request: updateRequest, response: result.1, data: result.0).validateStatus()
+    return response
   }
 
   /// Convenience method to upload data using an `HTTPRequestable`; creates and resumes a `URLSessionUploadTask` internally.
@@ -106,11 +107,10 @@ public extension HTTPTransferable {
       try await interceptor.intercept(&updateRequest, for: session)
     }
     let (data, response) = try await session.upload(for: updateRequest, fromFile: fileURL, delegate: delegate)
+    var result = HTTPAnyResponse(request: updateRequest, response: response, data: data)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: updateRequest, data: data, url: nil, response: response)
+      try await interceptor.intercept(&result, for: session)
     }
-    
-    let result = HTTPAnyResponse(request: updateRequest, response: response, data: data)
     return result
   }
 
@@ -127,11 +127,10 @@ public extension HTTPTransferable {
       try await interceptor.intercept(&updateRequest, for: session)
     }
     let (data, response) = try await session.upload(for: updateRequest, from: bodyData, delegate: delegate)
+    var result = HTTPAnyResponse(request: updateRequest, response: response, data: data)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: updateRequest, data: data, url: nil, response: response)
+      try await interceptor.intercept(&result, for: session)
     }
-    
-    let result = HTTPAnyResponse(request: updateRequest, response: response, data: data)
     return result
   }
 
@@ -147,10 +146,10 @@ public extension HTTPTransferable {
       try await interceptor.intercept(&updateRequest, for: session)
     }
     let (url, response) = try await session.download(for: updateRequest, delegate: delegate)
+    var result = HTTPAnyResponse(request: updateRequest, response: response, fileURL: url)
     for interceptor in responseInterceptors {
-      try await interceptor.intercept(request: updateRequest, data: nil, url: url, response: response)
+      try await interceptor.intercept(&result, for: session)
     }
-    let result: HTTPAnyResponse = HTTPAnyResponse(request: updateRequest, response: response, fileURL: url)
     return result
   }
 
@@ -178,10 +177,10 @@ public extension HTTPTransferable {
    */
   func object<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Request.ResultType {
     let response = try await data(for: request, delegate: delegate)
-    if let data = response.data, let decoded = try request.responseDataTransformer?(data) {
-      return decoded
+    guard let data = response.data, let result = try request.responseDataTransformer?(data) else {
+      let error = response.error ?? URLError(.cannotDecodeContentData)
+      throw error
     }
-    let error = response.error ?? URLError(.cannotDecodeContentData)
-    throw error
+    return result
   }
 }

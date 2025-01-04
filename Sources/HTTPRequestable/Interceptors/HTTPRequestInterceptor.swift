@@ -9,6 +9,10 @@ import Foundation
 import HTTPTypes
 
 public protocol HTTPRequestInterceptor {
+  /// Modify the request if needed
+  /// - Parameters:
+  ///   - request: The request that needs to be modified
+  ///   - session: The session used to send the request
   func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws
 }
 

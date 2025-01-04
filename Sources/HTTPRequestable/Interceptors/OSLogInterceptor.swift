@@ -23,12 +23,12 @@ extension OSLogInterceptor: HTTPRequestInterceptor {
 }
 
 extension OSLogInterceptor: HTTPResponseInterceptor {
-  public func intercept(request: HTTPRequest, data: Data?, url: URL?, response: HTTPTypes.HTTPResponse) async throws {
-    os_log(logType, log: logger, "%{private}@", response.debugDescription)
-    if let data {
+  public func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws {
+    os_log(logType, log: logger, "%{private}@", response.response.debugDescription)
+    if let data = response.data {
       os_log(logType, log: logger, "\n%{private}@", String(decoding: data, as: UTF8.self))
     }
-    if let url {
+    if let url = response.fileURL {
       os_log(logType, log: logger, "\n%{private}@", url.absoluteString)
     }
   }
