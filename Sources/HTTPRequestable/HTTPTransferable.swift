@@ -32,7 +32,7 @@ public protocol HTTPTransferable: Sendable {
   ///   - request:  Request where to get the data from
   ///   - delegate: Delegate to handle the request
   /// - Returns: Data, and HTTPResponse
-  func data(for request: any HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func data(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Convenience method to upload data using an `HTTPRequestable`; creates and resumes a `URLSessionUploadTask` internally.
   /// - Parameters:
@@ -40,7 +40,7 @@ public protocol HTTPTransferable: Sendable {
   ///   - fileURL: File to upload.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  func upload<Request: HTTPRequestable>(for request: Request, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func upload(for request: some HTTPRequestable, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Convenience method to upload data using an `HTTPRequestable`, creates and resumes a `URLSessionUploadTask` internally.
   /// - Parameters:
@@ -48,21 +48,21 @@ public protocol HTTPTransferable: Sendable {
   ///   - bodyData: Data to upload.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  func upload<Request: HTTPRequestable>(for request: Request, from bodyData: Data, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func upload(for request: some HTTPRequestable, from bodyData: Data, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Convenience method to download using an `HTTPRequestable`; creates and resumes a `URLSessionDownloadTask` internally.
   /// - Parameters:
   ///   - request: The `HTTPRequestable` for which to download.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
-  func download<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func download(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.
   /// - Parameters:
   ///   - request: The `HTTPRequestable` for which to load data.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data stream and response.
-  func bytes<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse)
+  func bytes(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse)
 
   /**
    Make a request call and return decoded data as decoded by the transformer, this requesst must return data
@@ -76,7 +76,7 @@ public protocol HTTPTransferable: Sendable {
 }
 
 public extension HTTPTransferable {
-  func data(for request: any HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  func data(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     var updateRequest = try request.httpRequest
     for interceptor in requestInterceptors {
@@ -100,7 +100,7 @@ public extension HTTPTransferable {
   ///   - fileURL: File to upload.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  func upload<Request: HTTPRequestable>(for request: Request, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  func upload(for request: some HTTPRequestable, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     var updateRequest = try request.httpRequest
     for interceptor in requestInterceptors {
@@ -120,7 +120,7 @@ public extension HTTPTransferable {
   ///   - bodyData: Data to upload.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  func upload<Request: HTTPRequestable>(for request: Request, from bodyData: Data, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
+  func upload(for request: some HTTPRequestable, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     var updateRequest = try request.httpRequest
     for interceptor in requestInterceptors {
@@ -158,7 +158,7 @@ public extension HTTPTransferable {
   ///   - request: The `HTTPRequestable` for which to load data.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data stream and response.
-  func bytes(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
+  func bytes(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
     logger.trace("[IN]: \(#function)")
     var updateRequest = try request.httpRequest
     for interceptor in requestInterceptors {
@@ -166,7 +166,7 @@ public extension HTTPTransferable {
     }
     return try await session.bytes(for: updateRequest, delegate: delegate)
   }
-  
+
   /**
    Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
