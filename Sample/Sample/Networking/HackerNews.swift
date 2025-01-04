@@ -42,10 +42,10 @@ extension HackerNews {
   }
 
   func stories(type: String) async throws -> [Int] {
-    try await decoded(for: StoryListRequest(environment: environment, storyType: type))
+    try await object(for: StoryListRequest(environment: environment, storyType: type))
   }
 
   func item(id: Int) async throws -> Item {
-    try await decoded(for: ItemRequest(environment: environment, item: id))
+    try await object(for: ItemRequest(environment: environment, item: id))
   }
 }

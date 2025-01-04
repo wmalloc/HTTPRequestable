@@ -14,7 +14,7 @@ class HackerNews: HTTPTransferable, @unchecked Sendable {
   var responseInterceptors: [any HTTPResponseInterceptor] = []
 
   let session: URLSession
-  
+
   private(set) var environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com", path: "/v0")
 
   required init(session: URLSession = .shared) {

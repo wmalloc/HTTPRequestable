@@ -8,8 +8,8 @@
 import Foundation
 @testable import HTTPRequestable
 import HTTPTypes
-import Testing
 import MockURLProtocol
+import Testing
 
 struct RequestInterceptorTests {
   let hackerNews: HackerNews = {
@@ -22,7 +22,7 @@ struct RequestInterceptorTests {
     api.responseInterceptors.append(logger)
     return api
   }()
-  
+
   @Test func modifyHTTPRequest() async throws {
     let request = try StoryListRequest(environment: hackerNews.environment, storyType: "topstories")
     var httpRequst = try request.httpRequest

@@ -24,12 +24,13 @@ extension LoggerInterceptor: HTTPRequestInterceptor {
 }
 
 extension LoggerInterceptor: HTTPResponseInterceptor {
-  public func intercept(request: HTTPRequest, data: Data?, url: URL?, response: HTTPTypes.HTTPResponse) async throws {
-    logger.log(level: logLevel, "\(response.debugDescription, privacy: .private)")
-    if let data {
+  public func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws {
+    let httpResponse = response.response
+    logger.log(level: logLevel, "\(httpResponse.debugDescription, privacy: .private)")
+    if let data = response.data {
       logger.log(level: logLevel, "\n\(String(decoding: data, as: UTF8.self), privacy: .private)")
     }
-    if let url {
+    if let url = response.fileURL {
       logger.log(level: logLevel, "\n\(url.absoluteString, privacy: .private)")
     }
   }
