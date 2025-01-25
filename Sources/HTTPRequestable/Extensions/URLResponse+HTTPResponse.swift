@@ -13,7 +13,7 @@ public extension URLResponse {
   var httpResponse: HTTPResponse {
     get throws {
       guard let httpResponse = try httpURLResponse.httpResponse else {
-        throw URLError(.badServerResponse)
+        throw HTTPError.cannotConvertToHTTPResponse
       }
       return httpResponse
     }
@@ -22,7 +22,7 @@ public extension URLResponse {
   var httpURLResponse: HTTPURLResponse {
     get throws {
       guard let httpResponse = self as? HTTPURLResponse else {
-        throw URLError(.badServerResponse)
+        throw HTTPError.cannotConvertToHTTPURLResponse
       }
       return httpResponse
     }

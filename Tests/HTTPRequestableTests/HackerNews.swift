@@ -28,6 +28,6 @@ class HackerNews: HTTPTransferable, @unchecked Sendable {
 extension HackerNews {
   func storyList(type: String) async throws -> StoryListRequest.ResultType {
     let request = try StoryListRequest(environment: environment, storyType: type)
-    return try await object(for: request, delegate: nil).value ?? []
+    return try await object(for: request, delegate: nil)
   }
 }

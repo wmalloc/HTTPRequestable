@@ -1,5 +1,66 @@
 {
   "sourceLanguage" : "en",
-  "strings" : {},
+  "strings" : {
+    "error_cant_convert_to_http_response" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot convert URLResponse to HTTPResponse."
+          }
+        }
+      }
+    },
+    "error_cant_convert_to_http_url_response" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot convert URLResponse to HTTPURLResponse."
+          }
+        }
+      }
+    },
+    "error_cant_create_url_request" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot create URLRequest."
+          }
+        }
+      }
+    },
+    "error_content_type_header_missing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ContentType header is missing."
+          }
+        }
+      }
+    },
+    "error_invalid_content_type" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ContentType header value is invalid"
+          }
+        }
+      }
+    },
+    "error_invalid_url" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot create URL."
+          }
+        }
+      }
+    }
+  },
   "version" : "1.0"
 }
