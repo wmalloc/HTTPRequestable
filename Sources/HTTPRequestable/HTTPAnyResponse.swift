@@ -78,7 +78,7 @@ public extension HTTPAnyResponse {
 
     // if the server did not set the content type then throw a bad server response
     guard let contentType = response.headerFields[.contentType] else {
-      throw HTTPError.contentTypeMissing
+      throw HTTPError.contentTypeHeaderMissing
     }
 
     // if content type is not acceptable throw and errro

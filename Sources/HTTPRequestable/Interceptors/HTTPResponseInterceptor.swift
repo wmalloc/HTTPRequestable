@@ -26,6 +26,7 @@ public protocol HTTPResponseInterceptor {
   func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws
 }
 
+/// Default implementation
 public extension HTTPResponseInterceptor {
   @inlinable
   func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws {}

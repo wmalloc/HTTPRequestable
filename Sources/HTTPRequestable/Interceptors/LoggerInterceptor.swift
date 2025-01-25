@@ -11,9 +11,11 @@ import OSLog
 
 public final class LoggerInterceptor {
   let logger: Logger = .init(category: "LoggerInterceptor")
-  public var logLevel: OSLogType = .default
+  public var logLevel: OSLogType
 
-  public init() {}
+  public init(logLevel: OSLogType = .default) {
+    self.logLevel = logLevel
+  }
 }
 
 extension LoggerInterceptor: HTTPRequestInterceptor {

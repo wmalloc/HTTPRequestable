@@ -25,6 +25,7 @@ public protocol HTTPRequestInterceptor {
   func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws
 }
 
+/// Default implemenation
 public extension HTTPRequestInterceptor {
   func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {}
 }
