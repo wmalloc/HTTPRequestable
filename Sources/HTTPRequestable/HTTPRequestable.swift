@@ -25,44 +25,44 @@ public typealias Transformer<InputType: Sendable, OutputType: Sendable> = @Senda
 /// HTTP Request
 public typealias URLRequestable = HTTPRequestable
 
-/// URL/HTTP Request builder
+/// URL/HTTP Request builder protocol
 public protocol HTTPRequestable: Sendable {
   associatedtype ResultType: Sendable
 
-  /// URL Components to build the url
+  /// Environment containing base URL and other configuration settings
   var environment: HTTPEnvironment { get }
 
-  /// Method defaults to .get
+  /// Method for the request, default is GET
   var method: HTTPMethod { get }
 
-  /// Override the path if needed, defaults to nil
+  /// Path to append to the base URL, optional
   var path: String? { get }
 
-  /// Additional query items if needed, defaults to nil
+  /// Additional query items to include in the URL
   var queryItems: [URLQueryItem]? { get }
 
-  /// Additional headers if needed, defaults to nil
+  /// Additional headers to include in the request
   var headerFields: HTTPFields? { get }
 
-  /// Override the body if needed, defaults to nil
+  /// Body data for the request, optional
   var httpBody: Data? { get }
 
-  /// How to transform the resulting data
+  /// Transformer to convert raw response data to ResultType
   var responseDataTransformer: Transformer<Data, ResultType>? { get }
 
-  /// builds the final url for request
+  /// Constructs the final URL with query items
   /// - Parameter queryItems: additonal query items
   /// - Returns: final url
   var url: URL { get throws }
 
-  /// HTTP Request
+  /// Constructs the HTTPRequest object
   /// - Parameters:
   ///   - fields:     additonal headers, defaults to nil
   ///   - queryItems: additonal query items, defaults to nil
   /// - Returns: HTTPRequest
   var httpRequest: HTTPRequest { get throws }
 
-  /// URL Request
+  /// Constructs the URLRequest object
   /// - Parameters:
   ///   - fields:     additonal headers, defaults to nil
   ///   - queryItems: additonal query items, defaults to nil
@@ -104,7 +104,7 @@ public extension HTTPRequestable {
       }
       components.queryItems = items.isEmpty ? nil : Array(items)
       guard let url = components.url else {
-        throw URLError(.badURL)
+        throw HTTPError.invalidURL
       }
       return url
     }
@@ -121,7 +121,7 @@ public extension HTTPRequestable {
       logger.trace("[IN]: \(#function)")
       let httpRequest = try httpRequest
       guard var urlRequest = URLRequest(httpRequest: httpRequest) else {
-        throw URLError(.unsupportedURL)
+        throw HTTPError.cannotCreateURLRequest
       }
       urlRequest.httpBody = httpBody
       return urlRequest
