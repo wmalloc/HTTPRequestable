@@ -70,6 +70,7 @@ public protocol HTTPRequestable: Sendable {
   var urlRequest: URLRequest { get throws }
 }
 
+/// Default imeplementation
 public extension HTTPRequestable {
   @inlinable
   var method: HTTPMethod { .get }

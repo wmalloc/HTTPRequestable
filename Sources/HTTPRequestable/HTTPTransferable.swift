@@ -5,7 +5,6 @@
 //  Created by Waqar Malik on 11/17/23
 //
 
-import Combine
 import Foundation
 import HTTPTypes
 import HTTPTypesFoundation
@@ -19,6 +18,7 @@ private let logger = Logger(.disabled)
 
 public protocol HTTPTransferable: Sendable {
   var session: URLSession { get }
+
   init(session: URLSession)
 
   /// Request Modifiers
@@ -26,6 +26,11 @@ public protocol HTTPTransferable: Sendable {
 
   /// Response Interceptors
   var responseInterceptors: [any HTTPResponseInterceptor] { get set }
+
+  /// Request to sent to server
+  /// - Parameter request: Description of the request
+  /// - Returns: request to be sent to server
+  func httpRequest(_ request: some HTTPRequestable) async throws -> HTTPRequest
 
   /// Request data from server
   /// - Parameters:
@@ -75,20 +80,29 @@ public protocol HTTPTransferable: Sendable {
   func object<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> Request.ResultType
 }
 
+/// Default implementations of the protocol
 public extension HTTPTransferable {
+  /// Request to sent to server
+  /// - Parameter request: Description of the request
+  /// - Returns: request to be sent to server
+  func httpRequest(_ request: some HTTPRequestable) async throws -> HTTPRequest {
+    var updatedRequest = try request.httpRequest
+    for interceptor in requestInterceptors {
+      try await interceptor.intercept(&updatedRequest, for: session)
+    }
+    return updatedRequest
+  }
+
   func data(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
-    var updateRequest = try request.httpRequest
-    for interceptor in requestInterceptors {
-      try await interceptor.intercept(&updateRequest, for: session)
-    }
-    let result: (Data, HTTPResponse) = if let httpBody = request.httpBody {
-      try await session.upload(for: updateRequest, from: httpBody, delegate: delegate)
+    let updatedRequest = try await httpRequest(request)
+    let (data, httpResponse) = if let bodyData = request.httpBody {
+      try await session.upload(for: updatedRequest, from: bodyData, delegate: delegate)
     } else {
-      try await session.data(for: updateRequest, delegate: delegate)
+      try await session.data(for: updatedRequest, delegate: delegate)
     }
-    var response = try HTTPAnyResponse(request: updateRequest, response: result.1, data: result.0)
-    for interceptor in responseInterceptors {
+    var response = HTTPAnyResponse(request: updatedRequest, response: httpResponse, data: data)
+    for interceptor in responseInterceptors.reversed() {
       try await interceptor.intercept(&response, for: session)
     }
     return response
@@ -102,13 +116,10 @@ public extension HTTPTransferable {
   /// - Returns: Data and response.
   func upload(for request: some HTTPRequestable, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
-    var updateRequest = try request.httpRequest
-    for interceptor in requestInterceptors {
-      try await interceptor.intercept(&updateRequest, for: session)
-    }
-    let (data, response) = try await session.upload(for: updateRequest, fromFile: fileURL, delegate: delegate)
-    var result = HTTPAnyResponse(request: updateRequest, response: response, data: data)
-    for interceptor in responseInterceptors {
+    let updatedRequest = try await httpRequest(request)
+    let (data, response) = try await session.upload(for: updatedRequest, fromFile: fileURL, delegate: delegate)
+    var result = HTTPAnyResponse(request: updatedRequest, response: response, data: data)
+    for interceptor in responseInterceptors.reversed() {
       try await interceptor.intercept(&result, for: session)
     }
     return result
@@ -122,13 +133,10 @@ public extension HTTPTransferable {
   /// - Returns: Data and response.
   func upload(for request: some HTTPRequestable, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
-    var updateRequest = try request.httpRequest
-    for interceptor in requestInterceptors {
-      try await interceptor.intercept(&updateRequest, for: session)
-    }
-    let (data, response) = try await session.upload(for: updateRequest, from: bodyData, delegate: delegate)
-    var result = HTTPAnyResponse(request: updateRequest, response: response, data: data)
-    for interceptor in responseInterceptors {
+    let updatedRequest = try await httpRequest(request)
+    let (data, response) = try await session.upload(for: updatedRequest, from: bodyData, delegate: delegate)
+    var result = HTTPAnyResponse(request: updatedRequest, response: response, data: data)
+    for interceptor in responseInterceptors.reversed() {
       try await interceptor.intercept(&result, for: session)
     }
     return result
@@ -141,13 +149,10 @@ public extension HTTPTransferable {
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
   func download(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
-    var updateRequest = try request.httpRequest
-    for interceptor in requestInterceptors {
-      try await interceptor.intercept(&updateRequest, for: session)
-    }
-    let (url, response) = try await session.download(for: updateRequest, delegate: delegate)
-    var result = HTTPAnyResponse(request: updateRequest, response: response, fileURL: url)
-    for interceptor in responseInterceptors {
+    let updatedRequest = try await httpRequest(request)
+    let (url, response) = try await session.download(for: updatedRequest, delegate: delegate)
+    var result = HTTPAnyResponse(request: updatedRequest, response: response, fileURL: url)
+    for interceptor in responseInterceptors.reversed() {
       try await interceptor.intercept(&result, for: session)
     }
     return result
@@ -160,11 +165,11 @@ public extension HTTPTransferable {
   /// - Returns: Data stream and response.
   func bytes(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
     logger.trace("[IN]: \(#function)")
-    var updateRequest = try request.httpRequest
+    var updatedRequest = try request.httpRequest
     for interceptor in requestInterceptors {
-      try await interceptor.intercept(&updateRequest, for: session)
+      try await interceptor.intercept(&updatedRequest, for: session)
     }
-    return try await session.bytes(for: updateRequest, delegate: delegate)
+    return try await session.bytes(for: updatedRequest, delegate: delegate)
   }
 
   /**
