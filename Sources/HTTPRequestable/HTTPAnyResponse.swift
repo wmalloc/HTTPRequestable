@@ -55,8 +55,8 @@ public extension HTTPAnyResponse {
     response.status.kind == .successful
   }
 
-  /// Validate the result for status code
-  /// - Returns: Self
+  /// Validates the result for a given status code.
+  /// - Returns: Self if the status code indicates success.
   @discardableResult
   func validateStatus() throws -> Self {
     if response.status.kind != .successful {
@@ -66,9 +66,9 @@ public extension HTTPAnyResponse {
     return self
   }
 
-  /// Validate the content type, if the content type are given
-  /// - Parameter acceptableContentTypes: Set of acceptable content types, defaults to nil
-  /// - Returns: Self
+  /// Validates the content type if acceptable content types are given.
+  /// - Parameter acceptableContentTypes: Set of acceptable content types, defaults to nil.
+  /// - Returns: Self if the content type is acceptable.
   @discardableResult
   func validateContentType(_ acceptableContentTypes: Set<String>? = nil) throws -> Self {
     // bypass if no content type defined
@@ -78,15 +78,27 @@ public extension HTTPAnyResponse {
 
     // if the server did not set the content type then throw a bad server response
     guard let contentType = response.headerFields[.contentType] else {
-      throw URLError(.badServerResponse)
+      throw HTTPError.contentTypeHeaderMissing
     }
 
     // if content type is not acceptable throw and errro
     guard acceptableContentTypes.contains(contentType) else {
-      throw URLError(.notAcceptable)
+      throw HTTPError.invalidContentType
     }
 
     // success
     return self
+  }
+}
+
+public extension HTTPAnyResponse {
+  func transformed<ResultType>(using transformer: Transformer<Data, ResultType>?) throws -> ResultType {
+    guard let transformer else {
+      throw URLError(.cannotDecodeContentData)
+    }
+    guard let data else {
+      throw URLError(.zeroByteResource)
+    }
+    return try transformer(data)
   }
 }

@@ -6,12 +6,10 @@
 
 import Foundation
 
+/// Extension providing validation methods for Data instances.
 public extension Data {
-  /**
-   Checks if the data is empty or not, throws if data is empty
-
-   - returns: Data
-   */
+  /// Validates that the data is not empty. If the data is empty, it throws a URLError with code `.zeroByteResource`.
+  /// - Returns: The `Data` instance if it is not empty.
   @discardableResult
   func url_validateNotEmptyData() throws -> Self {
     guard !isEmpty else {
@@ -21,9 +19,12 @@ public extension Data {
   }
 }
 
+/// Extension providing validation methods for optional Data instances.
 public extension Data? {
-  /// validate the Data is not empty
-  /// - Returns: Data
+  /// Validates that the data is not empty. If the data is nil or empty, it throws a URLError with the appropriate code:
+  /// - `.cannotDecodeContentData` if the data itself is nil.
+  /// - `.zeroByteResource` if the data exists but is empty.
+  /// - Returns: The non-nil and non-empty `Data` instance.
   @discardableResult
   func url_validateNotEmptyData() throws -> Self {
     guard let data = self else {

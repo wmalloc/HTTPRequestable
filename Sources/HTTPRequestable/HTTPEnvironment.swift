@@ -6,10 +6,16 @@
 
 import Foundation
 
-/// URL Components
+/// Represents a set of properties for an HTTP environment, which includes URL components like scheme, host, path, query items, etc.
 public typealias HTTPEnvironment = URLComponents
 
 public extension HTTPEnvironment {
+  /// Initializes an `HTTPEnvironment` with the given scheme, authority (host), and optional path.
+  ///
+  /// - Parameters:
+  ///   - scheme: The scheme of the URL (e.g., "https").
+  ///   - authority: The authority part of the URL which includes the host.
+  ///   - path: The path component of the URL (optional).
   init(scheme: String, authority: String, path: String = "") {
     self.init()
     self.scheme = scheme
