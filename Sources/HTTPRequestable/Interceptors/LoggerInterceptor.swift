@@ -30,7 +30,7 @@ extension LoggerInterceptor: HTTPResponseInterceptor {
     let httpResponse = response.response
     logger.log(level: logLevel, "\(httpResponse.debugDescription, privacy: .private)")
     if let data = response.data {
-      logger.log(level: logLevel, "\n\(String(decoding: data, as: UTF8.self), privacy: .private)")
+      logger.log(level: logLevel, "\n\(String(data: data, encoding: .utf8) ?? "nil", privacy: .private)")
     }
     if let url = response.fileURL {
       logger.log(level: logLevel, "\n\(url.absoluteString, privacy: .private)")

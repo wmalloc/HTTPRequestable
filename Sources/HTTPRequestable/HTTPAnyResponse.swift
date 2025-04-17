@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 
 /// Raw response from the api call
-public struct HTTPAnyResponse: Sendable {
+public struct HTTPAnyResponse: Hashable, Sendable {
   /// Request that was sent to the server
   public let request: HTTPRequest
 

@@ -35,10 +35,10 @@ final class HackerNewsAPITests: XCTestCase {
   func testMockTopStories() async throws {
     let request = try StoryListRequest(environment: api.environment, storyType: "topstories")
     let url = try request.url
-    MockURLProtocol.requestHandlers[url] = { _ in
+    await MockURLProtocol.setRequestHandler({ _ in
       let data = try Bundle.module.data(forResource: "topstories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
-    }
+    }, forURL: url)
 
     let topStories = try await api.storyList(type: "topstories")
     XCTAssertEqual(topStories.count, 466)
@@ -53,10 +53,10 @@ final class HackerNewsAPITests: XCTestCase {
   func testMockNewStories() async throws {
     let request = try StoryListRequest(environment: api.environment, storyType: "newstories")
     let url = try request.url
-    MockURLProtocol.requestHandlers[url] = { _ in
+    await MockURLProtocol.setRequestHandler({ _ in
       let data = try Bundle.module.data(forResource: "newstories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
-    }
+    }, forURL: url)
     let newStories = try await api.storyList(type: "newstories")
     XCTAssertEqual(newStories.count, 500)
   }
@@ -70,10 +70,10 @@ final class HackerNewsAPITests: XCTestCase {
   func testMockBestStories() async throws {
     let request = try StoryListRequest(environment: api.environment, storyType: "beststories")
     let url = try request.url
-    MockURLProtocol.requestHandlers[url] = { _ in
+    await MockURLProtocol.setRequestHandler({ _ in
       let data = try Bundle.module.data(forResource: "beststories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
-    }
+    }, forURL: url)
     let bestStories = try await api.storyList(type: "beststories")
     XCTAssertEqual(bestStories.count, 200)
   }

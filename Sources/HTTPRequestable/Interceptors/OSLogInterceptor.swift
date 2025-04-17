@@ -28,7 +28,7 @@ extension OSLogInterceptor: HTTPResponseInterceptor {
   public func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws {
     os_log(logType, log: logger, "%{private}@", response.response.debugDescription)
     if let data = response.data {
-      os_log(logType, log: logger, "\n%{private}@", String(decoding: data, as: UTF8.self))
+      os_log(logType, log: logger, "\n%{private}@", String(data: data, encoding: .utf8) ?? "nil")
     }
     if let url = response.fileURL {
       os_log(logType, log: logger, "\n%{private}@", url.absoluteString)
