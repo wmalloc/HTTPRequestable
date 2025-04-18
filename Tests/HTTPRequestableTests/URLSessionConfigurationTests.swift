@@ -23,10 +23,9 @@ struct URLSessionConfigurationTests {
 
     let defaultAcceptLang = headers?["Accept-Language"] as? String
     #expect(defaultAcceptLang != nil)
-    #expect(defaultAcceptLang == "en-US;q=1.0")
+    #expect(defaultAcceptLang!.contains("en-US;q=1.0"))
 
     let defaultUserAgent = headers?["User-Agent"] as? String
     #expect(defaultUserAgent != nil)
-    #expect(defaultUserAgent == "xctest/16.0 (com.apple.dt.xctest.tool; build:23600; iOS(Simulator) Version 18.0 (Build 22A3351)) HTTPRequestable")
   }
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import HTTPRequestable
 
 public typealias MockURLRequestHandler = @Sendable (URLRequest) async throws -> (HTTPURLResponse, Data)
 
@@ -13,7 +14,7 @@ actor RequestHandlerStorage {
   private var handlers: [URL: MockURLRequestHandler] = [:]
 
   func setHandler(_ handler: @escaping MockURLRequestHandler, forURL url: URL) async {
-    handlers[url.byRemovingQueryItems] = handler
+    handlers[url] = handler
   }
 
   @discardableResult
@@ -22,11 +23,11 @@ actor RequestHandlerStorage {
   }
 
   func executeHandler(for request: URLRequest) async throws -> (HTTPURLResponse, Data) {
-    guard let url = request.url?.byRemovingQueryItems else {
+    guard let url = request.url else {
       throw URLError(.badURL)
     }
     guard let handler = removeHandler(forURL: url) else {
-      throw MockURLProtocolError.noRequestHandler
+      throw HTTPError.cannotCreateURLRequest
     }
     return try await handler(request)
   }

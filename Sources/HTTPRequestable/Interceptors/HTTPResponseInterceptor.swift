@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 
 /// Interceptor is a middleware component that can intercept, modify, or observe network requests and responses.
-public protocol HTTPResponseInterceptor {
+public protocol HTTPResponseInterceptor: Sendable {
   /// Intercepts and customizes the HTTP response before it is returned from a URLSession.
   ///
   /// This method allows for customization of the HTTP response after it is received from the server. It provides an opportunity to modify the response properties, such as headers or body data, before returning it from a `URLSession`.

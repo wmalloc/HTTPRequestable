@@ -9,9 +9,9 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-public final class OSLogInterceptor {
-  public var logger: OSLog = .init(category: "OSLogInterceptor")
-  public var logType: OSLogType
+public struct OSLogInterceptor {
+  let logger: OSLog = .init(category: "OSLogInterceptor")
+  public let logType: OSLogType
 
   public init(logType: OSLogType = .default) {
     self.logType = logType

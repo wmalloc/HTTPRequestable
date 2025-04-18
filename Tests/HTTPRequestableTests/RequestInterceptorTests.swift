@@ -43,7 +43,7 @@ struct RequestInterceptorTests {
     #expect(urlRequest.value(forHTTPHeaderField: HTTPField.Name.contentType.rawName) == HTTPContentType.jsonUTF8.rawValue)
   }
 
-  class AddContentTypeModifier: HTTPRequestInterceptor {
+  final class AddContentTypeModifier: HTTPRequestInterceptor {
     func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {
       request.headerFields.append(HTTPField(name: .contentType, value: "application/json"))
     }

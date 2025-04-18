@@ -8,7 +8,7 @@
 import Foundation
 import HTTPTypes
 
-public protocol HTTPRequestInterceptor {
+public protocol HTTPRequestInterceptor: Sendable {
   /// Intercepts and customizes the HTTP request before it is sent through a URLSession.
   ///
   /// This method allows for customization of the HTTP request before it is sent to the server. It provides an opportunity to modify the request properties, such as headers or body data, before the request is sent through a `URLSession`.

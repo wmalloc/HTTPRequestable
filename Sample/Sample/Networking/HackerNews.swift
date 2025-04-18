@@ -10,7 +10,7 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-class HackerNews: HTTPTransferable, @unchecked Sendable {
+final class HackerNews: HTTPTransferable, @unchecked Sendable {
   var requestInterceptors: [any HTTPRequestInterceptor] = []
   var responseInterceptors: [any HTTPResponseInterceptor] = []
 
