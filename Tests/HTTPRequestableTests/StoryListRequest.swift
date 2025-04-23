@@ -13,8 +13,8 @@ struct StoryListRequest: HTTPRequestable {
   typealias ResultType = [Int]
 
   let environment: HTTPEnvironment
-  let headerFields: HTTPFields? = .init([.accept(.json)])
-  let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
+  var headerFields: HTTPFields? = .init([.accept(.json)])
+  var queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
   let path: String?
 
   var responseDataTransformer: Transformer<Data, ResultType>? {

@@ -17,9 +17,11 @@ struct RequestInterceptorTests {
     configuration.protocolClasses = [MockURLProtocol.self]
     let session = URLSession(configuration: configuration)
     let api = HackerNews(session: session)
-    let logger = LoggerInterceptor()
-    api.requestInterceptors.append(logger)
-    api.responseInterceptors.append(logger)
+    Task {
+      let logger = LoggerInterceptor()
+      await api.requestInterceptors.append(logger)
+      await api.responseInterceptors.append(logger)
+    }
     return api
   }()
 
@@ -41,6 +43,21 @@ struct RequestInterceptorTests {
     #expect(urlRequest.httpMethod == "GET")
     try await modifier.intercept(&urlRequest, for: URLSession.shared)
     #expect(urlRequest.value(forHTTPHeaderField: HTTPField.Name.contentType.rawName) == HTTPContentType.jsonUTF8.rawValue)
+  }
+
+  @Test func storageTests() async throws {
+    let storage = AsyncArray<any HTTPRequestInterceptor>()
+    #expect(await storage.isEmpty)
+    await storage.append(OSLogInterceptor())
+    #expect(await !storage.isEmpty)
+    #expect(await storage.count == 1)
+    await storage.remove(at: 0)
+    #expect(await storage.isEmpty)
+    #expect(await storage.count == 0)
+    await storage.append(OSLogInterceptor())
+    await storage.append(LoggerInterceptor())
+    #expect(await storage.count == 2)
+    await storage.append(AddContentTypeModifier())
   }
 
   final class AddContentTypeModifier: HTTPRequestInterceptor {

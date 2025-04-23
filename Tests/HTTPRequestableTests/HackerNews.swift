@@ -9,9 +9,9 @@ import Foundation
 @testable import HTTPRequestable
 import HTTPTypes
 
-class HackerNews: HTTPTransferable, @unchecked Sendable {
-  var requestInterceptors: [any HTTPRequestInterceptor] = []
-  var responseInterceptors: [any HTTPResponseInterceptor] = []
+final class HackerNews: HTTPTransferable, @unchecked Sendable {
+  let requestInterceptors = AsyncArray<any HTTPRequestInterceptor>()
+  let responseInterceptors = AsyncArray<any HTTPResponseInterceptor>()
 
   let session: URLSession
 
@@ -19,9 +19,11 @@ class HackerNews: HTTPTransferable, @unchecked Sendable {
 
   required init(session: URLSession = .shared) {
     self.session = session
-    let logger = LoggerInterceptor()
-    requestInterceptors.append(logger)
-    responseInterceptors.append(logger)
+    Task {
+      let logger = LoggerInterceptor()
+      await requestInterceptors.append(logger)
+      await responseInterceptors.append(logger)
+    }
   }
 }
 

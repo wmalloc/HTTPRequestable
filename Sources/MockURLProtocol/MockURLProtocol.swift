@@ -5,14 +5,15 @@
 //
 
 import Foundation
+import HTTPRequestable
 
 public class MockURLProtocol: URLProtocol, @unchecked Sendable {
   private static let requestHandlerStorage = RequestHandlerStorage()
 
-  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forURL url: URL) async {
+  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forRequest request: any HTTPRequestable) async {
     await requestHandlerStorage.setHandler({ request in
       try await handler(request)
-    }, forURL: url)
+    }, forRequest: request)
   }
 
   override public class func canInit(with _: URLRequest) -> Bool { true }

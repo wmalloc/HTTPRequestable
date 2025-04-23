@@ -41,6 +41,9 @@
         }
       }
     },
+    "error_header_value_missing" : {
+
+    },
     "error_invalid_content_type" : {
       "localizations" : {
         "en" : {

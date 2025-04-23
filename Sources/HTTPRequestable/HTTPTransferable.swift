@@ -22,11 +22,11 @@ public protocol HTTPTransferable: Sendable {
   init(session: URLSession)
 
   /// Request Modifiers
-  var requestInterceptors: [any HTTPRequestInterceptor] { get set }
+  var requestInterceptors: AsyncArray<any HTTPRequestInterceptor> { get }
 
   /// Response Interceptors
-  var responseInterceptors: [any HTTPResponseInterceptor] { get set }
-
+  var responseInterceptors: AsyncArray<any HTTPResponseInterceptor>{ get }
+  
   /// Request to sent to server
   /// - Parameter request: Description of the request
   /// - Returns: request to be sent to server
@@ -134,8 +134,9 @@ public extension HTTPTransferable {
   /// - Returns: request to be sent to server
   func httpRequest(_ request: some HTTPRequestable) async throws -> HTTPRequest {
     var updatedRequest = try request.httpRequest
-    for interceptor in requestInterceptors {
-      try await interceptor.intercept(&updatedRequest, for: session)
+    let count = await requestInterceptors.count
+    for index in 0..<count {
+      try await requestInterceptors[index].intercept(&updatedRequest, for: session)
     }
     return updatedRequest
   }
@@ -154,8 +155,9 @@ public extension HTTPTransferable {
       try await session.data(for: updatedRequest, delegate: delegate)
     }
     var response = HTTPAnyResponse(request: updatedRequest, response: httpResponse, data: data)
-    for interceptor in responseInterceptors.reversed() {
-      try await interceptor.intercept(&response, for: session)
+    let count = await responseInterceptors.count
+    for index in stride(from: count - 1, to: 0, by: -1) {
+      try await responseInterceptors[index].intercept(&response, for: session)
     }
     return response
   }
@@ -171,8 +173,9 @@ public extension HTTPTransferable {
     let updatedRequest = try await httpRequest(request)
     let (data, response) = try await session.upload(for: updatedRequest, fromFile: fileURL, delegate: delegate)
     var result = HTTPAnyResponse(request: updatedRequest, response: response, data: data)
-    for interceptor in responseInterceptors.reversed() {
-      try await interceptor.intercept(&result, for: session)
+    let count = await responseInterceptors.count
+    for index in stride(from: count - 1, to: 0, by: -1) {
+      try await responseInterceptors[index].intercept(&result, for: session)
     }
     return result
   }
@@ -188,8 +191,9 @@ public extension HTTPTransferable {
     let updatedRequest = try await httpRequest(request)
     let (data, response) = try await session.upload(for: updatedRequest, from: bodyData, delegate: delegate)
     var result = HTTPAnyResponse(request: updatedRequest, response: response, data: data)
-    for interceptor in responseInterceptors.reversed() {
-      try await interceptor.intercept(&result, for: session)
+    let count = await responseInterceptors.count
+    for index in stride(from: count - 1, to: 0, by: -1) {
+      try await responseInterceptors[index].intercept(&result, for: session)
     }
     return result
   }
@@ -204,8 +208,9 @@ public extension HTTPTransferable {
     let updatedRequest = try await httpRequest(request)
     let (url, response) = try await session.download(for: updatedRequest, delegate: delegate)
     var result = HTTPAnyResponse(request: updatedRequest, response: response, fileURL: url)
-    for interceptor in responseInterceptors.reversed() {
-      try await interceptor.intercept(&result, for: session)
+    let count = await responseInterceptors.count
+    for index in stride(from: count - 1, to: 0, by: -1) {
+      try await responseInterceptors[index].intercept(&result, for: session)
     }
     return result
   }
@@ -217,10 +222,7 @@ public extension HTTPTransferable {
   /// - Returns: Data stream and response.
   func bytes(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
     logger.trace("[IN]: \(#function)")
-    var updatedRequest = try request.httpRequest
-    for interceptor in requestInterceptors {
-      try await interceptor.intercept(&updatedRequest, for: session)
-    }
+    let updatedRequest = try await httpRequest(request)
     return try await session.bytes(for: updatedRequest, delegate: delegate)
   }
 

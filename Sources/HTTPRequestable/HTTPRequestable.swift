@@ -39,10 +39,10 @@ public protocol HTTPRequestable: Sendable {
   var path: String? { get }
 
   /// Additional query items to include in the URL
-  var queryItems: [URLQueryItem]? { get }
+  var queryItems: [URLQueryItem]? { get mutating set }
 
   /// Additional headers to include in the request
-  var headerFields: HTTPFields? { get }
+  var headerFields: HTTPFields? { get mutating set }
 
   /// Body data for the request, optional
   var httpBody: Data? { get }
