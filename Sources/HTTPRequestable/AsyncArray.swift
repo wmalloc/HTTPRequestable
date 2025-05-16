@@ -11,7 +11,7 @@ import Foundation
 ///
 /// This struct is designed to be used as an `actor`, ensuring thread-safe operations when accessing or modifying the list of interceptors.
 /// It conforms to the `Sendable` protocol, allowing it to be safely shared between tasks.
-public actor AsyncArray<Element: Sendable> {
+public actor AsyncArray<Element: Sendable>: AsyncSequence {
   /// The internal storage for HTTP interceptors.
   private var elements: [Element]
 
@@ -19,6 +19,7 @@ public actor AsyncArray<Element: Sendable> {
   ///
   public init() {
     self.elements = []
+    (self.stream, self.continuation) = AsyncThrowingStream.makeStream(bufferingPolicy: .unbounded)
   }
   
   /// Creates an array containing the elements of a sequence.
@@ -38,6 +39,7 @@ public actor AsyncArray<Element: Sendable> {
   /// - Parameter s: The sequence of elements to turn into an array.
   public init<S>(_ s: S) where Element == S.Element, S : Sequence {
     self.elements = Array(s)
+    (self.stream, self.continuation) = AsyncThrowingStream.makeStream(bufferingPolicy: .unbounded)
   }
   
   /// Creates an array from the given array literal.
@@ -53,6 +55,7 @@ public actor AsyncArray<Element: Sendable> {
   /// - Parameter elements: A variadic list of elements of the new array.
   public init(arrayLiteral elements: Element...) {
     self.elements = Array(elements)
+    (self.stream, self.continuation) = AsyncThrowingStream.makeStream(bufferingPolicy: .unbounded)
   }
 
   /// The total number of interceptors currently stored in this `HTTPInterceptorStorage`.
@@ -102,11 +105,24 @@ public actor AsyncArray<Element: Sendable> {
     elements.insert(newElement, at: i)
   }
 
-  /// Appends a new HTTP interceptor to this storage.
+  /// Adds a new element at the end of the array.
   ///
-  /// - Parameter interceptor: The new HTTP interceptor to be added.
-  public func append(_ interceptor: Element) {
-    elements.append(interceptor)
+  /// Use this method to append a single element to the end of a mutable array.
+  ///
+  /// Because arrays increase their allocated capacity using an exponential
+  /// strategy, appending a single element to an array is an O(1) operation
+  /// when averaged over many calls to the `append(_:)` method. When an array
+  /// has additional capacity and is not sharing its storage with another
+  /// instance, appending an element is O(1). When an array needs to
+  /// reallocate storage before appending or its storage is shared with
+  /// another copy, appending is O(*n*), where *n* is the length of the array.
+  ///
+  /// - Parameter newElement: The element to append to the array.
+  ///
+  /// - Complexity: O(1) on average, over many calls to `append(_:)` on the
+  ///   same array.
+  public func append(_ newElement: Element) {
+    elements.append(newElement)
   }
 
   /// Removes an HTTP interceptor from the storage at a specified index and returns it, if found.
@@ -149,7 +165,26 @@ public actor AsyncArray<Element: Sendable> {
     try elements.removeAll(where: shouldBeRemoved)
   }
 
-  /*
+  /// Returns a view presenting the elements of the collection in reverse
+  /// order.
+  ///
+  /// You can reverse a collection without allocating new space for its
+  /// elements by calling this `reversed()` method. A `ReversedCollection`
+  /// instance wraps an underlying collection and provides access to its
+  /// elements in reverse order. This example prints the characters of a
+  /// string in reverse order:
+  ///
+  /// If you need a reversed collection of the same type, you may be able to
+  /// use the collection's sequence-based or collection-based initializer. For
+  /// example, to get the reversed version of a string, reverse its
+  /// characters and initialize a new `String` instance from the result.
+  ///
+  /// - Complexity: O(1)
+  public func reversed() -> AsyncArray<Element> {
+    let reversedElements = elements.reversed()
+    return AsyncArray(reversedElements)
+  }
+  
   public typealias AsyncIterator = AsyncThrowingStream<Element, Error>.AsyncIterator
   
   private var page = 1
@@ -157,11 +192,6 @@ public actor AsyncArray<Element: Sendable> {
   private let stream: AsyncThrowingStream<Element, Error>
   private let continuation: AsyncThrowingStream<Element, Error>.Continuation
    
-  public init() {
-    elements = []
-    (self.stream, self.continuation) = AsyncThrowingStream.makeStream(bufferingPolicy: .unbounded)
-  }
-  
   func produce() async throws {
     do {
       while !hasReachedEnd {
@@ -186,5 +216,4 @@ public actor AsyncArray<Element: Sendable> {
   public nonisolated func makeAsyncIterator() -> AsyncIterator {
     stream.makeAsyncIterator()
   }
-   */
 }
