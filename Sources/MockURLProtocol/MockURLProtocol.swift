@@ -10,10 +10,25 @@ import HTTPRequestable
 public class MockURLProtocol: URLProtocol, @unchecked Sendable {
   private static let requestHandlerStorage = RequestHandlerStorage()
 
-  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forRequest request: any HTTPRequestable) async {
+  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forRequest request: any HTTPRequestable) async throws {
+    guard let identifier = request.testIdentifier else {
+      throw URLError(.badURL)
+    }
     await requestHandlerStorage.setHandler({ request in
       try await handler(request)
-    }, forRequest: request)
+    }, forIdentifier: identifier)
+  }
+
+  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forURL url: URL) async {
+    await requestHandlerStorage.setHandler({ request in
+      try await handler(request)
+    }, forIdentifier: url.absoluteString)
+  }
+
+  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forIdentifier identifier: String) async {
+    await requestHandlerStorage.setHandler({ request in
+      try await handler(request)
+    }, forIdentifier: identifier)
   }
 
   override public class func canInit(with _: URLRequest) -> Bool { true }

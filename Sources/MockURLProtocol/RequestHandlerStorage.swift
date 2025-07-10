@@ -13,10 +13,7 @@ public typealias MockURLRequestHandler = @Sendable (URLRequest) async throws -> 
 actor RequestHandlerStorage {
   private var handlers: [String: MockURLRequestHandler] = [:]
 
-  func setHandler(_ handler: @escaping MockURLRequestHandler, forRequest request: any HTTPRequestable) async {
-    guard let identifier = request.testIdentifier else {
-      return
-    }
+  func setHandler(_ handler: @escaping MockURLRequestHandler, forIdentifier identifier: String) async {
     handlers[identifier] = handler
   }
 
