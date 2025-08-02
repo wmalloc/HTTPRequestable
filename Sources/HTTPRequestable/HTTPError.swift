@@ -29,7 +29,7 @@ public enum HTTPError: LocalizedError {
 
   /// Thrown when header value is missing
   case headerValueMissing(String)
-  
+
   public var errorDescription: String? {
     description
   }
@@ -55,7 +55,7 @@ extension HTTPError: CustomStringConvertible {
 
     case .invalidContentType:
       String(localized: "error_invalid_content_type", bundle: .module)
-      
+
     case .headerValueMissing(let header):
       String(format: String(localized: "error_header_value_missing", bundle: .module), header)
     }

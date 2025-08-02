@@ -26,7 +26,7 @@ public protocol HTTPTransferable: Sendable, AnyObject, Actor {
   var responseInterceptors: [any HTTPResponseInterceptor] { get set }
 
   init(session: URLSession)
-  
+
   /// Request to sent to server
   /// - Parameter request: Description of the request
   /// - Returns: request to be sent to server

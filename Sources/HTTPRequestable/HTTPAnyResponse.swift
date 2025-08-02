@@ -89,6 +89,20 @@ public extension HTTPAnyResponse {
     // success
     return self
   }
+
+  /// Validates the content type if acceptable content types are given.
+  /// - Parameter acceptableContentTypes: Set of acceptable content types, defaults to nil.
+  /// - Returns: Self if the content type is acceptable.
+  @discardableResult
+  func validateContentType(_ acceptableContentTypes: Set<HTTPContentType>? = nil) throws -> Self {
+    guard let acceptableContentTypes else {
+      return self
+    }
+    let contentTypes: Set<String> = acceptableContentTypes.reduce(into: []) { result, type in
+      result.insert(type.rawValue)
+    }
+    return try validateContentType(contentTypes)
+  }
 }
 
 public extension HTTPAnyResponse {

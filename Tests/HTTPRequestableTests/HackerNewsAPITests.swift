@@ -20,8 +20,8 @@ final class HackerNewsAPITests: XCTestCase, @unchecked Sendable {
     Task { [weak self] in
       guard let self else { return }
       let logger = LoggerInterceptor()
-      await self.api.requestInterceptors.append(logger)
-      await self.api.responseInterceptors.append(logger)
+      await api.requestInterceptors.append(logger)
+      await api.responseInterceptors.append(logger)
     }
   }
 
