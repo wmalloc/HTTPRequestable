@@ -13,7 +13,8 @@ struct ItemRequest: HTTPRequestable {
   typealias ResultType = Item
 
   let environment: HTTPEnvironment
-  let headerFields: HTTPFields? = .init([.accept(.json)])
+  var headerFields: HTTPFields? = .init([.accept(.json)])
+  var queryItems: [URLQueryItem]?
   let path: String?
 
   var responseDataTransformer: Transformer<Data, ResultType>? {

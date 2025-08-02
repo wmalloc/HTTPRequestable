@@ -18,8 +18,8 @@ public struct OSLogInterceptor {
   }
 }
 
-extension OSLogInterceptor: HTTPRequestInterceptor {
-  public func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {
+extension OSLogInterceptor: HTTPRequestModifier {
+  public func modify(_ request: inout HTTPRequest, for session: URLSession) async throws {
     os_log(logType, log: logger, "%{private}@", request.debugDescription)
   }
 }

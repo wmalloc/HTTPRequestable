@@ -18,8 +18,8 @@ public struct LoggerInterceptor {
   }
 }
 
-extension LoggerInterceptor: HTTPRequestInterceptor {
-  public func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {
+extension LoggerInterceptor: HTTPRequestModifier {
+  public func modify(_ request: inout HTTPRequest, for session: URLSession) async throws {
     let debugDescription = request.debugDescription
     logger.log(level: logLevel, "\(debugDescription, privacy: .private)")
   }

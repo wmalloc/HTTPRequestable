@@ -16,16 +16,16 @@ private let logger = Logger(.init(category: "HTTPTransferable"))
 private let logger = Logger(.disabled)
 #endif
 
-public protocol HTTPTransferable: Sendable {
+public protocol HTTPTransferable: Sendable, AnyObject, Actor {
   var session: URLSession { get }
 
-  init(session: URLSession)
-
   /// Request Modifiers
-  var requestInterceptors: AsyncArray<any HTTPRequestInterceptor> { get }
+  var requestModifiers: [any HTTPRequestModifier] { get set }
 
   /// Response Interceptors
-  var responseInterceptors: AsyncArray<any HTTPResponseInterceptor>{ get }
+  var responseInterceptors: [any HTTPResponseInterceptor] { get set }
+
+  init(session: URLSession)
   
   /// Request to sent to server
   /// - Parameter request: Description of the request
@@ -134,8 +134,8 @@ public extension HTTPTransferable {
   /// - Returns: request to be sent to server
   func httpRequest(_ request: some HTTPRequestable) async throws -> HTTPRequest {
     var updatedRequest = try request.httpRequest
-    for try await interceptor in requestInterceptors {
-      try await interceptor.intercept(&updatedRequest, for: session)
+    for try await modifier in requestModifiers {
+      try await modifier.modify(&updatedRequest, for: session)
     }
     return updatedRequest
   }
@@ -154,7 +154,7 @@ public extension HTTPTransferable {
       try await session.data(for: updatedRequest, delegate: delegate)
     }
     var response = HTTPAnyResponse(request: updatedRequest, response: httpResponse, data: data)
-    for try await interceptor in await responseInterceptors.reversed() {
+    for try await interceptor in responseInterceptors.reversed() {
       try await interceptor.intercept(&response, for: session)
     }
     return response
@@ -171,7 +171,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await httpRequest(request)
     let (data, response) = try await session.upload(for: updatedRequest, fromFile: fileURL, delegate: delegate)
     var result = HTTPAnyResponse(request: updatedRequest, response: response, data: data)
-    for try await interceptor in await responseInterceptors.reversed() {
+    for try await interceptor in responseInterceptors.reversed() {
       try await interceptor.intercept(&result, for: session)
     }
     return result
@@ -188,7 +188,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await httpRequest(request)
     let (data, response) = try await session.upload(for: updatedRequest, from: bodyData, delegate: delegate)
     var result = HTTPAnyResponse(request: updatedRequest, response: response, data: data)
-    for try await interceptor in await responseInterceptors.reversed() {
+    for try await interceptor in responseInterceptors.reversed() {
       try await interceptor.intercept(&result, for: session)
     }
     return result
@@ -204,7 +204,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await httpRequest(request)
     let (url, response) = try await session.download(for: updatedRequest, delegate: delegate)
     var result = HTTPAnyResponse(request: updatedRequest, response: response, fileURL: url)
-    for try await interceptor in await responseInterceptors.reversed() {
+    for try await interceptor in responseInterceptors.reversed() {
       try await interceptor.intercept(&result, for: session)
     }
     return result

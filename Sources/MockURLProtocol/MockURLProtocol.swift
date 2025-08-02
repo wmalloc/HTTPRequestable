@@ -41,13 +41,8 @@ public class MockURLProtocol: URLProtocol, @unchecked Sendable {
 
   override public func startLoading() {
     Task {
-      let validCodes = Set(200 ..< 300)
       do {
         let (response, data) = try await executeHandler(for: request)
-        if !validCodes.contains(response.statusCode) {
-          throw URLError(URLError.Code(rawValue: response.statusCode))
-        }
-
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: data)
         client?.urlProtocolDidFinishLoading(self)
