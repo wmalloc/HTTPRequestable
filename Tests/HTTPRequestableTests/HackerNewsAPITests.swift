@@ -54,7 +54,7 @@ final class HackerNewsAPITests: XCTestCase, @unchecked Sendable {
       let data = try Bundle.module.data(forResource: "newstories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
     }, forRequest: request)
-    let newStories = try await api.storyList(type: "newstories")
+    let newStories = try await api.object(for: request, delegate: nil)
     XCTAssertEqual(newStories.count, 500)
   }
 
@@ -71,7 +71,7 @@ final class HackerNewsAPITests: XCTestCase, @unchecked Sendable {
       let data = try Bundle.module.data(forResource: "beststories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
     }, forRequest: request)
-    let bestStories = try await api.storyList(type: "beststories")
+    let bestStories = try await api.object(for: request, delegate: nil)
     XCTAssertEqual(bestStories.count, 200)
   }
 }

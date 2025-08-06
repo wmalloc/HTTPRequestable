@@ -172,7 +172,7 @@ public extension HTTPTransferable {
   /// - Returns: request to be sent to server
   func httpRequest(_ request: some HTTPRequestable) async throws -> HTTPRequest {
     var updatedRequest = try request.httpRequest
-    for try await modifier in requestModifiers {
+    for try modifier in requestModifiers {
       try await modifier.modify(&updatedRequest, for: session)
     }
     return updatedRequest
@@ -203,7 +203,7 @@ public extension HTTPTransferable {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
     var response = try await data(for: updatedRequest, httpBody: request.httpBody, delegate: delegate)
-    for try await interceptor in interceptors.reversed() {
+    for try interceptor in interceptors.reversed() {
       try await interceptor.intercept(&response, for: session)
     }
     return response
@@ -220,7 +220,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await httpRequest(request)
     let (data, response) = try await session.upload(for: updatedRequest, fromFile: fileURL, delegate: delegate)
     var result = HTTPAnyResponse(request: updatedRequest, response: response, data: data)
-    for try await interceptor in interceptors.reversed() {
+    for try interceptor in interceptors.reversed() {
       try await interceptor.intercept(&result, for: session)
     }
     return result
@@ -237,7 +237,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await httpRequest(request)
     let (data, response) = try await session.upload(for: updatedRequest, from: bodyData, delegate: delegate)
     var result = HTTPAnyResponse(request: updatedRequest, response: response, data: data)
-    for try await interceptor in interceptors.reversed() {
+    for try interceptor in interceptors.reversed() {
       try await interceptor.intercept(&result, for: session)
     }
     return result
@@ -253,7 +253,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await httpRequest(request)
     let (url, response) = try await session.download(for: updatedRequest, delegate: delegate)
     var result = HTTPAnyResponse(request: updatedRequest, response: response, fileURL: url)
-    for try await interceptor in interceptors.reversed() {
+    for try interceptor in interceptors.reversed() {
       try await interceptor.intercept(&result, for: session)
     }
     return result
