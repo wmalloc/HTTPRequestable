@@ -17,12 +17,6 @@ final class HackerNewsAPITests: XCTestCase, @unchecked Sendable {
     configuration.protocolClasses = [MockURLProtocol.self]
     let session = URLSession(configuration: configuration)
     api = HackerNews(session: session)
-    Task { [weak self] in
-      guard let self else { return }
-      let logger = LoggerInterceptor()
-      await api.requestInterceptors.append(logger)
-      await api.responseInterceptors.append(logger)
-    }
   }
 
   override func tearDownWithError() throws {
@@ -38,7 +32,7 @@ final class HackerNewsAPITests: XCTestCase, @unchecked Sendable {
   func testMockTopStories() async throws {
     let request = try StoryListRequest(environment: api.environment, storyType: "topstories").addTestIdentifierHeader()
     let url = try request.url
-    await MockURLProtocol.setRequestHandler({ _ in
+    try await MockURLProtocol.setRequestHandler({ _ in
       let data = try Bundle.module.data(forResource: "topstories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
     }, forRequest: request)
@@ -56,7 +50,7 @@ final class HackerNewsAPITests: XCTestCase, @unchecked Sendable {
   func testMockNewStories() async throws {
     let request = try StoryListRequest(environment: api.environment, storyType: "newstories").addTestIdentifierHeader()
     let url = try request.url
-    await MockURLProtocol.setRequestHandler({ _ in
+    try await MockURLProtocol.setRequestHandler({ _ in
       let data = try Bundle.module.data(forResource: "newstories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
     }, forRequest: request)
@@ -73,7 +67,7 @@ final class HackerNewsAPITests: XCTestCase, @unchecked Sendable {
   func testMockBestStories() async throws {
     let request = try StoryListRequest(environment: api.environment, storyType: "beststories").addTestIdentifierHeader()
     let url = try request.url
-    await MockURLProtocol.setRequestHandler({ _ in
+    try await MockURLProtocol.setRequestHandler({ _ in
       let data = try Bundle.module.data(forResource: "beststories", withExtension: "json")
       return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!, data)
     }, forRequest: request)
