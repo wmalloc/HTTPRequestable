@@ -49,7 +49,7 @@ public extension HTTPAnyResponse {
       partialResult[field.name.rawName] = field.value
     }
   }
-  
+
   /// If there was a server error
   @inlinable
   var error: Error? {
