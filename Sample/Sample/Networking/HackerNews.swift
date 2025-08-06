@@ -12,7 +12,7 @@ import OSLog
 
 actor HackerNews: HTTPTransferable {
   var requestModifiers: [any HTTPRequestModifier] = []
-  var responseInterceptors: [any HTTPResponseInterceptor] = []
+  var interceptors: [any HTTPInterceptor] = []
 
   private(set) var environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com", path: "/v0")
 

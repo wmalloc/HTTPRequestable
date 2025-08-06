@@ -23,7 +23,7 @@ public protocol HTTPTransferable: Sendable, AnyObject, Actor {
   var requestModifiers: [any HTTPRequestModifier] { get set }
 
   /// Response Interceptors
-  var responseInterceptors: [any HTTPResponseInterceptor] { get set }
+  var interceptors: [any HTTPInterceptor] { get set }
 
   init(session: URLSession)
 
@@ -31,6 +31,44 @@ public protocol HTTPTransferable: Sendable, AnyObject, Actor {
   /// - Parameter request: Description of the request
   /// - Returns: request to be sent to server
   func httpRequest(_ request: some HTTPRequestable) async throws -> HTTPRequest
+
+  /// Performs a network request and returns the raw response.
+  ///
+  /// This method is part of an asynchronous networking layer that sends an `HTTPRequest`
+  /// (a type‑aliased wrapper around `URLRequest`) using `URLSession`.
+  ///
+  /// The caller can provide an optional HTTP body (`Data?`) and an optional task delegate.
+  /// If a delegate is supplied, it will be used for the created `URLSessionTask`; otherwise,
+  /// the default delegate of the session is used.
+  ///
+  /// - Parameters:
+  ///   - request: The `HTTPRequest` to send. This includes the URL, method, headers, etc.
+  ///   - body: Optional raw HTTP body data that will be attached to the request.
+  ///     If `nil`, no body is added.
+  ///   - delegate: An optional object conforming to `URLSessionTaskDelegate`.
+  ///     It is used for task‑level callbacks such as authentication challenges or progress updates.
+  /// - Returns: A value of type `HTTPAnyResponse`, which encapsulates the status code,
+  ///   headers, and raw data returned by the server. The caller can then decode
+  ///   this response into a more specific model if desired.
+  /// - Throws:
+  ///   - Any error thrown by `URLSession` during task creation or execution.
+  ///   - Network‑level errors such as connection failures or timeouts.
+  ///
+  /// Example usage:
+  ///
+  /// ```swift
+  /// let request = HTTPRequest(url: URL(string: "https://api.example.com")!)
+  /// do {
+  ///     let response = try await client.data(for: request, httpBody: nil, delegate: nil)
+  ///     // Handle `response`
+  /// } catch {
+  ///     print("Network error:", error)
+  /// }
+  /// ```
+  ///
+  /// This method is designed to be called from an asynchronous context (`async/await`)
+  /// and will automatically propagate any networking errors up the call chain.
+  func data(for request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Fetches the data for a given HTTP request using an asynchronous task.
   ///
@@ -143,18 +181,29 @@ public extension HTTPTransferable {
   /// Send the request and get the raw data back
   /// - Parameters:
   ///   - request: The `HTTPRequestable` for which to load data.
+  ///   - httpBody: httpbody, defaults to nil
+  ///   - delegate: Task-specific delegate. defaults to nil
+  /// - Returns: Data and response.
+  func data(for request: HTTPRequest, httpBody body: Data? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+    logger.trace("[IN]: \(#function)")
+    let (data, httpResponse) = if let body {
+      try await session.upload(for: request, from: body, delegate: delegate)
+    } else {
+      try await session.data(for: request, delegate: delegate)
+    }
+    return HTTPAnyResponse(request: request, response: httpResponse, data: data)
+  }
+
+  /// Send the request and get the raw data back
+  /// - Parameters:
+  ///   - request: The `HTTPRequestable` for which to load data.
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
   func data(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
-    let (data, httpResponse) = if let bodyData = request.httpBody {
-      try await session.upload(for: updatedRequest, from: bodyData, delegate: delegate)
-    } else {
-      try await session.data(for: updatedRequest, delegate: delegate)
-    }
-    var response = HTTPAnyResponse(request: updatedRequest, response: httpResponse, data: data)
-    for try await interceptor in responseInterceptors.reversed() {
+    var response = try await data(for: updatedRequest, httpBody: request.httpBody, delegate: delegate)
+    for try await interceptor in interceptors.reversed() {
       try await interceptor.intercept(&response, for: session)
     }
     return response
@@ -171,7 +220,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await httpRequest(request)
     let (data, response) = try await session.upload(for: updatedRequest, fromFile: fileURL, delegate: delegate)
     var result = HTTPAnyResponse(request: updatedRequest, response: response, data: data)
-    for try await interceptor in responseInterceptors.reversed() {
+    for try await interceptor in interceptors.reversed() {
       try await interceptor.intercept(&result, for: session)
     }
     return result
@@ -188,7 +237,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await httpRequest(request)
     let (data, response) = try await session.upload(for: updatedRequest, from: bodyData, delegate: delegate)
     var result = HTTPAnyResponse(request: updatedRequest, response: response, data: data)
-    for try await interceptor in responseInterceptors.reversed() {
+    for try await interceptor in interceptors.reversed() {
       try await interceptor.intercept(&result, for: session)
     }
     return result
@@ -204,7 +253,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await httpRequest(request)
     let (url, response) = try await session.download(for: updatedRequest, delegate: delegate)
     var result = HTTPAnyResponse(request: updatedRequest, response: response, fileURL: url)
-    for try await interceptor in responseInterceptors.reversed() {
+    for try await interceptor in interceptors.reversed() {
       try await interceptor.intercept(&result, for: session)
     }
     return result
@@ -225,8 +274,8 @@ public extension HTTPTransferable {
    Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
    - Parameters:
-     - route:    Request where to get the data from
-     - delegate: Delegate to handle the request, defaults to nil
+   - route:    Request where to get the data from
+   - delegate: Delegate to handle the request, defaults to nil
    - returns: Transformed Object
    */
   @inlinable

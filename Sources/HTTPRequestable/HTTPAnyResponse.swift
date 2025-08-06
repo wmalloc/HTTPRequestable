@@ -30,13 +30,26 @@ public struct HTTPAnyResponse: Hashable, Sendable {
   ///   - fileURL: fileurl if downloading the file
   public init(request: HTTPRequest, response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil) {
     self.request = request
+    self.response = response
     self.data = data
     self.fileURL = fileURL
-    self.response = response
   }
 }
 
 public extension HTTPAnyResponse {
+  /// The response header fields.
+  @inlinable
+  var headerFields: HTTPFields {
+    response.headerFields
+  }
+
+  /// The response headers.
+  var headers: [String: String] {
+    response.headerFields.reduce(into: [:]) { partialResult, field in
+      partialResult[field.name.rawName] = field.value
+    }
+  }
+  
   /// If there was a server error
   @inlinable
   var error: Error? {

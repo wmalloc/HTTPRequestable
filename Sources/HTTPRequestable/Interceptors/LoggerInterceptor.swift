@@ -25,7 +25,7 @@ extension LoggerInterceptor: HTTPRequestModifier {
   }
 }
 
-extension LoggerInterceptor: HTTPResponseInterceptor {
+extension LoggerInterceptor: HTTPInterceptor {
   public func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws {
     let httpResponse = response.response
     logger.log(level: logLevel, "\(httpResponse.debugDescription, privacy: .private)")

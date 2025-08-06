@@ -24,7 +24,7 @@ extension OSLogInterceptor: HTTPRequestModifier {
   }
 }
 
-extension OSLogInterceptor: HTTPResponseInterceptor {
+extension OSLogInterceptor: HTTPInterceptor {
   public func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws {
     os_log(logType, log: logger, "%{private}@", response.response.debugDescription)
     if let data = response.data {

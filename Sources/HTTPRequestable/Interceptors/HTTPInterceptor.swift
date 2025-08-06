@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 
 /// Interceptor is a middleware component that can intercept, modify, or observe network requests and responses.
-public protocol HTTPResponseInterceptor: Sendable {
+public protocol HTTPInterceptor: Sendable {
   /// Intercepts and customizes the HTTP response before it is returned from a URLSession.
   ///
   /// This method allows for customization of the HTTP response after it is received from the server. It provides an opportunity to modify the response properties, such as headers or body data, before returning it from a `URLSession`.
@@ -27,7 +27,7 @@ public protocol HTTPResponseInterceptor: Sendable {
 }
 
 /// Default implementation
-public extension HTTPResponseInterceptor {
+public extension HTTPInterceptor {
   @inlinable
   func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws {}
 }
