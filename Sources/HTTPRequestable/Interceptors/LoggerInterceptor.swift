@@ -9,31 +9,34 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-public final class LoggerInterceptor {
+public struct LoggerInterceptor {
   let logger: Logger = .init(category: "LoggerInterceptor")
-  public var logLevel: OSLogType
+  public let logLevel: OSLogType
 
   public init(logLevel: OSLogType = .default) {
     self.logLevel = logLevel
   }
 }
 
-extension LoggerInterceptor: HTTPRequestInterceptor {
-  public func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {
+extension LoggerInterceptor: HTTPRequestModifier {
+  public func modify(_ request: inout HTTPRequest, for session: URLSession) async throws {
     let debugDescription = request.debugDescription
     logger.log(level: logLevel, "\(debugDescription, privacy: .private)")
   }
 }
 
-extension LoggerInterceptor: HTTPResponseInterceptor {
-  public func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws {
+extension LoggerInterceptor: HTTPInterceptor {
+  public func intercept(for request: HTTPRequest, next: Next) async throws -> HTTPAnyResponse {
+    let response = try await next(request)
     let httpResponse = response.response
     logger.log(level: logLevel, "\(httpResponse.debugDescription, privacy: .private)")
     if let data = response.data {
-      logger.log(level: logLevel, "\n\(String(decoding: data, as: UTF8.self), privacy: .private)")
+      logger.log(level: logLevel, "\n\(String(data: data, encoding: .utf8) ?? "nil", privacy: .private)")
     }
     if let url = response.fileURL {
       logger.log(level: logLevel, "\n\(url.absoluteString, privacy: .private)")
     }
+
+    return response
   }
 }

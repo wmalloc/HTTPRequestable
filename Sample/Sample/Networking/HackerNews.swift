@@ -10,15 +10,15 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-class HackerNews: HTTPTransferable, @unchecked Sendable {
-  var requestInterceptors: [any HTTPRequestInterceptor] = []
-  var responseInterceptors: [any HTTPResponseInterceptor] = []
+actor HackerNews: HTTPTransferable {
+  var requestModifiers: [any HTTPRequestModifier] = []
+  var interceptors: [any HTTPInterceptor] = []
 
   private(set) var environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com", path: "/v0")
 
   let session: URLSession
 
-  required init(session: URLSession = .shared) {
+  init(session: URLSession = .shared) {
     self.session = session
     environment.queryItems = [URLQueryItem(name: "print", value: "pretty")]
   }

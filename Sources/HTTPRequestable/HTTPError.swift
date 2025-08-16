@@ -26,7 +26,10 @@ public enum HTTPError: LocalizedError {
 
   /// Thrown when the specified content type is invalid or does not match expected format.
   case invalidContentType
-  
+
+  /// Thrown when header value is missing
+  case headerValueMissing(String)
+
   public var errorDescription: String? {
     description
   }
@@ -36,17 +39,25 @@ extension HTTPError: CustomStringConvertible {
   public var description: String {
     switch self {
     case .invalidURL:
-      return String(localized: "error_invalid_url", bundle: .module)
+      String(localized: "error_invalid_url", bundle: .module)
+
     case .cannotCreateURLRequest:
-      return String(localized: "error_cant_create_url_request", bundle: .module)
+      String(localized: "error_cant_create_url_request", bundle: .module)
+
     case .cannotConvertToHTTPResponse:
-      return String(localized: "error_cant_convert_to_http_response", bundle: .module)
+      String(localized: "error_cant_convert_to_http_response", bundle: .module)
+
     case .cannotConvertToHTTPURLResponse:
-      return String(localized: "error_cant_convert_to_http_url_response", bundle: .module)
+      String(localized: "error_cant_convert_to_http_url_response", bundle: .module)
+
     case .contentTypeHeaderMissing:
-      return String(localized: "error_content_type_header_missing", bundle: .module)
+      String(localized: "error_content_type_header_missing", bundle: .module)
+
     case .invalidContentType:
-      return String(localized: "error_invalid_content_type", bundle: .module)
+      String(localized: "error_invalid_content_type", bundle: .module)
+
+    case .headerValueMissing(let header):
+      String(format: String(localized: "error_header_value_missing", bundle: .module), header)
     }
   }
 }

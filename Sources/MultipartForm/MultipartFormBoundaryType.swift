@@ -27,8 +27,10 @@ public enum MultipartFormBoundaryType: Hashable, Identifiable, CaseIterable, Sen
     switch boundaryType {
     case .initial:
       "--\(boundary)\(EncodingCharacters.crlf)"
+
     case .interstitial:
       "\(EncodingCharacters.crlf)--\(boundary)\(EncodingCharacters.crlf)"
+
     case .final:
       "\(EncodingCharacters.crlf)--\(boundary)--\(EncodingCharacters.crlf)"
     }

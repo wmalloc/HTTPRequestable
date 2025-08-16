@@ -1,5 +1,5 @@
 //
-//  HTTPRequestInterceptor.swift
+//  HTTPRequestModifier.swift
 //  HTTPRequestable
 //
 //  Created by Waqar Malik on 9/24/24.
@@ -8,7 +8,7 @@
 import Foundation
 import HTTPTypes
 
-public protocol HTTPRequestInterceptor {
+public protocol HTTPRequestModifier: Sendable {
   /// Intercepts and customizes the HTTP request before it is sent through a URLSession.
   ///
   /// This method allows for customization of the HTTP request before it is sent to the server. It provides an opportunity to modify the request properties, such as headers or body data, before the request is sent through a `URLSession`.
@@ -22,10 +22,10 @@ public protocol HTTPRequestInterceptor {
   /// - Note: This method is called automatically by the `object(for:)` and `data(for:)` methods to allow for request customization.
   ///
   /// - SeeAlso: `HTTPRequestable`, `URLSession`
-  func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws
+  func modify(_ request: inout HTTPRequest, for session: URLSession) async throws
 }
 
 /// Default implemenation
-public extension HTTPRequestInterceptor {
-  func intercept(_ request: inout HTTPRequest, for session: URLSession) async throws {}
+public extension HTTPRequestModifier {
+  func modify(_ request: inout HTTPRequest, for session: URLSession) async throws {}
 }
