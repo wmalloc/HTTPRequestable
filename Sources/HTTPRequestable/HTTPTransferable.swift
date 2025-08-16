@@ -16,7 +16,7 @@ private let logger = Logger(.init(category: "HTTPTransferable"))
 private let logger = Logger(.disabled)
 #endif
 
-public protocol HTTPTransferable: Sendable, AnyObject, Actor {
+public protocol HTTPTransferable: AnyObject, Sendable {
   var session: URLSession { get }
 
   /// Request Modifiers
@@ -26,11 +26,6 @@ public protocol HTTPTransferable: Sendable, AnyObject, Actor {
   var interceptors: [any HTTPInterceptor] { get }
 
   init(session: URLSession)
-
-  /// Request to sent to server
-  /// - Parameter request: Description of the request
-  /// - Returns: request to be sent to server
-  func httpRequest(_ request: some HTTPRequestable) async throws -> HTTPRequest
 
   /// Performs a network request and returns the raw response.
   ///
