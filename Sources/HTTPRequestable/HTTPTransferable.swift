@@ -171,6 +171,7 @@ extension HTTPTransferable {
   /// - Parameter request: Description of the request
   /// - Returns: request to be sent to server
   func httpRequest(_ request: some HTTPRequestable) async throws -> HTTPRequest {
+    logger.trace("[IN]: \(#function)")
     var updatedRequest = try request.httpRequest
     for try modifier in requestModifiers {
       try await modifier.modify(&updatedRequest, for: session)
@@ -195,6 +196,7 @@ extension HTTPTransferable {
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
   func send(request: HTTPRequest, interceptor: HTTPInterceptor.Next) async throws -> HTTPAnyResponse {
+    logger.trace("[IN]: \(#function)")
     var next = interceptor
     for try interceptor in interceptors.reversed() {
       let _next = next
@@ -215,7 +217,7 @@ public extension HTTPTransferable {
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
   func data(for request: HTTPRequest, httpBody body: Data? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
-    logger.trace("[IN]: \(#function), path - \(request.url?.path ?? "nil")")
+    logger.trace("[IN]: \(#function)")
     let (data, httpResponse) = if let body {
       try await session.upload(for: request, from: body, delegate: delegate)
     } else {
