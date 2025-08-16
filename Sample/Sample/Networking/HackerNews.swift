@@ -10,9 +10,9 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-actor HackerNews: HTTPTransferable {
-  var requestModifiers: [any HTTPRequestModifier] = []
-  var interceptors: [any HTTPInterceptor] = []
+class HackerNews: HTTPTransferable, @unchecked Sendable {
+  private(set) var requestModifiers: [any HTTPRequestModifier] = []
+  private(set) var interceptors: [any HTTPInterceptor] = []
 
   private(set) var environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com", path: "/v0")
 

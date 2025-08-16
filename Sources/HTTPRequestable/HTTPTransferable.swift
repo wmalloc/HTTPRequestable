@@ -16,7 +16,7 @@ private let logger = Logger(.init(category: "HTTPTransferable"))
 private let logger = Logger(.disabled)
 #endif
 
-public protocol HTTPTransferable: Sendable, AnyObject, Actor {
+public protocol HTTPTransferable: AnyObject, Sendable {
   var session: URLSession { get }
 
   /// Request Modifiers
@@ -27,10 +27,43 @@ public protocol HTTPTransferable: Sendable, AnyObject, Actor {
 
   init(session: URLSession)
 
-  /// Request to sent to server
-  /// - Parameter request: Description of the request
-  /// - Returns: request to be sent to server
-  func httpRequest(_ request: some HTTPRequestable) async throws -> HTTPRequest
+  /// Performs a network request and returns the raw response.
+  ///
+  /// This method is part of an asynchronous networking layer that sends an `HTTPRequest`
+  /// (a type‑aliased wrapper around `URLRequest`) using `URLSession`.
+  ///
+  /// The caller can provide an optional HTTP body (`Data?`) and an optional task delegate.
+  /// If a delegate is supplied, it will be used for the created `URLSessionTask`; otherwise,
+  /// the default delegate of the session is used.
+  ///
+  /// - Parameters:
+  ///   - request: The `HTTPRequest` to send. This includes the URL, method, headers, etc.
+  ///   - body: Optional raw HTTP body data that will be attached to the request.
+  ///     If `nil`, no body is added.
+  ///   - delegate: An optional object conforming to `URLSessionTaskDelegate`.
+  ///     It is used for task‑level callbacks such as authentication challenges or progress updates.
+  /// - Returns: A value of type `HTTPAnyResponse`, which encapsulates the status code,
+  ///   headers, and raw data returned by the server. The caller can then decode
+  ///   this response into a more specific model if desired.
+  /// - Throws:
+  ///   - Any error thrown by `URLSession` during task creation or execution.
+  ///   - Network‑level errors such as connection failures or timeouts.
+  ///
+  /// Example usage:
+  ///
+  /// ```swift
+  /// let request = HTTPRequest(url: URL(string: "https://api.example.com")!)
+  /// do {
+  ///     let response = try await client.data(for: request, httpBody: nil, delegate: nil)
+  ///     // Handle `response`
+  /// } catch {
+  ///     print("Network error:", error)
+  /// }
+  /// ```
+  ///
+  /// This method is designed to be called from an asynchronous context (`async/await`)
+  /// and will automatically propagate any networking errors up the call chain.
+  func data(for request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Performs a network request and returns the raw response.
   ///
