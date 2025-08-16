@@ -20,10 +20,10 @@ public protocol HTTPTransferable: Sendable, AnyObject, Actor {
   var session: URLSession { get }
 
   /// Request Modifiers
-  var requestModifiers: [any HTTPRequestModifier] { get set }
+  var requestModifiers: [any HTTPRequestModifier] { get }
 
   /// Response Interceptors
-  var interceptors: [any HTTPInterceptor] { get set }
+  var interceptors: [any HTTPInterceptor] { get }
 
   init(session: URLSession)
 
@@ -166,7 +166,7 @@ public protocol HTTPTransferable: Sendable, AnyObject, Actor {
 }
 
 /// Default implementations of the protocol
-public extension HTTPTransferable {
+extension HTTPTransferable {
   /// Request to sent to server
   /// - Parameter request: Description of the request
   /// - Returns: request to be sent to server
@@ -178,6 +178,36 @@ public extension HTTPTransferable {
     return updatedRequest
   }
 
+  /// Sends the given HTTP request through the provided interceptor chain and returns the resulting response.
+  ///
+  /// This method applies the registered interceptors to the provided request in reverse order, wrapping each one around the provided `interceptor` closure.
+  /// The resulting chain is then executed asynchronously, allowing each interceptor to observe and modify the request or response as needed before ultimately
+  /// forwarding the response back to the caller.
+  ///
+  /// - Parameters:
+  ///   - request: The `HTTPRequest` to send through the interceptor chain.
+  ///   - interceptor: The terminal closure that is called to perform the actual network operation. This closure receives the (potentially modified)
+  ///     request and returns an `HTTPAnyResponse` asynchronously. Interceptors can call this closure to forward the request and receive the response.
+  ///
+  /// - Returns: An `HTTPAnyResponse` containing the data and metadata received from the server after all interceptors have been applied.
+  ///
+  /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
+  ///
+  /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
+  func send(request: HTTPRequest, interceptor: HTTPInterceptor.Next) async throws -> HTTPAnyResponse {
+    var next = interceptor
+    for try interceptor in interceptors.reversed() {
+      let _next = next
+      next = {
+        try await interceptor.intercept(for: $0, next: _next)
+      }
+    }
+    return try await next(request)
+  }
+}
+
+/// Default implementations of the protocol
+public extension HTTPTransferable {
   /// Send the request and get the raw data back
   /// - Parameters:
   ///   - request: The `HTTPRequestable` for which to load data.
@@ -185,7 +215,7 @@ public extension HTTPTransferable {
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
   func data(for request: HTTPRequest, httpBody body: Data? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
-    logger.trace("[IN]: \(#function)")
+    logger.trace("[IN]: \(#function), path - \(request.url?.path ?? "nil")")
     let (data, httpResponse) = if let body {
       try await session.upload(for: request, from: body, delegate: delegate)
     } else {
@@ -202,11 +232,10 @@ public extension HTTPTransferable {
   func data(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
-    var response = try await data(for: updatedRequest, httpBody: request.httpBody, delegate: delegate)
-    for try interceptor in interceptors.reversed() {
-      try await interceptor.intercept(&response, for: session)
+    let next: HTTPInterceptor.Next = {
+      try await self.data(for: $0, httpBody: request.httpBody, delegate: delegate)
     }
-    return response
+    return try await send(request: updatedRequest, interceptor: next)
   }
 
   /// Convenience method to upload data using an `HTTPRequestable`; creates and resumes a `URLSessionUploadTask` internally.
@@ -218,12 +247,11 @@ public extension HTTPTransferable {
   func upload(for request: some HTTPRequestable, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
-    let (data, response) = try await session.upload(for: updatedRequest, fromFile: fileURL, delegate: delegate)
-    var result = HTTPAnyResponse(request: updatedRequest, response: response, data: data)
-    for try interceptor in interceptors.reversed() {
-      try await interceptor.intercept(&result, for: session)
+    let next: HTTPInterceptor.Next = {
+      let (data, response) = try await self.session.upload(for: updatedRequest, fromFile: fileURL, delegate: delegate)
+      return HTTPAnyResponse(request: $0, response: response, data: data)
     }
-    return result
+    return try await send(request: updatedRequest, interceptor: next)
   }
 
   /// Convenience method to upload data using an `HTTPRequestable`, creates and resumes a `URLSessionUploadTask` internally.
@@ -235,12 +263,11 @@ public extension HTTPTransferable {
   func upload(for request: some HTTPRequestable, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
-    let (data, response) = try await session.upload(for: updatedRequest, from: bodyData, delegate: delegate)
-    var result = HTTPAnyResponse(request: updatedRequest, response: response, data: data)
-    for try interceptor in interceptors.reversed() {
-      try await interceptor.intercept(&result, for: session)
+    let next: HTTPInterceptor.Next = {
+      let (data, response) = try await self.session.upload(for: $0, from: bodyData, delegate: delegate)
+      return HTTPAnyResponse(request: $0, response: response, data: data)
     }
-    return result
+    return try await send(request: updatedRequest, interceptor: next)
   }
 
   /// Convenience method to download using an `HTTPRequestable`; creates and resumes a `URLSessionDownloadTask` internally.
@@ -251,12 +278,11 @@ public extension HTTPTransferable {
   func download(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
-    let (url, response) = try await session.download(for: updatedRequest, delegate: delegate)
-    var result = HTTPAnyResponse(request: updatedRequest, response: response, fileURL: url)
-    for try interceptor in interceptors.reversed() {
-      try await interceptor.intercept(&result, for: session)
+    let next: HTTPInterceptor.Next = {
+      let (url, response) = try await self.session.download(for: updatedRequest, delegate: delegate)
+      return HTTPAnyResponse(request: $0, response: response, data: nil, fileURL: url)
     }
-    return result
+    return try await send(request: updatedRequest, interceptor: next)
   }
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.

@@ -26,7 +26,8 @@ extension LoggerInterceptor: HTTPRequestModifier {
 }
 
 extension LoggerInterceptor: HTTPInterceptor {
-  public func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws {
+  public func intercept(for request: HTTPRequest, next: Next) async throws -> HTTPAnyResponse {
+    let response = try await next(request)
     let httpResponse = response.response
     logger.log(level: logLevel, "\(httpResponse.debugDescription, privacy: .private)")
     if let data = response.data {
@@ -35,5 +36,7 @@ extension LoggerInterceptor: HTTPInterceptor {
     if let url = response.fileURL {
       logger.log(level: logLevel, "\n\(url.absoluteString, privacy: .private)")
     }
+
+    return response
   }
 }

@@ -10,24 +10,40 @@ import HTTPTypes
 
 /// Interceptor is a middleware component that can intercept, modify, or observe network requests and responses.
 public protocol HTTPInterceptor: Sendable {
-  /// Intercepts and customizes the HTTP response before it is returned from a URLSession.
+  /// A closure type representing the next step in the interceptor chain.
   ///
-  /// This method allows for customization of the HTTP response after it is received from the server. It provides an opportunity to modify the response properties, such as headers or body data, before returning it from a `URLSession`.
+  /// This typealias is used to forward the current HTTP request, optional body data, and an optional delegate
+  /// to the next interceptor or the actual network execution. It allows interceptors to perform pre-processing,
+  /// post-processing, or short-circuit the request handling.
   ///
   /// - Parameters:
-  ///   - response: A reference to an `HTTPAnyResponse` object that can be modified in place. The type of `HTTPAnyResponse` must conform to `HTTPResponse`.
-  ///   - session: The `URLSession` from which the response was received. This parameter is provided so that you can adjust the response based on the session's configuration or other properties.
-  /// - Throws: An error of type `Error` if there is an issue with the interceptor logic, such as invalid input.
-  ///
-  /// - Note: The `HTTPAnyResponse` type must conform to `HTTPResponse` for this method to work correctly.
-  /// - Note: This method is called automatically by the `object(for:)` and `data(for:)` methods to allow for response customization.
-  ///
-  /// - SeeAlso: `HTTPResponse`, `URLSession`
-  func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws
+  ///   - request: The `HTTPRequest` object representing the original or modified outbound HTTP request.
+  /// - Returns: An `HTTPAnyResponse` representing the response for the request.
+  /// - Throws: Propagates any error thrown by the next interceptor or the underlying network operation.
+  typealias Next = (_ request: HTTPRequest) async throws -> HTTPAnyResponse
+
+  /**
+   Intercepts an outgoing HTTP request, allowing modification, observation, or short-circuiting of the request before it continues through the interceptor chain.
+
+   Use this method to inspect or alter the outgoing request, modify the request body, provide a custom response, or perform asynchronous work before delegating to the next interceptor. If you do not call `next`, the chain is short-circuited and your response will be returned instead.
+
+   - Parameters:
+   - request: The `HTTPRequest` representing the outbound HTTP request to be sent.
+   - next: A closure for invoking the next interceptor or performing the actual network operation. Call this with (potentially modified) arguments to continue the chain.
+
+   - Returns: An `HTTPAnyResponse` representing the network response or an interceptor-provided response.
+
+   - Throws: Propagates any error thrown by the next interceptor or the underlying network operation, or throws an error if intercepting fails.
+
+   - Note: If you wish to continue the request with modified values, call `next` using the new values. If you wish to terminate the chain early, do not call `next` and instead return or throw your own response or error.
+   */
+  func intercept(for request: HTTPRequest, next: Next) async throws -> HTTPAnyResponse
 }
 
 /// Default implementation
 public extension HTTPInterceptor {
   @inlinable
-  func intercept(_ response: inout HTTPAnyResponse, for session: URLSession) async throws {}
+  func intercept(for request: HTTPRequest, next: Next) async throws -> HTTPAnyResponse {
+    try await next(request)
+  }
 }
