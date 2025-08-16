@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 
 /// Raw response from the api call
-public struct HTTPAnyResponse: Sendable {
+public struct HTTPAnyResponse: Hashable, Sendable {
   /// Request that was sent to the server
   public let request: HTTPRequest
 
@@ -30,13 +30,26 @@ public struct HTTPAnyResponse: Sendable {
   ///   - fileURL: fileurl if downloading the file
   public init(request: HTTPRequest, response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil) {
     self.request = request
+    self.response = response
     self.data = data
     self.fileURL = fileURL
-    self.response = response
   }
 }
 
 public extension HTTPAnyResponse {
+  /// The response header fields.
+  @inlinable
+  var headerFields: HTTPFields {
+    response.headerFields
+  }
+
+  /// The response headers.
+  var headers: [String: String] {
+    response.headerFields.reduce(into: [:]) { partialResult, field in
+      partialResult[field.name.rawName] = field.value
+    }
+  }
+
   /// If there was a server error
   @inlinable
   var error: Error? {
@@ -88,6 +101,20 @@ public extension HTTPAnyResponse {
 
     // success
     return self
+  }
+
+  /// Validates the content type if acceptable content types are given.
+  /// - Parameter acceptableContentTypes: Set of acceptable content types, defaults to nil.
+  /// - Returns: Self if the content type is acceptable.
+  @discardableResult
+  func validateContentType(_ acceptableContentTypes: Set<HTTPContentType>? = nil) throws -> Self {
+    guard let acceptableContentTypes else {
+      return self
+    }
+    let contentTypes: Set<String> = acceptableContentTypes.reduce(into: []) { result, type in
+      result.insert(type.rawValue)
+    }
+    return try validateContentType(contentTypes)
   }
 }
 

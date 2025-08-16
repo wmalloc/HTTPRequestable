@@ -12,7 +12,7 @@ let package = Package(
     .library(name: "MockURLProtocol", targets: ["MockURLProtocol"])
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-http-types.git", from: "1.3.1")
+    .package(url: "https://github.com/apple/swift-http-types.git", from: "1.4.0")
   ],
   targets: [
     .target(name: "HTTPRequestable", dependencies: [.product(name: "HTTPTypes", package: "swift-http-types"),
@@ -24,7 +24,9 @@ let package = Package(
                                                   .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
             resources: [.process("Resources")],
             swiftSettings: []),
-    .target(name: "MockURLProtocol", dependencies: []),
+    .target(name: "MockURLProtocol", dependencies: ["HTTPRequestable",
+                                                    .product(name: "HTTPTypes", package: "swift-http-types"),
+                                                    .product(name: "HTTPTypesFoundation", package: "swift-http-types")]),
     .testTarget(name: "HTTPRequestableTests",
                 dependencies: ["HTTPRequestable", "MultipartForm", "MockURLProtocol",
                                .product(name: "HTTPTypes", package: "swift-http-types"),

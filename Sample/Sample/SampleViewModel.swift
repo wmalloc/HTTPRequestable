@@ -7,6 +7,7 @@
 
 import Foundation
 import OSLog
+import SwiftUI
 
 @MainActor @Observable
 class SampleViewModel {
@@ -26,6 +27,9 @@ class SampleViewModel {
 
   func topStories() async throws {
     let items = try await hackerNews.topStories()
-    self.items = items
+
+    withAnimation {
+      self.items = items
+    }
   }
 }

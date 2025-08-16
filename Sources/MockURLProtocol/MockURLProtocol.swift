@@ -1,46 +1,54 @@
 //
 //  MockURLProtocol.swift
 //
-//
 //  Created by Waqar Malik on 5/31/24.
 //
 
 import Foundation
+import HTTPRequestable
 
-public class MockURLProtocol: URLProtocol {
-  public typealias RequestHandler = (URLRequest) throws -> (HTTPURLResponse, Data?)
+public class MockURLProtocol: URLProtocol, @unchecked Sendable {
+  private static let requestHandlerStorage = RequestHandlerStorage()
 
-  public nonisolated(unsafe) static var requestHandlers: [URL: RequestHandler] = [:]
+  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forRequest request: any HTTPRequestable) async throws {
+    guard let identifier = request.testIdentifier else {
+      throw URLError(.badURL)
+    }
+    await requestHandlerStorage.setHandler({ request in
+      try await handler(request)
+    }, forIdentifier: identifier)
+  }
+
+  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forURL url: URL) async {
+    await requestHandlerStorage.setHandler({ request in
+      try await handler(request)
+    }, forIdentifier: url.absoluteString)
+  }
+
+  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forIdentifier identifier: String) async {
+    await requestHandlerStorage.setHandler({ request in
+      try await handler(request)
+    }, forIdentifier: identifier)
+  }
 
   override public class func canInit(with _: URLRequest) -> Bool { true }
   override public class func canInit(with _: URLSessionTask) -> Bool { true }
   override public class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
 
+  func executeHandler(for request: URLRequest) async throws -> (HTTPURLResponse, Data) {
+    try await Self.requestHandlerStorage.executeHandler(for: request)
+  }
+
   override public func startLoading() {
-    guard let client else {
-      fatalError("missing client")
-    }
-
-    let validCodes = Set(200 ..< 300)
-    do {
-      guard let url = request.url, let handler = Self.requestHandlers.removeValue(forKey: url) else {
-        throw URLError(.badURL)
+    Task {
+      do {
+        let (response, data) = try await executeHandler(for: request)
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: data)
+        client?.urlProtocolDidFinishLoading(self)
+      } catch {
+        client?.urlProtocol(self, didFailWithError: error)
       }
-
-      let (response, data) = try handler(request)
-      if !validCodes.contains(response.statusCode) {
-        throw URLError(URLError.Code(rawValue: response.statusCode))
-      }
-
-      client.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-
-      if let data {
-        client.urlProtocol(self, didLoad: data)
-      }
-
-      client.urlProtocolDidFinishLoading(self)
-    } catch {
-      client.urlProtocol(self, didFailWithError: error)
     }
   }
 

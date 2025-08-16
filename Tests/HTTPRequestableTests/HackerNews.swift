@@ -9,19 +9,19 @@ import Foundation
 @testable import HTTPRequestable
 import HTTPTypes
 
-class HackerNews: HTTPTransferable, @unchecked Sendable {
-  var requestInterceptors: [any HTTPRequestInterceptor] = []
-  var responseInterceptors: [any HTTPResponseInterceptor] = []
+actor HackerNews: HTTPTransferable {
+  var requestModifiers: [any HTTPRequestModifier] = []
+  var interceptors: [any HTTPInterceptor] = []
 
   let session: URLSession
 
-  private(set) var environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com", path: "/v0")
+  let environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com", path: "/v0")
 
-  required init(session: URLSession = .shared) {
+  init(session: URLSession = .shared) {
     self.session = session
     let logger = LoggerInterceptor()
-    requestInterceptors.append(logger)
-    responseInterceptors.append(logger)
+    requestModifiers.append(logger)
+    interceptors.append(logger)
   }
 }
 
