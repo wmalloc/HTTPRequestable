@@ -18,7 +18,7 @@ class HackerNews: HTTPTransferable, @unchecked Sendable {
 
   let session: URLSession
 
-  init(session: URLSession = .shared) {
+  required init(session: URLSession = .shared) {
     self.session = session
     environment.queryItems = [URLQueryItem(name: "print", value: "pretty")]
   }
