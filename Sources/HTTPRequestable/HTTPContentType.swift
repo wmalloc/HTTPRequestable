@@ -7,6 +7,7 @@
 import Foundation
 
 /// Request Content types
+@frozen
 public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
   public var rawValue: String // ISOLatin1String
 

@@ -42,16 +42,16 @@ struct RequestInterceptorTests {
 
   @Test func storageTests() async throws {
     var storage = [any HTTPRequestModifier]()
-    #expect(await storage.isEmpty)
+    #expect(storage.isEmpty)
     storage.append(OSLogInterceptor())
-    #expect(await !storage.isEmpty)
-    #expect(await storage.count == 1)
+    #expect(!storage.isEmpty)
+    #expect(storage.count == 1)
     storage.remove(at: 0)
-    #expect(await storage.isEmpty)
-    #expect(await storage.count == 0)
+    #expect(storage.isEmpty)
+    #expect(storage.count == 0)
     storage.append(OSLogInterceptor())
     storage.append(LoggerInterceptor())
-    #expect(await storage.count == 2)
+    #expect(storage.count == 2)
     storage.append(AddContentTypeModifier())
   }
 
