@@ -20,7 +20,7 @@ public protocol HTTPInterceptor: Sendable {
   ///   - request: The `HTTPRequest` object representing the original or modified outbound HTTP request.
   /// - Returns: An `HTTPAnyResponse` representing the response for the request.
   /// - Throws: Propagates any error thrown by the next interceptor or the underlying network operation.
-  typealias Next = (_ request: HTTPRequest) async throws -> HTTPAnyResponse
+  typealias Next = (_ request: HTTPRequest, _ delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /**
    Intercepts an outgoing HTTP request, allowing modification, observation, or short-circuiting of the request before it continues through the interceptor chain.
@@ -37,13 +37,13 @@ public protocol HTTPInterceptor: Sendable {
 
    - Note: If you wish to continue the request with modified values, call `next` using the new values. If you wish to terminate the chain early, do not call `next` and instead return or throw your own response or error.
    */
-  func intercept(for request: HTTPRequest, next: Next) async throws -> HTTPAnyResponse
+  func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 }
 
 /// Default implementation
 public extension HTTPInterceptor {
   @inlinable
-  func intercept(for request: HTTPRequest, next: Next) async throws -> HTTPAnyResponse {
-    try await next(request)
+  func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
+    try await next(request, delegate)
   }
 }

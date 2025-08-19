@@ -7,6 +7,30 @@
 
 import Foundation
 
+/// A structure that wraps an item with a set of associated key-value string parameters.
+///
+/// `KeyedItem` provides a convenient way to associate additional metadata (as a dictionary of `String` keys and values)
+/// with any item conforming to `Codable`, `Equatable`, and `Sendable`. The structure also supports collection-like
+/// access to its parameters and custom string descriptions.
+///
+/// - Note: The structure is frozen, which means future versions will not add stored properties, ensuring binary compatibility.
+///
+/// - Parameters:
+///   - ItemType: The type of the item to associate parameters with. Must conform to `Codable`, `Equatable`, and `Sendable`.
+///
+/// # Example
+/// ```swift
+/// let item = KeyedItem(item: 42, parameters: ["unit": "kg", "precision": "2"])
+/// print(item["unit"]) // Optional("kg")
+/// print(item.encoded) // "42; unit=kg; precision=2"
+/// ```
+///
+/// # Collection Conformance
+/// `KeyedItem` conforms to `Collection`, enabling iteration over its parameters.
+///
+/// # Thread Safety
+/// `KeyedItem` is `Sendable` as long as its `ItemType` is `Sendable`, making it safe for use in concurrent contexts.
+@frozen
 public struct KeyedItem<ItemType: Codable & Equatable & Sendable>: Equatable, Sendable {
   public let item: ItemType
   public var parameters: [String: String]

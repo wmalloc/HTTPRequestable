@@ -190,16 +190,16 @@ extension HTTPTransferable {
   /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
-  func send(request: HTTPRequest, interceptor: HTTPInterceptor.Next) async throws -> HTTPAnyResponse {
+  func send(request: HTTPRequest, interceptor: HTTPInterceptor.Next, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     var next = interceptor
     for try interceptor in interceptors.reversed() {
       let _next = next
       next = {
-        try await interceptor.intercept(for: $0, next: _next)
+        try await interceptor.intercept(for: $0, next: _next, delegate: $1)
       }
     }
-    return try await next(request)
+    return try await next(request, delegate)
   }
 }
 
@@ -230,9 +230,9 @@ public extension HTTPTransferable {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
     let next: HTTPInterceptor.Next = {
-      try await self.data(for: $0, httpBody: request.httpBody, delegate: delegate)
+      try await self.data(for: $0, httpBody: request.httpBody, delegate: $1)
     }
-    return try await send(request: updatedRequest, interceptor: next)
+    return try await send(request: updatedRequest, interceptor: next, delegate: delegate)
   }
 
   /// Convenience method to upload data using an `HTTPRequestable`; creates and resumes a `URLSessionUploadTask` internally.
@@ -245,10 +245,10 @@ public extension HTTPTransferable {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
     let next: HTTPInterceptor.Next = {
-      let (data, response) = try await self.session.upload(for: updatedRequest, fromFile: fileURL, delegate: delegate)
+      let (data, response) = try await self.session.upload(for: updatedRequest, fromFile: fileURL, delegate: $1)
       return HTTPAnyResponse(request: $0, response: response, data: data)
     }
-    return try await send(request: updatedRequest, interceptor: next)
+    return try await send(request: updatedRequest, interceptor: next, delegate: delegate)
   }
 
   /// Convenience method to upload data using an `HTTPRequestable`, creates and resumes a `URLSessionUploadTask` internally.
@@ -261,10 +261,10 @@ public extension HTTPTransferable {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
     let next: HTTPInterceptor.Next = {
-      let (data, response) = try await self.session.upload(for: $0, from: bodyData, delegate: delegate)
+      let (data, response) = try await self.session.upload(for: $0, from: bodyData, delegate: $1)
       return HTTPAnyResponse(request: $0, response: response, data: data)
     }
-    return try await send(request: updatedRequest, interceptor: next)
+    return try await send(request: updatedRequest, interceptor: next, delegate: delegate)
   }
 
   /// Convenience method to download using an `HTTPRequestable`; creates and resumes a `URLSessionDownloadTask` internally.
@@ -276,10 +276,10 @@ public extension HTTPTransferable {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
     let next: HTTPInterceptor.Next = {
-      let (url, response) = try await self.session.download(for: updatedRequest, delegate: delegate)
+      let (url, response) = try await self.session.download(for: updatedRequest, delegate: $1)
       return HTTPAnyResponse(request: $0, response: response, data: nil, fileURL: url)
     }
-    return try await send(request: updatedRequest, interceptor: next)
+    return try await send(request: updatedRequest, interceptor: next, delegate: delegate)
   }
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.
