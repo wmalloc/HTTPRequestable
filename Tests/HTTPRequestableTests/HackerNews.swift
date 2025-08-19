@@ -9,7 +9,7 @@ import Foundation
 @testable import HTTPRequestable
 import HTTPTypes
 
-actor HackerNews: HTTPTransferable {
+final class HackerNews: HTTPTransferable, @unchecked Sendable {
   var requestModifiers: [any HTTPRequestModifier] = []
   var interceptors: [any HTTPInterceptor] = []
 
