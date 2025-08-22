@@ -27,7 +27,7 @@ import OSLog
 ///
 @frozen
 public struct OSLogInterceptor {
-  let logger: OSLog = .init(category: "OSLogInterceptor")
+  public let logger: OSLog = .init(category: "OSLogInterceptor")
   public let logType: OSLogType
 
   public init(logType: OSLogType = .default) {
@@ -42,15 +42,27 @@ extension OSLogInterceptor: HTTPRequestModifier {
 }
 
 extension OSLogInterceptor: HTTPInterceptor {
-  public func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
-    let response = try await next(request, delegate)
-    os_log(logType, log: logger, "%{private}@", response.response.debugDescription)
-    if let data = response.data {
+  public func log(request: HTTPRequest, data: Data? = nil) {
+    os_log(logType, log: logger, "%{private}@", request.debugDescription)
+    if let data {
       os_log(logType, log: logger, "\n%{private}@", String(data: data, encoding: .utf8) ?? "nil")
     }
-    if let url = response.fileURL {
-      os_log(logType, log: logger, "\n%{private}@", url.absoluteString)
+  }
+
+  public func log(response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil) {
+    os_log(logType, log: logger, "%{private}@", response.debugDescription)
+    if let data {
+      os_log(logType, log: logger, "\n%{private}@", String(data: data, encoding: .utf8) ?? "nil")
     }
+    if let fileURL {
+      os_log(logType, log: logger, "\n%{private}@", fileURL.absoluteString)
+    }
+  }
+
+  public func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
+    let response = try await next(request, delegate)
+    log(request: request, data: nil)
+    log(response: response.response, data: response.data, fileURL: response.fileURL)
     return response
   }
 }
