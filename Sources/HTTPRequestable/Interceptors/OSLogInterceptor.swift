@@ -49,7 +49,11 @@ extension OSLogInterceptor: HTTPInterceptor {
     }
   }
 
-  public func log(response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil) {
+  public func log(response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil, error: (any Error)? = nil) {
+    Self.log(logger, logType: logType, response: response, data: data, fileURL: fileURL, error: error)
+  }
+
+  public static func log(_ logger: OSLog, logType: OSLogType, response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil, error: (any Error)? = nil) {
     os_log(logType, log: logger, "%{private}@", response.debugDescription)
     if let data {
       os_log(logType, log: logger, "\n%{private}@", String(data: data, encoding: .utf8) ?? "nil")
@@ -57,12 +61,15 @@ extension OSLogInterceptor: HTTPInterceptor {
     if let fileURL {
       os_log(logType, log: logger, "\n%{private}@", fileURL.absoluteString)
     }
+    if let error {
+      os_log(logType, log: logger, "\n%{private}@", "\(error)")
+    }
   }
 
   public func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
     let response = try await next(request, delegate)
     log(request: request, data: nil)
-    log(response: response.response, data: response.data, fileURL: response.fileURL)
+    log(response: response.response, data: response.data, fileURL: response.fileURL, error: response.error)
     return response
   }
 }
