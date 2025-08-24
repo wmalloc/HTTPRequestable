@@ -54,20 +54,27 @@ extension LoggerInterceptor: HTTPInterceptor {
     }
   }
 
-  public func log(response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil) {
-    logger.log(level: logLevel, "\(response.debugDescription, privacy: .private)")
+  public func log(response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil, error: (any Error)? = nil) {
+    Self.log(logger, level: logLevel, response: response, data: data, fileURL: fileURL, error: error)
+  }
+
+  public static func log(_ logger: Logger, level: OSLogType, response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil, error: (any Error)? = nil) {
+    logger.log(level: level, "\(response.debugDescription, privacy: .private)")
     if let data {
-      logger.log(level: logLevel, "\n\(String(data: data, encoding: .utf8) ?? "nil", privacy: .private)")
+      logger.log(level: level, "\n\(String(data: data, encoding: .utf8) ?? "nil", privacy: .private)")
     }
     if let fileURL {
-      logger.log(level: logLevel, "\n\(fileURL.absoluteString, privacy: .private)")
+      logger.log(level: level, "\n\(fileURL.absoluteString, privacy: .private)")
+    }
+    if let error {
+      logger.log(level: level, "\(error)")
     }
   }
 
   public func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
     let response = try await next(request, delegate)
     log(request: request, data: nil)
-    log(response: response.response, data: response.data, fileURL: response.fileURL)
+    log(response: response.response, data: response.data, fileURL: response.fileURL, error: response.error)
     return response
   }
 }
