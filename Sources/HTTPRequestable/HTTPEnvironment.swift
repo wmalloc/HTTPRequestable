@@ -13,14 +13,14 @@ public extension HTTPEnvironment {
   /// Initializes an `HTTPEnvironment` with the given scheme, authority (host), and optional path.
   ///
   /// - Parameters:
-  ///   - scheme: The scheme of the URL (e.g., "https").
   ///   - authority: The authority part of the URL which includes the host.
+  ///   - scheme: The scheme of the URL (e.g., "https").
   ///   - path: The path component of the URL (optional).
-  init(scheme: String, authority: String, path: String = "") {
+  init(authority: String, scheme: String = "https", path: String? = nil) {
     self.init()
     self.scheme = scheme
     self.host = authority
-    self.path = path
+    self.path = path ?? ""
   }
 
   @discardableResult

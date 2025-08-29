@@ -15,7 +15,7 @@ final class HackerNews: HTTPTransferable, @unchecked Sendable {
 
   let session: URLSession
 
-  let environment: HTTPEnvironment = .init(scheme: "https", authority: "hacker-news.firebaseio.com", path: "/v0")
+  let environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
 
   init(session: URLSession = .shared) {
     self.session = session
