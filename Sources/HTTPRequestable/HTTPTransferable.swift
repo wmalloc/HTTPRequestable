@@ -57,7 +57,7 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   ///     let response = try await client.data(for: request, httpBody: nil, delegate: nil)
   ///     // Handle `response`
   /// } catch {
-  ///     print("Network error:", error)
+  ///     os_log("Network error: %@", error)
   /// }
   /// ```
   ///
