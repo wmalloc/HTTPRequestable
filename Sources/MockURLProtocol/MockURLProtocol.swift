@@ -35,14 +35,14 @@ public class MockURLProtocol: URLProtocol, @unchecked Sendable {
   override public class func canInit(with _: URLSessionTask) -> Bool { true }
   override public class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
 
-  func executeHandler(for request: URLRequest) async throws -> (HTTPURLResponse, Data) {
+  func executeHandler(for request: URLRequest) async throws -> (Data, HTTPURLResponse) {
     try await Self.requestHandlerStorage.executeHandler(for: request)
   }
 
   override public func startLoading() {
     Task {
       do {
-        let (response, data) = try await executeHandler(for: request)
+        let (data, response) = try await executeHandler(for: request)
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: data)
         client?.urlProtocolDidFinishLoading(self)
