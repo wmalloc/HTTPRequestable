@@ -9,7 +9,7 @@ import Foundation
 
 extension String {
   @inlinable
-  static var testIdentifier: String {
+  static var xTestIdentifier: Self {
     "X-Test-Identifier"
   }
 }
