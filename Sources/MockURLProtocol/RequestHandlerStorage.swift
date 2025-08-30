@@ -8,7 +8,7 @@
 import Foundation
 import HTTPRequestable
 
-public typealias MockURLRequestHandler = @Sendable (URLRequest) async throws -> (HTTPURLResponse, Data)
+public typealias MockURLRequestHandler = @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse)
 
 actor RequestHandlerStorage {
   private var handlers: [String: MockURLRequestHandler] = [:]
@@ -22,7 +22,7 @@ actor RequestHandlerStorage {
     handlers.removeValue(forKey: identifier)
   }
 
-  func executeHandler(for request: URLRequest) async throws -> (HTTPURLResponse, Data) {
+  func executeHandler(for request: URLRequest) async throws -> (Data, HTTPURLResponse) {
     guard let identifier = request.testIdentifier else {
       throw HTTPError.headerValueMissing(.testIdentifier)
     }
