@@ -6,6 +6,7 @@
 
 import Foundation
 import HTTPRequestable
+import HTTPTypes
 
 public class MockURLProtocol: URLProtocol, @unchecked Sendable {
   private static let requestHandlerStorage = RequestHandlerStorage()
@@ -19,16 +20,13 @@ public class MockURLProtocol: URLProtocol, @unchecked Sendable {
     }, forIdentifier: identifier)
   }
 
-  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forURL url: URL) async {
+  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forIdentifier identifier: any TestIdentifiable) async throws {
+    guard let testIdentifier = identifier.testIdentifier else {
+      throw URLError(.badURL)
+    }
     await requestHandlerStorage.setHandler({ request in
       try await handler(request)
-    }, forIdentifier: url.absoluteString)
-  }
-
-  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forIdentifier identifier: String) async {
-    await requestHandlerStorage.setHandler({ request in
-      try await handler(request)
-    }, forIdentifier: identifier)
+    }, forIdentifier: testIdentifier)
   }
 
   override public class func canInit(with _: URLRequest) -> Bool { true }
