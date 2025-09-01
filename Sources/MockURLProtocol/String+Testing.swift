@@ -7,10 +7,10 @@
 
 import Foundation
 
-extension String {
+public extension String {
   /// A predefined `String` representing the `X-Test-Identifier` header field.
   @inlinable
-  public static var xTestIdentifier: Self {
+  static var xTestIdentifier: Self {
     "X-Test-Identifier"
   }
 }

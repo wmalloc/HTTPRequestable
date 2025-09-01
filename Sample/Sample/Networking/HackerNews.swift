@@ -10,21 +10,29 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-class HackerNews: HTTPTransferable, @unchecked Sendable {
+@globalActor actor HackerNewsActor: GlobalActor {
+  static let shared = HackerNewsActor()
+
+  private init() {}
+}
+
+@HackerNewsActor
+final class HackerNews: HTTPTransferable {
+  static let shared = HackerNews()
   private(set) var requestModifiers: [any HTTPRequestModifier] = []
   private(set) var interceptors: [any HTTPInterceptor] = []
 
   private(set) var environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
-
   let session: URLSession
 
-  required init(session: URLSession = .shared) {
+  nonisolated init(session: URLSession = .shared) {
     self.session = session
     environment.queryItems = [URLQueryItem(name: "print", value: "pretty")]
   }
 }
 
 extension HackerNews {
+  @HackerNewsActor
   func topStories(limit: Int = 20) async throws -> [Item] {
     let stories = try await stories(type: "topstories")
     var items: [Item] = []

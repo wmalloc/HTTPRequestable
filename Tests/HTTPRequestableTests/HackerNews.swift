@@ -9,7 +9,16 @@ import Foundation
 @testable import HTTPRequestable
 import HTTPTypes
 
-final class HackerNews: HTTPTransferable, @unchecked Sendable {
+@globalActor actor HackerNewsActor: GlobalActor {
+  static let shared = HackerNewsActor()
+
+  private init() {}
+}
+
+@HackerNewsActor
+final class HackerNews: HTTPTransferable {
+  static let shared = HackerNews()
+
   var requestModifiers: [any HTTPRequestModifier] = []
   var interceptors: [any HTTPInterceptor] = []
 
@@ -17,7 +26,7 @@ final class HackerNews: HTTPTransferable, @unchecked Sendable {
 
   let environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
 
-  init(session: URLSession = .shared) {
+  nonisolated init(session: URLSession = .shared) {
     self.session = session
     let logger = LoggerInterceptor()
     requestModifiers.append(logger)
