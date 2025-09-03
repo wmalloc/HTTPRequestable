@@ -30,8 +30,7 @@ final class HackerNewsAPITests: XCTestCase, @unchecked Sendable {
   }
 
   func testTopStories() async throws {
-    let hackerNews = HackerNews()
-    let topStories = try await hackerNews.storyList(type: "topstories")
+    let topStories = try await HackerNews.shared.storyList(type: "topstories")
     XCTAssertFalse(topStories.isEmpty)
   }
 
@@ -49,8 +48,7 @@ final class HackerNewsAPITests: XCTestCase, @unchecked Sendable {
   }
 
   func testNewtories() async throws {
-    let hackerNews = HackerNews()
-    let topStories = try await hackerNews.storyList(type: "newstories")
+    let topStories = try await HackerNews.shared.storyList(type: "newstories")
     XCTAssertFalse(topStories.isEmpty)
   }
 
@@ -67,8 +65,7 @@ final class HackerNewsAPITests: XCTestCase, @unchecked Sendable {
   }
 
   func testBesttories() async throws {
-    let hackerNews = HackerNews()
-    let topStories = try await hackerNews.storyList(type: "beststories")
+    let topStories = try await HackerNews.shared.storyList(type: "beststories")
     XCTAssertFalse(topStories.isEmpty)
   }
 
