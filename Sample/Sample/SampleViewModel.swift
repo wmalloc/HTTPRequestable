@@ -13,8 +13,6 @@ import SwiftUI
 class SampleViewModel {
   var items: [Item] = []
 
-  let hackerNews = HackerNews()
-
   func topStories() {
     Task {
       do {
@@ -26,7 +24,7 @@ class SampleViewModel {
   }
 
   func topStories() async throws {
-    let items = try await hackerNews.topStories()
+    let items = try await HackerNews.shared.topStories()
 
     withAnimation {
       self.items = items
