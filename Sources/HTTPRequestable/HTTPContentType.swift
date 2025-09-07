@@ -12,7 +12,29 @@ public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
   public var rawValue: String // ISOLatin1String
 
   public init(rawValue: String) {
-    self.rawValue = rawValue
+    self.rawValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+  }
+
+  /// Returns just the mimeType
+  public var mimeType: String {
+    let parts = rawValue.split(separator: ";", maxSplits: 1)
+    guard let first = parts.first else {
+      return rawValue
+    }
+    return String(first)
+  }
+
+  /// Split the string and make the content types from mimetype only
+  public static func contentTypes(for value: String) -> [Self] {
+    guard !value.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
+    return value
+      .split(separator: ",")
+      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+      .compactMap { header in
+        let parts = header.split(separator: ";", maxSplits: 1)
+        return parts.first.map(String.init)
+      }
+      .compactMap(Self.init(rawValue:))
   }
 }
 
