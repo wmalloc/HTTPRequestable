@@ -16,8 +16,7 @@ struct RequestInterceptorTests {
     let configuration = URLSessionConfiguration.ephemeral
     configuration.protocolClasses = [MockURLProtocol.self]
     let session = URLSession(configuration: configuration)
-    let api = HackerNews(session: session)
-    return api
+    return HackerNews(session: session)
   }()
 
   @Test func modifyHTTPRequest() async throws {
@@ -48,7 +47,7 @@ struct RequestInterceptorTests {
     #expect(storage.count == 1)
     storage.remove(at: 0)
     #expect(storage.isEmpty)
-    #expect(storage.count == 0)
+    #expect(storage.isEmpty)
     storage.append(OSLogInterceptor())
     storage.append(LoggerInterceptor())
     #expect(storage.count == 2)
