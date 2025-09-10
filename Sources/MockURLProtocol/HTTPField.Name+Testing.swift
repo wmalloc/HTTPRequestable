@@ -8,9 +8,10 @@
 import Foundation
 import HTTPTypes
 
-extension HTTPField.Name {
-  /// A predefined `HTTPField.Name` representing the `X-API-Key` header field.
-  static var testIdentifier: HTTPField.Name {
-    .init(.testIdentifier)!
+public extension HTTPField.Name {
+  /// A predefined `HTTPField.Name` representing the `X-Test-Identifier` header field.
+  @inlinable
+  static var xTestIdentifier: HTTPField.Name {
+    .init(.xTestIdentifier)!
   }
 }

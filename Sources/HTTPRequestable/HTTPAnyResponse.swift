@@ -69,6 +69,26 @@ public extension HTTPAnyResponse {
     response.status.kind == .successful
   }
 
+  /// Validates the response and then returns itself.
+  ///
+  /// The method first checks that the HTTP status code is acceptable, then
+  /// verifies that the returned content type matches one of the types listed in
+  /// ``acceptContentType``.  If any check fails a throwing error is propagated,
+  /// otherwise the same instance (`self`) is returned so callers can chain
+  /// further operations.
+  ///
+  /// The `@discardableResult` attribute keeps the compiler quiet if the caller
+  /// doesn’t need the returned value (e.g., when just performing validation).
+  ///
+  /// - Throws: An error from either ``validateStatus()`` or
+  ///   ``validateContentType(_:)``.
+  /// - Returns: `self`, allowing method chaining.
+  @discardableResult
+  func validate() throws -> Self {
+    try validateStatus()
+      .validateContentTypes(acceptContentType)
+  }
+
   /// Validates the result for a given status code.
   /// - Returns: Self if the status code indicates success.
   @discardableResult
@@ -84,49 +104,79 @@ public extension HTTPAnyResponse {
   /// - Parameter acceptableContentTypes: Set of acceptable content types, defaults to nil.
   /// - Returns: Self if the content type is acceptable.
   @discardableResult
-  func validateContentType(_ acceptableContentTypes: Set<String>? = nil) throws -> Self {
-    // bypass if no content type defined
-    guard let acceptableContentTypes else {
-      return self
-    }
-
-    // if the server did not set the content type then throw a bad server response
-    guard let contentType = response.headerFields[.contentType] else {
-      throw HTTPError.contentTypeHeaderMissing
-    }
-
-    // if content type is not acceptable throw and errro
-    guard acceptableContentTypes.contains(contentType) else {
-      throw HTTPError.invalidContentType
-    }
-
-    // success
-    return self
+  func validateContentTypes(_ acceptableContentTypes: some Sequence<String>) throws -> Self {
+    let contentTypes = acceptableContentTypes.map(HTTPContentType.init(rawValue:))
+    return try validateContentTypes(contentTypes)
   }
 
   /// Validates the content type if acceptable content types are given.
   /// - Parameter acceptableContentTypes: Set of acceptable content types, defaults to nil.
   /// - Returns: Self if the content type is acceptable.
   @discardableResult
-  func validateContentType(_ acceptableContentTypes: Set<HTTPContentType>? = nil) throws -> Self {
-    guard let acceptableContentTypes else {
+  func validateContentTypes(_ acceptableContentTypes: some Sequence<HTTPContentType>) throws -> Self {
+    if acceptableContentTypes.contains(HTTPContentType.any) {
       return self
     }
-    let contentTypes: Set<String> = acceptableContentTypes.reduce(into: []) { result, type in
-      result.insert(type.rawValue)
+
+    // if the server did not set the content type then throw a bad server response
+    guard let contentTypes = response.contentTypes else {
+      throw HTTPError.contentTypeHeaderMissing
     }
-    return try validateContentType(contentTypes)
+
+    let acceptable = Set(acceptableContentTypes)
+    let isDisjoint = contentTypes.isDisjoint(with: acceptable)
+    guard isDisjoint else {
+      throw HTTPError.invalidContentType
+    }
+
+    return self
+  }
+
+  /// The set of MIME types this response accepts.
+  ///
+  /// Returns the value stored in ``HTTPRequest/acceptContentTypes`` or an empty
+  /// set when the request (or that property) is unavailable.
+  var acceptContentType: Set<HTTPContentType> {
+    request.acceptContentTypes ?? [HTTPContentType.any]
   }
 }
 
+/// A helper that applies an optional ``Transformer`` to the response body.
+///
+/// The method will throw if either:
+///   * No transformer is supplied – callers are expected to provide one.
+///   * The response contains no data (`data == nil`).
+///
+/// ```swift
+/// let decoded: MyModel = try response.transformed(using: JSONDecoder().decode)
+/// ```
+///
+/// - Parameter transformer: A closure that turns raw `Data` into the desired type.
+/// - Throws: ``URLError`` when the data is missing or a decoding error occurs.
+/// - Returns: The transformed value.
 public extension HTTPAnyResponse {
+  /// Transforms the underlying data with the supplied transformer.
+  ///
+  /// This method is intentionally *non‑async* because the transformation itself
+  /// operates purely on memory (e.g. JSON decoding).  If you need an async
+  /// variant, consider wrapping this call in a `Task` or providing an async
+  /// overload that forwards to an asynchronous transformer.
+  ///
+  /// - Parameter transformer: The closure used to convert raw `Data` into the desired type.
+  /// - Returns: The result of applying `transformer` to the response body.
+  /// - Throws:
+  ///   * ``URLError(.cannotDecodeContentData)`` – if no transformer was provided.
+  ///   * ``URLError(.zeroByteResource)`` – if the response contained no data.
+  ///   * Any error thrown by `transformer`.
   func transformed<ResultType>(using transformer: Transformer<Data, ResultType>?) throws -> ResultType {
     guard let transformer else {
       throw URLError(.cannotDecodeContentData)
     }
-    guard let data else {
+
+    guard let body = data else {
       throw URLError(.zeroByteResource)
     }
-    return try transformer(data)
+
+    return try transformer(body)
   }
 }

@@ -20,10 +20,10 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   var session: URLSession { get }
 
   /// Request Modifiers
-  var requestModifiers: [any HTTPRequestModifier] { get }
+  var requestModifiers: [any HTTPRequestModifier] { get async }
 
   /// Response Interceptors
-  var interceptors: [any HTTPInterceptor] { get }
+  var interceptors: [any HTTPInterceptor] { get async }
 
   init(session: URLSession)
 
@@ -168,7 +168,7 @@ extension HTTPTransferable {
   func httpRequest(_ request: some HTTPRequestable) async throws -> HTTPRequest {
     logger.trace("[IN]: \(#function)")
     var updatedRequest = try request.httpRequest
-    for try modifier in requestModifiers {
+    for try modifier in await requestModifiers {
       try await modifier.modify(&updatedRequest, for: session)
     }
     return updatedRequest
@@ -193,7 +193,7 @@ extension HTTPTransferable {
   func send(request: HTTPRequest, interceptor: HTTPInterceptor.Next, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     var next = interceptor
-    for try interceptor in interceptors.reversed() {
+    for try interceptor in await interceptors.reversed() {
       let _next = next
       next = {
         try await interceptor.intercept(for: $0, next: _next, delegate: $1)
