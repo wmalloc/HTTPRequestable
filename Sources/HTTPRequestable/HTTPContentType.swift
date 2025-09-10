@@ -6,23 +6,54 @@
 
 import Foundation
 
+/**
+ # HTTPContentType
+
+ The `HTTPContentType` struct represents HTTP content types, such as `application/json` or `text/html`.
+ It provides utilities for parsing, comparing, and encoding content types, making it easier to work with
+ HTTP headers and MIME types.
+ */
+
 /// Request Content types
 @frozen
 public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
+  /// The raw string value of the content type.
   public var rawValue: String // ISOLatin1String
 
+  /// The MIME type extracted from the raw value.
+  public var mimeType: String
+
+  /// Initializes a new `HTTPContentType` with the given raw value.
+  ///
+  /// - Parameter rawValue: The raw string value of the content type.
   public init(rawValue: String) {
-    self.rawValue = rawValue
+    self.rawValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+    self.mimeType = self.rawValue.mimeType ?? ""
+  }
+
+  /// Splits a string and creates content types from the MIME type only.
+  ///
+  /// - Parameter value: A string containing one or more content types, separated by commas.
+  /// - Returns: An array of `HTTPContentType` objects.
+  public static func contentTypes(for value: String) -> [Self] {
+    guard !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
+    return value.split(separator: ",")
+      .compactMap { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+      .map(Self.init(rawValue:))
   }
 }
 
-///  A type that can be Identified
+/// A type that can be identified.
 extension HTTPContentType: Identifiable {
+  /// The unique identifier for the content type.
   public var id: String { rawValue }
 }
 
-///  A type that can be initialized with a string literal.
+/// A type that can be initialized with a string literal.
 extension HTTPContentType: ExpressibleByStringLiteral {
+  /// Initializes a new `HTTPContentType` with a string literal.
+  ///
+  /// - Parameter value: The string literal value.
   public init(stringLiteral value: String) {
     self.init(rawValue: value)
   }
@@ -30,6 +61,7 @@ extension HTTPContentType: ExpressibleByStringLiteral {
 
 /// A type with a customized textual representation.
 extension HTTPContentType: CustomStringConvertible {
+  /// A textual representation of the content type.
   public var description: String {
     rawValue
   }
@@ -37,6 +69,9 @@ extension HTTPContentType: CustomStringConvertible {
 
 /// A type that can be represented as a string in a lossless, unambiguous way.
 extension HTTPContentType: LosslessStringConvertible {
+  /// Initializes a new `HTTPContentType` from a description string.
+  ///
+  /// - Parameter description: The description string.
   public init?(_ description: String) {
     self.init(rawValue: description)
   }
@@ -44,12 +79,16 @@ extension HTTPContentType: LosslessStringConvertible {
 
 /// A type that supplies a custom description for playground logging.
 extension HTTPContentType: CustomPlaygroundDisplayConvertible {
+  /// A custom description for playground logging.
   public var playgroundDescription: Any {
     description
   }
 }
 
 extension HTTPContentType: Encodable {
+  /// Encodes the content type to the given encoder.
+  ///
+  /// - Parameter encoder: The encoder to write data to.
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     try container.encode(rawValue)
@@ -57,69 +96,76 @@ extension HTTPContentType: Encodable {
 }
 
 extension HTTPContentType: Decodable {
+  /// Decodes a new `HTTPContentType` from the given decoder.
+  ///
+  /// - Parameter decoder: The decoder to read data from.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
     self.rawValue = try container.decode(String.self)
+    self.mimeType = self.rawValue.mimeType ?? ""
   }
 }
 
 public extension HTTPContentType {
-  /// Allow Comparison of raw string
+  /// Allows comparison of raw string values.
   static func == (lhs: HTTPContentType, rhs: StringLiteralType) -> Bool {
-    lhs.rawValue == rhs
+    lhs.mimeType == rhs.mimeType
   }
 }
 
 public extension HTTPContentType {
-  /// Any content type
+  /// Any content type.
   static var any: Self { "*/*" }
 
-  /// CSS content type
+  /// CSS content type.
   static var css: Self { "text/css" }
 
-  /// Form Data
+  /// Form Data.
   static var formData: Self { "form-data" }
 
-  /// URLencoded Form Data
+  /// URL-encoded Form Data.
   static var formEncoded: Self { "application/x-www-form-urlencoded" }
 
-  /// GIF
-  /// https://www.rfc-editor.org/rfc/rfc2158.html
+  /// GIF content type.
   static var gif: Self { "image/gif" }
 
-  /// HTML
+  /// HTML content type.
   static var html: Self { "text/html" }
 
-  /// JPEG
-  /// https://www.rfc-editor.org/rfc/rfc2158.html
+  /// JPEG content type.
   static var jpeg: Self { "image/jpeg" }
 
-  /// The application/json Media Type for JavaScript Object Notation (JSON) data
-  /// https://datatracker.ietf.org/doc/html/rfc4627
+  /// JSON content type.
   static var json: Self { "application/json" }
 
-  /// The application/json Media Type for JavaScript Object Notation (JSON) data
-  /// https://datatracker.ietf.org/doc/html/rfc4627
+  /// JSON content type with UTF-8 encoding.
   static var jsonUTF8: Self { "application/json; charset=utf-8" }
 
-  /// Multi-part form data
+  /// Multi-part form data.
   static var multipartForm: Self { "multipart/form-data" }
 
-  /// Octet Stream
+  /// Octet Stream content type.
   static var octetStream: Self { "application/octet-stream" }
 
-  /// Patch JSON
+  /// Patch JSON content type.
   static var patchjson: Self { "application/json-patch+json" }
 
-  /// PNG Media Type for Portable Network Graphics
+  /// PNG content type.
   static var png: Self { "image/png" }
 
-  /// PDF Media Type for Portable Document Format
+  /// SVG content type.
   static var svg: Self { "image/svg+xml" }
 
-  /// Plain Text
+  /// Plain Text content type.
   static var textPlain: Self { "text/plain" }
 
-  /// XML
+  /// XML content type.
   static var xml: Self { "application/xml" }
+}
+
+extension String {
+  /// Extracts the MIME type from a string.
+  var mimeType: String? {
+    self.split(separator: ";", maxSplits: 1).first.map(String.init)?.trimmingCharacters(in: .whitespacesAndNewlines)
+  }
 }
