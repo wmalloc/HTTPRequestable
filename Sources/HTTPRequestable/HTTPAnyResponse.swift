@@ -86,7 +86,7 @@ public extension HTTPAnyResponse {
   @discardableResult
   func validate() throws -> Self {
     try validateStatus()
-      .validateContentType(acceptContentType)
+      .validateContentTypes(acceptContentType)
   }
 
   /// Validates the result for a given status code.
@@ -104,8 +104,17 @@ public extension HTTPAnyResponse {
   /// - Parameter acceptableContentTypes: Set of acceptable content types, defaults to nil.
   /// - Returns: Self if the content type is acceptable.
   @discardableResult
-  func validateContentType(_ acceptableContentTypes: some Sequence<String>) throws -> Self {
-    if acceptableContentTypes.contains(HTTPContentType.any.rawValue) {
+  func validateContentTypes(_ acceptableContentTypes: some Sequence<String>) throws -> Self {
+    let contentTypes = acceptableContentTypes.map(HTTPContentType.init(rawValue:))
+    return try validateContentTypes(contentTypes)
+  }
+
+  /// Validates the content type if acceptable content types are given.
+  /// - Parameter acceptableContentTypes: Set of acceptable content types, defaults to nil.
+  /// - Returns: Self if the content type is acceptable.
+  @discardableResult
+  func validateContentTypes(_ acceptableContentTypes: some Sequence<HTTPContentType>) throws -> Self {
+    if acceptableContentTypes.contains(HTTPContentType.any) {
       return self
     }
 
@@ -116,30 +125,19 @@ public extension HTTPAnyResponse {
 
     let acceptable = Set(acceptableContentTypes)
     let isDisjoint = contentTypes.isDisjoint(with: acceptable)
-    // if content type is not acceptable throw and errro
-    guard !isDisjoint else {
+    guard isDisjoint else {
       throw HTTPError.invalidContentType
     }
 
-    // success
     return self
-  }
-
-  /// Validates the content type if acceptable content types are given.
-  /// - Parameter acceptableContentTypes: Set of acceptable content types, defaults to nil.
-  /// - Returns: Self if the content type is acceptable.
-  @discardableResult
-  func validateContentType(_ acceptableContentTypes: some Sequence<HTTPContentType>) throws -> Self {
-    let contentTypes = acceptableContentTypes.compactMap(\.rawValue)
-    return try validateContentType(contentTypes)
   }
 
   /// The set of MIME types this response accepts.
   ///
   /// Returns the value stored in ``HTTPRequest/acceptContentTypes`` or an empty
   /// set when the request (or that property) is unavailable.
-  var acceptContentType: Set<String> {
-    request.acceptContentTypes ?? [HTTPContentType.any.rawValue]
+  var acceptContentType: Set<HTTPContentType> {
+    request.acceptContentTypes ?? [HTTPContentType.any]
   }
 }
 

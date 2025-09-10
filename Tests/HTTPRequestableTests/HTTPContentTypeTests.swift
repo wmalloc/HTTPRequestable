@@ -29,7 +29,7 @@ struct HTTPContentTypeTests {
     let parsed = HTTPContentType.contentTypes(for: "application/json, text/html; charset=utf-8 ,image/png")
     #expect(parsed.count == 3)
     #expect(parsed[0].rawValue == "application/json")
-    #expect(parsed[1].rawValue == "text/html")
+    #expect(parsed[1].rawValue == "text/html; charset=utf-8")
     #expect(parsed[2].rawValue == "image/png")
   }
 

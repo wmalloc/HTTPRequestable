@@ -12,7 +12,7 @@ public extension HTTPRequest {
   /// The set of MIME types the request declares it accepts.
   ///
   /// If the `Accept` header is missing or empty, this property returns `nil`.
-  var acceptContentTypes: Set<String>? {
+  var acceptContentTypes: Set<HTTPContentType>? {
     // Grab the raw header value (if any)
     guard let raw = headerFields[.accept] else { return nil }
 
@@ -21,6 +21,7 @@ public extension HTTPRequest {
       .split(separator: ",")
       .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
       .filter { !$0.isEmpty }
+      .compactMap(HTTPContentType.init(stringLiteral:))
 
     return types.isEmpty ? nil : Set(types)
   }
