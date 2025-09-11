@@ -102,7 +102,7 @@ extension HTTPContentType: Decodable {
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
     self.rawValue = try container.decode(String.self)
-    self.mimeType = self.rawValue.mimeType ?? ""
+    self.mimeType = rawValue.mimeType ?? ""
   }
 }
 
@@ -166,6 +166,6 @@ public extension HTTPContentType {
 extension String {
   /// Extracts the MIME type from a string.
   var mimeType: String? {
-    self.split(separator: ";", maxSplits: 1).first.map(String.init)?.trimmingCharacters(in: .whitespacesAndNewlines)
+    split(separator: ";", maxSplits: 1).first.map(String.init)?.trimmingCharacters(in: .whitespacesAndNewlines)
   }
 }
