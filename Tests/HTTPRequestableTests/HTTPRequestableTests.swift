@@ -1,15 +1,16 @@
 @testable import HTTPRequestable
 import HTTPTypes
-import XCTest
+import Testing
 
-final class HTTPRequestableTests: XCTestCase {
-  func testDefaultHeaders() throws {
-    // "xctest/14.2 (com.apple.dt.xctest.tool; build:21501; macOS Version 13.1 (Build 22C65)) WebService"
+@Suite("HTTPRequestable")
+struct HTTPRequestableTests {
+  @Test
+  func defaultHeaders() async throws {
     let userAgent = HTTPField.defaultUserAgent
-    XCTAssertEqual(userAgent.name, HTTPField.Name.userAgent)
-    XCTAssertEqual(userAgent.value.contains("com.apple.dt.xctest.tool"), true)
-    XCTAssertEqual(userAgent.value.hasPrefix("xctest"), true)
-    XCTAssertEqual(userAgent.value.hasSuffix("HTTPRequestable"), true)
-    XCTAssertEqual(userAgent.value, String.url_userAgent)
+    #expect(userAgent.name == HTTPField.Name.userAgent)
+    #expect(userAgent.value.contains("com.apple.dt.xctest.tool"))
+    #expect(userAgent.value.hasPrefix("xctest"))
+    #expect(userAgent.value.hasSuffix("HTTPRequestable"))
+    #expect(userAgent.value == String.url_userAgent)
   }
 }

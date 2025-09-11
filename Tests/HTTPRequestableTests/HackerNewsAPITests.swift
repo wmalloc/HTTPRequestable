@@ -1,13 +1,7 @@
-//
-//  HackerNewsAPITests.swift
-//
-//
-//  Created by Waqar Malik on 7/15/23.
-//
-
+import Foundation
 @testable import HTTPRequestable
 import MockURLProtocol
-import XCTest
+import Testing
 
 extension HTTPURLResponse {
   static func ok(url: URL) -> HTTPURLResponse {
@@ -15,69 +9,66 @@ extension HTTPURLResponse {
   }
 }
 
-final class HackerNewsAPITests: XCTestCase, @unchecked Sendable {
-  private var api: HackerNews!
-
-  override func setUpWithError() throws {
+@Suite("HackerNews API Tests")
+struct HackerNewsAPITests {
+  private var api: HackerNews = {
     let configuration = URLSessionConfiguration.ephemeral
     configuration.protocolClasses = [MockURLProtocol.self]
     let session = URLSession(configuration: configuration)
-    api = HackerNews(session: session)
-  }
+    return HackerNews(session: session)
+  }()
 
-  override func tearDownWithError() throws {
-    api = nil
-  }
-
+  @Test("Top Stories from Live API")
   func testTopStories() async throws {
     let topStories = try await HackerNews.shared.storyList(type: "topstories")
-    XCTAssertFalse(topStories.isEmpty)
+    #expect(!topStories.isEmpty)
   }
 
-  func testMockTopStories() async throws {
-    let request = try StoryListRequest(environment: api.environment, storyType: "topstories")
-      .addTestIdentifierHeader()
+  @Test("Mocked Top Stories")
+  func mockTopStories() async throws {
+    let request = try StoryListRequest(environment: api.environment, storyType: "topstories").addTestIdentifierHeader()
     let url = try request.url
     try await MockURLProtocol.setRequestHandler({ _ in
       let data = try Bundle.module.data(forResource: "topstories", withExtension: "json")
       return (data, HTTPURLResponse.ok(url: url))
     }, forRequest: request)
-
     let topStories = try await api.object(for: request)
-    XCTAssertEqual(topStories.count, 466)
+    #expect(topStories.count == 466)
   }
 
-  func testNewtories() async throws {
+  @Test("New Stories from Live API")
+  func testNewStories() async throws {
     let topStories = try await HackerNews.shared.storyList(type: "newstories")
-    XCTAssertFalse(topStories.isEmpty)
+    #expect(!topStories.isEmpty)
   }
 
-  func testMockNewStories() async throws {
-    let request = try StoryListRequest(environment: api.environment, storyType: "newstories")
-      .addTestIdentifierHeader()
+  @Test("Mocked New Stories")
+  func mockNewStories() async throws {
+    let request = try StoryListRequest(environment: api.environment, storyType: "newstories").addTestIdentifierHeader()
     let url = try request.url
     try await MockURLProtocol.setRequestHandler({ _ in
       let data = try Bundle.module.data(forResource: "newstories", withExtension: "json")
       return (data, HTTPURLResponse.ok(url: url))
     }, forRequest: request)
     let newStories = try await api.object(for: request, delegate: nil)
-    XCTAssertEqual(newStories.count, 500)
+    #expect(newStories.count == 500)
   }
 
-  func testBesttories() async throws {
+  @Test("Best Stories from Live API")
+  func testBestStories() async throws {
     let topStories = try await HackerNews.shared.storyList(type: "beststories")
-    XCTAssertFalse(topStories.isEmpty)
+    #expect(!topStories.isEmpty)
   }
 
-  func testMockBestStories() async throws {
-    let request = try StoryListRequest(environment: api.environment, storyType: "beststories")
-      .addTestIdentifierHeader()
+  @Test("Mocked Best Stories")
+  func mockBestStories() async throws {
+    let request = try StoryListRequest(environment: api.environment, storyType: "beststories").addTestIdentifierHeader()
     let url = try request.url
     try await MockURLProtocol.setRequestHandler({ _ in
       let data = try Bundle.module.data(forResource: "beststories", withExtension: "json")
       return (data, HTTPURLResponse.ok(url: url))
     }, forRequest: request)
     let bestStories = try await api.object(for: request, delegate: nil)
-    XCTAssertEqual(bestStories.count, 200)
+    #expect(bestStories.count == 200)
   }
 }
