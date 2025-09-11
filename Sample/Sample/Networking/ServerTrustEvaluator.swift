@@ -7,6 +7,7 @@
 
 #if canImport(Security)
 import Foundation
+import HTTPRequestable
 @preconcurrency import Security
 
 public final class ServerTrustEvaluator: NSObject, HTTPServerTrustEvaluating, URLSessionDelegate, @unchecked Sendable {
@@ -19,7 +20,7 @@ public final class ServerTrustEvaluator: NSObject, HTTPServerTrustEvaluating, UR
   /// Initializes a new `ServerTrustEvaluator` with the specified certificates.
   ///
   /// - Parameter certificates: A set of certificates to use for trust evaluation. Defaults to an empty set.
-  public init(certificates: Set<SecCertificate> = []) {
+  public init(certificates: Set<SecCertificate> = Set(Bundle.main.certificates)) {
     self.certificates = certificates
   }
 

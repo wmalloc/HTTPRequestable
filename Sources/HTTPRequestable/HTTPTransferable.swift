@@ -25,8 +25,6 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   /// Response Interceptors
   var interceptors: [any HTTPInterceptor] { get async }
 
-  init(session: URLSession)
-
   /// Performs a network request and returns the raw response.
   ///
   /// This method is part of an asynchronous networking layer that sends an `HTTPRequest`
