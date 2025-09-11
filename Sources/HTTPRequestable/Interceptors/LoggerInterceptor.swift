@@ -9,37 +9,37 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-/// A logging interceptor for HTTP requests and responses.
-///
-/// `LoggerInterceptor` logs details about HTTP requests and responses at a specified log level to the system logger.
-/// It can be used as both an `HTTPRequestModifier` to log outgoing requests, and as an `HTTPInterceptor` to log incoming responses.
-///
-/// Usage:
-/// - As an `HTTPRequestModifier`, it logs the request's debug description before the request is sent.
-/// - As an `HTTPInterceptor`, it logs the response's debug description, payload data (if any), and file URL (if any) after receiving a response.
-///
-/// The log output is privacy protected using `.private` to avoid leaking sensitive information.
-///
-/// - Note: The logger uses the OSLog subsystem with a category of "LoggerInterceptor".
-///
-/// - Parameters:
-///   - logLevel: The minimum severity level for log messages (default: `.default`).
-///
-/// Example:
-/// ```swift
-/// let interceptor = LoggerInterceptor(logLevel: .debug)
-/// ```
+/**
+ # LoggerInterceptor
+
+ A logging interceptor for HTTP requests and responses.
+
+ `LoggerInterceptor` logs details about HTTP requests and responses at a specified log level to the system logger.
+ It can be used as both an `HTTPRequestModifier` to log outgoing requests, and as an `HTTPInterceptor` to log incoming responses.
+ */
+
 @frozen
 public struct LoggerInterceptor {
+  /// The logger instance used for logging messages.
   public let logger: Logger = .init(category: "LoggerInterceptor")
+
+  /// The minimum severity level for log messages.
   public let logLevel: OSLogType
 
+  /// Initializes a new `LoggerInterceptor` with the specified log level.
+  ///
+  /// - Parameter logLevel: The minimum severity level for log messages. Defaults to `.default`.
   public init(logLevel: OSLogType = .default) {
     self.logLevel = logLevel
   }
 }
 
 extension LoggerInterceptor: HTTPRequestModifier {
+  /// Logs the debug description of the HTTP request before it is sent.
+  ///
+  /// - Parameters:
+  ///   - request: The HTTP request to modify.
+  ///   - session: The URL session associated with the request.
   public func modify(_ request: inout HTTPRequest, for session: URLSession) async throws {
     let debugDescription = request.debugDescription
     logger.log(level: logLevel, "\(debugDescription, privacy: .private)")
@@ -47,6 +47,11 @@ extension LoggerInterceptor: HTTPRequestModifier {
 }
 
 extension LoggerInterceptor: HTTPInterceptor {
+  /// Logs the HTTP request and optional data.
+  ///
+  /// - Parameters:
+  ///   - request: The HTTP request to log.
+  ///   - data: Optional data associated with the request.
   public func log(request: HTTPRequest, data: Data? = nil) {
     logger.log(level: logLevel, "\(request.debugDescription, privacy: .private)")
     if let data {
@@ -54,10 +59,26 @@ extension LoggerInterceptor: HTTPInterceptor {
     }
   }
 
+  /// Logs the HTTP response and optional data, file URL, and error.
+  ///
+  /// - Parameters:
+  ///   - response: The HTTP response to log.
+  ///   - data: Optional data associated with the response.
+  ///   - fileURL: Optional file URL associated with the response.
+  ///   - error: Optional error associated with the response.
   public func log(response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil, error: (any Error)? = nil) {
     Self.log(logger, level: logLevel, response: response, data: data, fileURL: fileURL, error: error)
   }
 
+  /// Logs the HTTP response and optional data, file URL, and error using a static method.
+  ///
+  /// - Parameters:
+  ///   - logger: The logger instance to use for logging.
+  ///   - level: The log level to use.
+  ///   - response: The HTTP response to log.
+  ///   - data: Optional data associated with the response.
+  ///   - fileURL: Optional file URL associated with the response.
+  ///   - error: Optional error associated with the response.
   public static func log(_ logger: Logger, level: OSLogType, response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil, error: (any Error)? = nil) {
     logger.log(level: level, "\(response.debugDescription, privacy: .private)")
     if let data {
@@ -71,6 +92,13 @@ extension LoggerInterceptor: HTTPInterceptor {
     }
   }
 
+  /// Intercepts the HTTP request and logs the request and response details.
+  ///
+  /// - Parameters:
+  ///   - request: The HTTP request to intercept.
+  ///   - next: The next interceptor in the chain.
+  ///   - delegate: An optional URL session task delegate.
+  /// - Returns: The intercepted HTTP response.
   public func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
     let response = try await next(request, delegate)
     log(request: request, data: nil)

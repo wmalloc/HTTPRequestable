@@ -18,7 +18,7 @@ import Testing
   static var baseURL: URL {
     URL(string: baseURLString)!
   }
-  
+
   @Test("BaseHeaders")
   func baseHeaders() async throws {
     var headers = HTTPFields()
