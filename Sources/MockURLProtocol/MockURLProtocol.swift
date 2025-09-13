@@ -11,7 +11,7 @@ import HTTPTypes
 public class MockURLProtocol: URLProtocol, @unchecked Sendable {
   private static let requestHandlerStorage = RequestHandlerStorage()
 
-  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forRequest request: any HTTPRequestable) async throws {
+  public static func setRequestHandler(_ handler: @escaping MockURLRequestHandler, forRequest request: any HTTPRequestConvertible) async throws {
     guard let identifier = request.testIdentifier else {
       throw URLError(.badURL)
     }

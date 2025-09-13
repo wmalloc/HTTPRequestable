@@ -23,7 +23,7 @@ import HTTPTypes
 ///
 /// - Returns: A new instance of the conforming type with the header added.
 ///   The operation is value‑semantics safe – it does not mutate the receiver.
-public extension HTTPRequestable {
+public extension HTTPRequestConvertible {
   /// Adds an ``X-Test-Identifier`` header containing a random UUID to this request.
   ///
   /// The header key is provided by :enum:`HTTPHeaderField.xTestIdentifier`.

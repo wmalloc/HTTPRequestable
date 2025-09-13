@@ -9,7 +9,7 @@ import Foundation
 import HTTPRequestable
 import HTTPTypes
 
-struct ItemRequest: HTTPRequestable {
+struct ItemRequest: HTTPRequestConvertible {
   typealias ResultType = Item
 
   let environment: HTTPEnvironment

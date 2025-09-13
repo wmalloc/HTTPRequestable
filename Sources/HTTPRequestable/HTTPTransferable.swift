@@ -78,7 +78,7 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
   /// - SeeAlso: `HTTPRequestable`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
-  func data(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func data(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Uploads a file to the server as part of an HTTP request asynchronously.
   ///
@@ -96,7 +96,7 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
   /// - SeeAlso: `HTTPRequestable`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
-  func upload(for request: some HTTPRequestable, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Uploads data to the server as part of an HTTP request asynchronously.
   ///
@@ -114,14 +114,14 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
   /// - SeeAlso: `HTTPRequestable`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
-  func upload(for request: some HTTPRequestable, from bodyData: Data, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Convenience method to download using an `HTTPRequestable`; creates and resumes a `URLSessionDownloadTask` internally.
   /// - Parameters:
   ///   - request: The `HTTPRequestable` for which to download.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
-  func download(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Downloads data from the server as part of an HTTP request asynchronously.
   ///
@@ -138,7 +138,7 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
   /// - SeeAlso: `HTTPRequestable`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
-  func bytes(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse)
+  func bytes(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse)
 
   /// Sends an HTTP request and returns the parsed object of type `Request.ResultType` asynchronously.
   ///
@@ -155,7 +155,7 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   /// - Note: The `ResultType` must be defined by the request object and represents the type of the resulting object after parsing.
   ///
   /// - SeeAlso: `HTTPRequestable`, `URLSessionTaskDelegate`
-  func object<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> Request.ResultType
+  func object<Request: HTTPRequestConvertible>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> Request.ResultType
 }
 
 /// Default implementations of the protocol
@@ -163,7 +163,7 @@ extension HTTPTransferable {
   /// Request to sent to server
   /// - Parameter request: Description of the request
   /// - Returns: request to be sent to server
-  func httpRequest(_ request: some HTTPRequestable) async throws -> HTTPRequest {
+  func httpRequest(_ request: some HTTPRequestConvertible) async throws -> HTTPRequest {
     logger.trace("[IN]: \(#function)")
     var updatedRequest = try request.httpRequest
     for try modifier in await requestModifiers {
@@ -224,7 +224,7 @@ public extension HTTPTransferable {
   ///   - request: The `HTTPRequestable` for which to load data.
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
-  func data(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  func data(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
     let next: HTTPInterceptor.Next = {
@@ -239,7 +239,7 @@ public extension HTTPTransferable {
   ///   - fileURL: File to upload.
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
-  func upload(for request: some HTTPRequestable, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
     let next: HTTPInterceptor.Next = {
@@ -255,7 +255,7 @@ public extension HTTPTransferable {
   ///   - bodyData: Data to upload.
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
-  func upload(for request: some HTTPRequestable, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
     let next: HTTPInterceptor.Next = {
@@ -270,7 +270,7 @@ public extension HTTPTransferable {
   ///   - request: The `HTTPRequestable` for which to download.
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
-  func download(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
     let next: HTTPInterceptor.Next = {
@@ -285,7 +285,7 @@ public extension HTTPTransferable {
   ///   - request: The `HTTPRequestable` for which to load data.
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data stream and response.
-  func bytes(for request: some HTTPRequestable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
+  func bytes(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
     return try await session.bytes(for: updatedRequest, delegate: delegate)
@@ -300,7 +300,7 @@ public extension HTTPTransferable {
    - returns: Transformed Object
    */
   @inlinable
-  func object<Request: HTTPRequestable>(for request: Request, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Request.ResultType {
+  func object<Request: HTTPRequestConvertible>(for request: Request, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Request.ResultType {
     try await data(for: request, delegate: delegate)
       .transformed(using: request.responseDataTransformer)
   }
