@@ -7,6 +7,13 @@
 import Foundation
 import HTTPTypes
 
+/**
+ # URLRequest+Builder
+
+ This extension provides a fluent interface for configuring `URLRequest` instances.
+ It includes methods for setting various properties, such as HTTP headers, body, and network options.
+ */
+
 public extension URLRequest {
   /// Sets the cache policy of the `URLRequest`.
   ///

@@ -23,10 +23,14 @@ public typealias HTTPMethod = HTTPRequest.Method
 public typealias Transformer<InputType: Sendable, OutputType: Sendable> = @Sendable (InputType) throws -> OutputType
 
 /// HTTP Request
-public typealias URLRequestable = HTTPRequestable
+@available(*, deprecated, renamed: "HTTPRequestConvertible", message: "Renamed to HTTPRequestConvertible")
+public typealias URLRequestable = HTTPRequestConvertible
+
+@available(*, deprecated, renamed: "HTTPRequestConvertible", message: "Renamed to HTTPRequestConvertible")
+public typealias HTTPRequestable = HTTPRequestConvertible
 
 /// URL/HTTP Request builder protocol
-public protocol HTTPRequestable: Sendable {
+public protocol HTTPRequestConvertible: Sendable {
   associatedtype ResultType: Sendable
 
   /// Environment containing base URL and other configuration settings
@@ -71,7 +75,7 @@ public protocol HTTPRequestable: Sendable {
 }
 
 /// Default imeplementation
-public extension HTTPRequestable {
+public extension HTTPRequestConvertible {
   @inlinable
   var method: HTTPMethod { .get }
 
@@ -129,7 +133,7 @@ public extension HTTPRequestable {
   }
 }
 
-public extension HTTPRequestable where ResultType: Decodable {
+public extension HTTPRequestConvertible where ResultType: Decodable {
   static var jsonDecoder: Transformer<Data, ResultType> {
     { data in
       try JSONDecoder().decode(ResultType.self, from: data)
