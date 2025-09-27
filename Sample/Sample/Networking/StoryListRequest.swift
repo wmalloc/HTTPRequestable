@@ -9,7 +9,7 @@ import Foundation
 import HTTPRequestable
 import HTTPTypes
 
-struct StoryListRequest: HTTPRequestConvertible {
+struct StoryListRequest: HTTPRequestConfigurable {
   typealias ResultType = [Int]
 
   let environment: HTTPEnvironment
