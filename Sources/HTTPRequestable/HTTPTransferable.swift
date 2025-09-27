@@ -155,7 +155,7 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   /// - Note: The `ResultType` must be defined by the request object and represents the type of the resulting object after parsing.
   ///
   /// - SeeAlso: `HTTPRequestConfigurable`, `URLSessionTaskDelegate`
-  func object<Request: HTTPRequestConfigurable>(for request: Request, delegate: (any URLSessionTaskDelegate)?) async throws -> Request.ResultType
+  func object<R: HTTPRequestConfigurable>(for request: R, delegate: (any URLSessionTaskDelegate)?) async throws -> R.ResultType
 }
 
 /// Default implementations of the protocol
@@ -295,12 +295,12 @@ public extension HTTPTransferable {
    Make a request call and return decoded data as decoded by the transformer, this requesst must return data
 
    - Parameters:
-   - route:    Request where to get the data from
-   - delegate: Delegate to handle the request, defaults to nil
+     - request: Request where to get the data from
+     - delegate: Delegate to handle the request, defaults to nil
    - returns: Transformed Object
    */
   @inlinable
-  func object<Request: HTTPRequestConfigurable>(for request: Request, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> Request.ResultType {
+  func object<R: HTTPRequestConfigurable>(for request: R, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> R.ResultType {
     try await data(for: request, delegate: delegate)
       .transformed(using: request.responseDataTransformer)
   }
