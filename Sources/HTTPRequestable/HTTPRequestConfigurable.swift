@@ -22,10 +22,10 @@ public typealias HTTPMethod = HTTPRequest.Method
 public typealias Transformer<InputType: Sendable, OutputType: Sendable> = @Sendable (InputType) throws -> OutputType
 
 /// HTTP Request
-@available(*, deprecated, renamed: "HTTPRequestConvertible", message: "Renamed to HTTPRequestConvertible")
+@available(*, deprecated, renamed: "HTTPRequestConfigurable", message: "Renamed to HTTPRequestConfigurable")
 public typealias URLRequestable = HTTPRequestConfigurable
 
-@available(*, deprecated, renamed: "HTTPRequestConvertible", message: "Renamed to HTTPRequestConvertible")
+@available(*, deprecated, renamed: "HTTPRequestConfigurable", message: "Renamed to HTTPRequestConfigurable")
 public typealias HTTPRequestable = HTTPRequestConfigurable
 
 /// URL/HTTP Request builder protocol
