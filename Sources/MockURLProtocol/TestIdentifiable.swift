@@ -34,7 +34,7 @@ extension URLRequest: TestIdentifiable {
   /// Returns a test identifier by first checking for an `X-Test-Identifier` HTTP header.
   /// If not present, it returns the absolute URL string of the request.
   public var testIdentifier: String? {
-    value(forHTTPHeaderField: .xTestIdentifier) ?? url?.absoluteString
+    value(forHTTPHeaderField: .xTestIdentifier) ?? url?.testIdentifier
   }
 }
 
@@ -42,6 +42,6 @@ extension HTTPRequest: TestIdentifiable {
   /// Returns a test identifier by first checking for an `X-Test-Identifier` header in the request's
   /// header fields. If not present, it returns the absolute URL string of the request.
   public var testIdentifier: String? {
-    headerFields[.xTestIdentifier] ?? url?.absoluteString
+    headerFields[.xTestIdentifier] ?? url?.testIdentifier
   }
 }

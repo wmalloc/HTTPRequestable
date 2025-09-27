@@ -1,142 +1,83 @@
 //
-//  HTTPRequestable.swift
+//  HTTPRequestConvertible.swift
 //
-//
-//  Created by Waqar Malik on 10/17/23.
+//  Created by Waqar Malik on 9/26/25.
 //
 
 import Foundation
 import HTTPTypes
 import HTTPTypesFoundation
-import OSLog
 
-#if DEBUG
-private let logger = Logger(.init(category: "HTTPRequestable"))
-#else
-private let logger = Logger(.disabled)
-#endif
-
-/// Method
-public typealias HTTPMethod = HTTPRequest.Method
-
-/// How to transform the resulting data
-public typealias Transformer<InputType: Sendable, OutputType: Sendable> = @Sendable (InputType) throws -> OutputType
-
-/// HTTP Request
-@available(*, deprecated, renamed: "HTTPRequestConvertible", message: "Renamed to HTTPRequestConvertible")
-public typealias URLRequestable = HTTPRequestConvertible
-
-@available(*, deprecated, renamed: "HTTPRequestConvertible", message: "Renamed to HTTPRequestConvertible")
-public typealias HTTPRequestable = HTTPRequestConvertible
-
-/// URL/HTTP Request builder protocol
+/// A lightweight protocol for types that can produce a fully formed `HTTPTypes.HTTPRequest`.
+///
+/// Conform to `HTTPRequestConvertible` when you already have enough information to construct
+/// a complete `HTTPRequest` (method, scheme, authority/host, path, query, and header fields).
+/// This protocol is intentionally minimal—just a single throwing property—so you can adopt it
+/// for existing request builders, request models, or routing enums without inheriting any
+/// additional behavior.
+///
+/// Concurrency
+/// - Conforming types must be `Sendable`. Ensure any state used to construct the request is
+///   safe to access across concurrency domains (e.g., avoid shared mutable state).
+/// - The `httpRequest` property is synchronous and may throw. If you need asynchronous work
+///   (e.g., reading from disk or keychain), perform that before accessing `httpRequest`.
+///
+/// Throwing
+/// - Throw an error when a complete `HTTPRequest` cannot be produced (for example, when a URL
+///   is invalid or required components are missing).
+///
+/// Usage
+/// - Use the resulting `HTTPRequest` directly with `HTTPTypesFoundation` to create a `URLRequest`,
+///   or pass it to your networking layer as-is.
+/// - If you need a higher-level, configurable builder (e.g., with base URL, default headers,
+///   and query composition), consider using `HTTPRequestConfigurable` instead.
+///
+/// Example
+/// ```swift
+/// struct GetUserRoute: HTTPRequestConvertible {
+///     let userID: String
+///
+///     var httpRequest: HTTPRequest {
+///         get throws {
+///             var components = URLComponents()
+///             components.scheme = "https"
+///             components.host = "api.example.com"
+///             components.path = "/v1/users/\(userID)"
+///
+///             guard let url = components.url else { throw URLError(.badURL) }
+///             return try HTTPRequest(method: .get, url: url)
+///         }
+///     }
+/// }
+/// ```
+///
+/// See Also
+/// - `HTTPRequestConfigurable` for composable request building
+/// - `HTTPTypes.HTTPRequest`
+/// - `HTTPTypesFoundation.URLRequest.init(httpRequest:)`
+///
+/// Requirements:
+/// - `httpRequest`: A fully formed `HTTPRequest` ready to execute or to convert into a `URLRequest`.
 public protocol HTTPRequestConvertible: Sendable {
-  associatedtype ResultType: Sendable
-
-  /// Environment containing base URL and other configuration settings
-  var environment: HTTPEnvironment { get }
-
-  /// Method for the request, default is GET
-  var method: HTTPMethod { get }
-
-  /// Path to append to the base URL, optional
-  var path: String? { get }
-
-  /// Additional query items to include in the URL
-  var queryItems: [URLQueryItem]? { get mutating set }
-
-  /// Additional headers to include in the request
-  var headerFields: HTTPFields? { get mutating set }
-
-  /// Body data for the request, optional
-  var httpBody: Data? { get }
-
-  /// Transformer to convert raw response data to ResultType
-  var responseDataTransformer: Transformer<Data, ResultType>? { get }
-
-  /// Constructs the final URL with query items
-  /// - Parameter queryItems: additonal query items
-  /// - Returns: final url
-  var url: URL { get throws }
-
-  /// Constructs the HTTPRequest object
-  /// - Parameters:
-  ///   - fields:     additonal headers, defaults to nil
-  ///   - queryItems: additonal query items, defaults to nil
-  /// - Returns: HTTPRequest
+  /// returns fully formed request
   var httpRequest: HTTPRequest { get throws }
-
-  /// Constructs the URLRequest object
-  /// - Parameters:
-  ///   - fields:     additonal headers, defaults to nil
-  ///   - queryItems: additonal query items, defaults to nil
-  /// - Returns: URLRequest
-  var urlRequest: URLRequest { get throws }
 }
 
-/// Default imeplementation
-public extension HTTPRequestConvertible {
-  @inlinable
-  var method: HTTPMethod { .get }
-
-  @inlinable
-  var path: String? { nil }
-
-  @inlinable
-  var queryItems: [URLQueryItem]? { nil }
-
-  @inlinable
-  var headerFields: HTTPFields? { nil }
-
-  @inlinable
-  var httpBody: Data? { nil }
-
-  var url: URL {
+extension String: HTTPRequestConvertible {
+  public var httpRequest: HTTPRequest {
     get throws {
-      logger.trace("[IN]: \(#function)")
-      var components = environment
-      var paths = components.path.components(separatedBy: "/")
-      paths.append(contentsOf: path?.components(separatedBy: "/") ?? [])
-      paths = paths.filter { !$0.isEmpty }
-      if !paths.isEmpty {
-        paths.insert("", at: 0)
-      }
-      components.path = paths.joined(separator: "/")
-      var items: [URLQueryItem] = environment.queryItems ?? []
-      if let queryItems {
-        items.append(contentsOf: queryItems)
-      }
-      components.queryItems = items.isEmpty ? nil : Array(items)
-      guard let url = components.url else {
-        throw HTTPError.invalidURL
-      }
-      return url
-    }
-  }
-
-  var httpRequest: HTTPRequest {
-    get throws {
-      try HTTPRequest(method: method, url: url, headerFields: headerFields ?? HTTPFields())
-    }
-  }
-
-  var urlRequest: URLRequest {
-    get throws {
-      logger.trace("[IN]: \(#function)")
-      let httpRequest = try httpRequest
-      guard var urlRequest = URLRequest(httpRequest: httpRequest) else {
-        throw HTTPError.cannotCreateURLRequest
-      }
-      urlRequest.httpBody = httpBody
-      return urlRequest
+      try HTTPRequest(url: url)
     }
   }
 }
 
-public extension HTTPRequestConvertible where ResultType: Decodable {
-  static var jsonDecoder: Transformer<Data, ResultType> {
-    { data in
-      try JSONDecoder().decode(ResultType.self, from: data)
+extension URLComponents: HTTPRequestConvertible {
+  public var httpRequest: HTTPRequest {
+    get throws {
+      guard let url else {
+        throw URLError(.badURL)
+      }
+      return HTTPRequest(url: url)
     }
   }
 }

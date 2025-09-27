@@ -1,5 +1,5 @@
 //
-//  HTTPRequestable+Testing.swift
+//  HTTPRequestConfigurable+Testing.swift
 //  HTTPRequestable
 //
 //  Created by Waqar Malik on 4/21/25.
@@ -17,13 +17,13 @@ import HTTPTypes
 ///
 /// ```swift
 /// let original = URLRequest(url: URL(string: "https://example.com")!)
-/// let requestWithId = original.addTestIdentifierHeader()
+/// let requestWithId = original.byAddingTestIdentifierHeader()
 /// // requestWithId.headerFields[.xTestIdentifier] now contains a UUID string
 /// ```
 ///
 /// - Returns: A new instance of the conforming type with the header added.
 ///   The operation is value‑semantics safe – it does not mutate the receiver.
-public extension HTTPRequestConvertible {
+public extension HTTPRequestConfigurable {
   /// Adds an ``X-Test-Identifier`` header containing a random UUID to this request.
   ///
   /// The header key is provided by :enum:`HTTPHeaderField.xTestIdentifier`.
@@ -31,7 +31,7 @@ public extension HTTPRequestConvertible {
   /// only the `X-Test-Identifier` field is added or overwritten.
   ///
   /// - Returns: A copy of the request with the new header set.
-  func addTestIdentifierHeader() -> Self {
+  func byAddingTestIdentifierHeader() -> Self {
     var request = self
     var existing = request.headerFields ?? [:]
     existing[.xTestIdentifier] = UUID().uuidString

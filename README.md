@@ -13,17 +13,17 @@ A lightweight WebService API for [Apple](https://www.apple.com) devices, written
 Add the following dependency clause to your Package.swift:
 
 ```swift
-// swift-tools-version:5.10
+// swift-tools-version:5.11
 import PackageDescription
 
 let package = Package(
-  name: "MyApp",
+  name: "MyPackage",
   platforms: [.iOS(.v16), .tvOS(.v16), .macOS(.v12), .watchOS(.v9), .macCatalyst(.v16), .visionOS(.v1)],
   products: [
     .executable(name: "MyApp", targets: ["MyApp"])
   ],
   dependencies: [
-    .package(url: "https://github.com/wmalloc/HTTPRequestable.git", from: "0.10.1")
+    .package(url: "https://github.com/wmalloc/HTTPRequestable.git", from: "0.21.0")
   ],
   targets: [
     .target(name: "MyApp", dependencies: 
@@ -36,25 +36,28 @@ let package = Package(
 
 | Protocol |Features |
 |--------------------------|------------------------------------------|
-|`HTTPRequstable` | Define your request|
+|`HTTPRequestConfigurable` | Define your request|
 |`HTTPTransferable` | To create your API client|
+|`HTTPRequestConvertible` | To create your HTTPRequest|
+|`URLRequestConvertible` | To create your URLRequest|
+|`URLConvertible` | To create your URL|
 
 ## Usage
 
-### Creating an API
+### Creating an API Manager
 
 ```swift
-class HackerNews: HTTPTransferable, @unchecked Sendable {
-  var requestInterceptors: [any RequestInterceptor] = []
-  var responseInterceptors: [any ResponseInterceptor] = []
+final class HackerNews: HTTPTransferable, @unchecked Sendable {
+  var requestModifiers: [any HTTPRequestModifier] = []
+  var interceptors: [any HTTPInterceptor] = []
 
   let session: URLSession
 
   required init(session: URLSession = .shared) {
     self.session = session
     let logger = LoggerInterceptor()
-    requestInterceptors.append(logger)
-    responseInterceptors.append(logger)
+    requestModifiers.append(logger)
+    interceptors.append(logger)
   }
 
  func storyList(type: String) async throws -> StoryList.ResultType {
@@ -67,7 +70,7 @@ class HackerNews: HTTPTransferable, @unchecked Sendable {
 ### To defineing a request
 
 ```swift
-struct StoryListRequest: HTTPRequestable {
+struct StoryListRequest: HTTPRequestConfigurable {
   typealias ResultType = [Int]
   
   let environment: HTTPEnvironment
@@ -93,6 +96,19 @@ Then you can create an instantiate your API object to make calls
 var api = HackerNews()
 let topStories = try await api.storyList(type: "topstories.json")
 ```
+
+### URLSession
+If you intend to make direct calls to URLSession, there are APIs defined to accept configuration and facilitate the execution of API calls.
+
+### HTTPRequestModifier
+If you wish to modify the requests before they are sent to the server, you can create an object that conforms to the `HTTPRequestModifier` interface and add it to the `requestModifiers`.
+
+For instance, you could create an authorization modifier that would add the `Authorization` header to the request.
+
+### HTTPInterceptor
+If you wish to intercept the requests before they are finished, you can create an object that conforms to the `HTTPInterceptor` interface and add it to the `interceptors`. They are called in the reverse order.
+
+Logging interceptors are provided if you would like to log you responses.
 
 ## License
 
