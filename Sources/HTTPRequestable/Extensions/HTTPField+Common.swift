@@ -82,7 +82,7 @@ public extension HTTPField {
   /// Creates an `HTTPField` instance representing the `Content-Disposition` header field with a raw string value.
   /// - Parameter value: A string representing the content disposition information.
   /// - Returns: An `HTTPField` instance with name `Content-Disposition` and the provided value.
-      static func contentDisposition(_ value: Quality) -> Self {
+  static func contentDisposition(_ value: Quality) -> Self {
     .init(name: .contentDisposition, value: value.encoded)
   }
 }

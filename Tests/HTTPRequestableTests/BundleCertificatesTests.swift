@@ -45,7 +45,7 @@ final class BundleCertificatesTests: XCTestCase {
       return
     }
     // If by any chance a cert is produced, check type
-    XCTAssertTrue(certificate is SecCertificate)
+    XCTAssertTrue(certificate.publicKey != nil)
   }
   #endif
 

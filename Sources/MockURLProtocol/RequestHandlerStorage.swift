@@ -40,7 +40,7 @@ import HTTPRequestable
 ///   status or custom test failure.
 ///
 /// **Use case**
-/// Register handlers via :func:`MockURLProtocol.setRequestHandler(_:for:)`
+/// Register handlers via :func:`MockURLProtocol.setRequestHandler(_:forIdentifier:)`
 /// to simulate network interactions in unit tests without hitting a real
 /// server.
 public typealias MockURLRequestHandler = @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse)
