@@ -42,7 +42,14 @@
       }
     },
     "error_header_value_missing" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Header missing value"
+          }
+        }
+      }
     },
     "error_invalid_content_type" : {
       "localizations" : {
@@ -60,6 +67,136 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cannot create URL."
+          }
+        }
+      }
+    },
+    "multipart_error_access_denined" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Access Denied"
+          }
+        }
+      }
+    },
+    "multipart_error_encoded_length" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "encodedLength"
+          }
+        }
+      }
+    },
+    "multipart_error_expected_length" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expected body content length"
+          }
+        }
+      }
+    },
+    "multipart_error_file_already_exists" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File already exists"
+          }
+        }
+      }
+    },
+    "multipart_error_file_is_directory" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File is directory"
+          }
+        }
+      }
+    },
+    "multipart_error_file_notfound" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File not found"
+          }
+        }
+      }
+    },
+    "multipart_error_file_size_not_available" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File size not available"
+          }
+        }
+      }
+    },
+    "multipart_error_input_stream_length" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Input stream length"
+          }
+        }
+      }
+    },
+    "multipart_error_input_stream_read_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Input stream read failed"
+          }
+        }
+      }
+    },
+    "multipart_error_invalid_filename" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid filename"
+          }
+        }
+      }
+    },
+    "multipart_error_invalid_url" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bad URL"
+          }
+        }
+      }
+    },
+    "multipart_error_output_stream_write_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Output stream write failed"
+          }
+        }
+      }
+    },
+    "multipart_error_stream_creation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stream creation"
           }
         }
       }

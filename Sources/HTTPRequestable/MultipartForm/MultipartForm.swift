@@ -6,7 +6,6 @@
 
 import CoreServices
 import Foundation
-import HTTPRequestable
 import HTTPTypes
 import OSLog
 import UniformTypeIdentifiers

@@ -8,7 +8,6 @@
 import Foundation
 @testable import HTTPRequestable
 import MockURLProtocol
-@testable import MultipartForm
 import Testing
 
 @Suite("MultiformDataTests")

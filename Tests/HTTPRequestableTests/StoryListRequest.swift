@@ -1,6 +1,5 @@
 //
 //  StoryListRequest.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 11/1/24.
 //

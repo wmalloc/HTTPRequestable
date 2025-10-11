@@ -5,7 +5,6 @@
 //
 
 import Foundation
-import HTTPRequestable
 import HTTPTypes
 
 public extension URLRequest {

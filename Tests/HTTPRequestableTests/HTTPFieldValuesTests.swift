@@ -6,8 +6,7 @@
 //
 
 import Foundation
-import HTTPRequestable
-@testable import MultipartForm
+@testable import HTTPRequestable
 import Testing
 
 @Suite("HTTPFieldValues tests")
