@@ -9,12 +9,12 @@ import HTTPTypes
 import OSLog
 
 #if DEBUG
-private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable.MultipartForm", category: "MultipartFormBodyPart"))
+private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable", category: "MultipartFormBodyPart"))
 #else
 private let logger = Logger(.disabled)
 #endif
 
-open class MultipartFormBodyPart: MultipartFormBody {
+open class MultipartFormBodyPart: AnyMultipartFormBodyPart {
   public let headers: [HTTPField]
   public let bodyStream: InputStream
   public let contentLength: UInt64
@@ -28,11 +28,10 @@ open class MultipartFormBodyPart: MultipartFormBody {
 }
 
 public extension MultipartFormBodyPart {
-  func encoded(streamBufferSize: Int) throws -> Data {
+  func data(streamBufferSize: Int) throws -> Data {
     logger.trace("[IN]: \(#function)")
     var encoded = Data()
-    let headerData = encodedHeaders()
-    encoded.append(headerData)
+    encoded.append(encodedHeadersData)
     let bodyStreamData = try encodedBodyStream(streamBufferSize: streamBufferSize)
     encoded.append(bodyStreamData)
     return encoded
@@ -78,7 +77,7 @@ extension MultipartFormBodyPart {
 extension MultipartFormBodyPart {
   func write(to outputStream: OutputStream, streamBufferSize: Int) throws {
     logger.trace("[IN]: \(#function)")
-    let headerData = encodedHeaders()
+    let headerData = encodedHeadersData
     try Data.write(data: headerData, to: outputStream)
     try write(bodyStreamTo: outputStream, streamBufferSize: streamBufferSize)
   }

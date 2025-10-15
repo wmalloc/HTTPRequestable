@@ -13,18 +13,18 @@ import Testing
 @Suite("MultiformDataTests")
 struct MultiformDataTests {
   @Test func testBoundary() async throws {
-    let boundary = UUID().uuidString.replacingOccurrences(of: "-", with: "")
+    let boundary = UUID().uuidString
     let multipartData = MultipartForm(boundary: boundary)
     #expect(boundary == multipartData.boundary)
-    let initialBoudary = "--\(boundary)\(EncodingCharacters.crlf)"
-    #expect(multipartData.initialBoundary == initialBoudary)
-    #expect(multipartData.initialBoundaryData == Data(initialBoudary.utf8))
-    let interstitialBoudary = "\(EncodingCharacters.crlf)--\(boundary)\(EncodingCharacters.crlf)"
-    #expect(multipartData.interstitialBoundary == interstitialBoudary)
-    #expect(multipartData.interstitialBoundaryData == Data(interstitialBoudary.utf8))
-    let finalBoundary = "\(EncodingCharacters.crlf)--\(boundary)--\(EncodingCharacters.crlf)"
-    #expect(multipartData.finalBoundary == finalBoundary)
-    #expect(multipartData.finalBoundaryData == Data(finalBoundary.utf8))
+    let initialBoudary = "--\(boundary)\(String.crlf)"
+    #expect(boundary.initialBoundary == initialBoudary)
+    #expect(boundary.initialBoundaryData == Data(initialBoudary.utf8))
+    let interstitialBoudary = "\(String.crlf)--\(boundary)\(String.crlf)"
+    #expect(boundary.interstitialBoundary == interstitialBoudary)
+    #expect(boundary.interstitialBoundaryData == Data(interstitialBoudary.utf8))
+    let finalBoundary = "\(String.crlf)--\(boundary)--\(String.crlf)"
+    #expect(boundary.finalBoundary == finalBoundary)
+    #expect(boundary.finalBoundaryData == Data(finalBoundary.utf8))
   }
 
   @Test func oneItem() async throws {
@@ -36,7 +36,7 @@ struct MultiformDataTests {
     let imageDataString = "{\"homePage\": \"https://www.apple.com\"}"
     let imageString = try #require(imageDataString.data(using: .utf8)?.base64EncodedData())
     multiformData.append(data: imageString, withName: "\"Image\"", mimeType: "application/jpeg;base64")
-    let encoedData = try multiformData.encoded()
+    let encoedData = try multiformData.data()
     let data = try Bundle.module.data(forResource: "MultipartFormData", withExtension: "txt")
     #expect(data == encoedData)
   }

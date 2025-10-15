@@ -11,16 +11,18 @@ import OSLog
 import UniformTypeIdentifiers
 
 #if DEBUG
-private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable.MultipartForm", category: "MultipartForm"))
+private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable", category: "MultipartForm"))
 #else
 private let logger = Logger(.disabled)
 #endif
 
 /// https://datatracker.ietf.org/doc/html/rfc7578
-open class MultipartForm: MultipartFormBody {
+open class MultipartForm: AnyMultipartFormBodyPart {
   public let boundary: String
   public var headers: [HTTPField]
   public let contentType: KeyedItem<String>
+  public private(set) var bodyParts: [MultipartFormBodyPart] = []
+  let fileManager: FileManager
 
   public var contentLength: UInt64 {
     bodyParts.reduce(0) {
@@ -28,15 +30,12 @@ open class MultipartForm: MultipartFormBody {
     }
   }
 
-  public init(fileManager: FileManager = .default, boundary: String = UUID().uuidString.replacingOccurrences(of: "-", with: "")) {
+  public init(fileManager: FileManager = .default, boundary: String = UUID().uuidString) {
     self.fileManager = fileManager
     self.boundary = boundary
     self.contentType = KeyedItem(item: HTTPContentType.multipartForm.rawValue, parameters: ["boundary": boundary])
     self.headers = [HTTPField.contentType(contentType.encoded)]
   }
-
-  let fileManager: FileManager
-  public private(set) var bodyParts: [MultipartFormBodyPart] = []
 
   public func append(stream: InputStream, withLength length: UInt64, headers: [HTTPField]) {
     logger.trace("[IN]: \(#function)")
@@ -64,7 +63,7 @@ open class MultipartForm: MultipartFormBody {
     let pathExtension = fileURL.pathExtension
 
     if !fileName.isEmpty, !pathExtension.isEmpty {
-      let mime = mimeType(forPathExtension: pathExtension)
+      let mime = Self.mimeType(forPathExtension: pathExtension)
       try append(fileURL: fileURL, withName: name, fileName: fileName, mimeType: mime)
     } else {
       throw MultipartFormError.invalidFilename(fileURL)
@@ -98,19 +97,19 @@ open class MultipartForm: MultipartFormBody {
     append(stream: stream, withLength: bodyContentLength, headers: headers)
   }
 
-  public func encoded(streamBufferSize: Int = 1024) throws -> Data {
+  public func data(streamBufferSize: Int = 1024) throws -> Data {
     logger.trace("[IN]: \(#function)")
     headers.append(HTTPField(name: .contentLength, value: String(contentLength)))
     var encoded = Data()
-    encoded.append(encodedHeaders())
-    encoded.append(initialBoundaryData)
+    encoded.append(encodedHeadersData)
+    encoded.append(boundary.initialBoundaryData)
     for (index, bodyPart) in bodyParts.enumerated() {
       if index > 0 {
-        encoded.append(interstitialBoundaryData)
+        encoded.append(boundary.interstitialBoundaryData)
       }
-      try encoded.append(bodyPart.encoded(streamBufferSize: streamBufferSize))
+      try encoded.append(bodyPart.data(streamBufferSize: streamBufferSize))
     }
-    encoded.append(finalBoundaryData)
+    encoded.append(boundary.finalBoundaryData)
     return encoded
   }
 
@@ -133,42 +132,18 @@ open class MultipartForm: MultipartFormBody {
       outputStream.close()
     }
 
-    try initialBoundaryData.write(to: outputStream)
+    try boundary.initialBoundaryData.write(to: outputStream)
     for (index, bodyPart) in bodyParts.enumerated() {
       if index > 0 {
-        try interstitialBoundaryData.write(to: outputStream)
+        try boundary.interstitialBoundaryData.write(to: outputStream)
       }
       try bodyPart.write(to: outputStream, streamBufferSize: streamBufferSize)
     }
-    try finalBoundaryData.write(to: outputStream)
+    try boundary.finalBoundaryData.write(to: outputStream)
   }
 }
 
 extension MultipartForm {
-  var initialBoundary: String {
-    MultipartFormBoundaryType.boundary(forBoundaryType: .initial, boundary: boundary)
-  }
-
-  var initialBoundaryData: Data {
-    Data(initialBoundary.utf8)
-  }
-
-  var interstitialBoundary: String {
-    MultipartFormBoundaryType.boundary(forBoundaryType: .interstitial, boundary: boundary)
-  }
-
-  var interstitialBoundaryData: Data {
-    Data(interstitialBoundary.utf8)
-  }
-
-  var finalBoundary: String {
-    MultipartFormBoundaryType.boundary(forBoundaryType: .final, boundary: boundary)
-  }
-
-  var finalBoundaryData: Data {
-    Data(finalBoundary.utf8)
-  }
-
   func contentHeaders(withName name: String, fileName: String? = nil, mimeType: String? = nil) -> [HTTPField] {
     logger.trace("[IN]: \(#function)")
     var disposition = KeyedItem(item: HTTPContentType.formData.rawValue, parameters: ["name": name])
@@ -179,14 +154,14 @@ extension MultipartForm {
     var fields: [HTTPField] = []
     fields.append(.contentDisposition(disposition.encoded))
     if let mimeType {
-      fields.append(HTTPField.contentType(mimeType + EncodingCharacters.crlf))
+      fields.append(HTTPField.contentType(mimeType + String.crlf))
     }
     return fields
   }
 }
 
 extension MultipartForm {
-  func mimeType(forPathExtension pathExtension: String) -> String {
+  static func mimeType(forPathExtension pathExtension: String) -> String {
     logger.trace("[IN]: \(#function)")
     if let id = UTType(filenameExtension: pathExtension), let contentType = id.preferredMIMEType {
       return contentType
@@ -196,19 +171,22 @@ extension MultipartForm {
 }
 
 extension MultipartForm: MutableCollection {
-  public var startIndex: Int {
+  public typealias Index = [MultipartFormBodyPart].Index
+  public typealias Element = MultipartFormBodyPart
+
+  public var startIndex: Index {
     bodyParts.startIndex
   }
 
-  public var endIndex: Int {
+  public var endIndex: Index {
     bodyParts.endIndex
   }
 
-  public func index(after index: Int) -> Int {
+  public func index(after index: Index) -> Index {
     bodyParts.index(after: index)
   }
 
-  public subscript(position: Int) -> MultipartFormBodyPart {
+  public subscript(position: Index) -> Element {
     get {
       bodyParts[position]
     }

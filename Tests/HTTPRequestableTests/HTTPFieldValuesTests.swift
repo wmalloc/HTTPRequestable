@@ -20,7 +20,7 @@ struct HTTPFieldValuesTests {
 
   @Test("KeyedItem boundary encoding")
   func keyedItemBoundary() async throws {
-    let boundary = MultipartFormBoundaryType.boundary(forBoundaryType: .initial, boundary: "boundary")
+    let boundary = "boundary".initialBoundary
     let values = KeyedItem(item: "multipart/form-data", parameters: ["boundary": boundary])
     #expect(values.encoded == "multipart/form-data; boundary=\(boundary)")
   }
