@@ -116,6 +116,24 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   /// - SeeAlso: `HTTPRequestConvertible`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
   func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
+  /// Uploads data to the server as part of an HTTP request asynchronously.
+  ///
+  /// This method sends the specified `HTTPRequestConvertible` object to a server and waits for the response, including data body. The request can optionally include a delegate
+  /// that conforms to `URLSessionTaskDelegate` for customizing the behavior of the request.
+  ///
+  /// - Parameters:
+  ///   - request: The `HTTPRequestConvertible` object representing the HTTP upload request. This protocol defines properties necessary to create an URLRequest.
+  ///   - multipartForm: The data body to upload as multipartform.
+  ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
+  /// - Returns: An `HTTPAnyResponse` object containing the data received from the server in response to the request.
+  /// - Throws: An error of type `Error` if the upload operation fails, such as network issues or invalid requests.
+  ///
+  /// - Note: The `HTTPRequestConvertible` protocol must be implemented by the request object for this method to work correctly.
+  /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
+  ///
+  /// - SeeAlso: `HTTPRequestConvertible`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
+  func upload(for request: some HTTPRequestConvertible, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+
   /// Convenience method to download using an `HTTPRequestConvertible`; creates and resumes a `URLSessionDownloadTask` internally.
   /// - Parameters:
   ///   - request: The `HTTPRequestConvertible` for which to download.
@@ -263,6 +281,46 @@ public extension HTTPTransferable {
       return HTTPAnyResponse(request: $0, response: response, data: data)
     }
     return try await send(request: updatedRequest, interceptor: next, delegate: delegate)
+  }
+
+  /// Convenience method to upload data using an `HTTPRequestConvertible`, creates and resumes a `URLSessionUploadTask` internally.
+  /// - Parameters:
+  ///   - request: The `HTTPRequestConvertible` for which to upload data.
+  ///   - multipartForm: Data to upload.
+  ///   - delegate: Task-specific delegate. defaults to nil
+  /// - Returns: Data and response.
+  func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
+    let contentLength = multipartForm.contentLength
+    var headerFields = request.headerFields ?? [:]
+    headerFields.append(HTTPField(name: .contentLength, value: "\(multipartForm.contentLength)"))
+    let contentType = multipartForm.contentType
+    headerFields.append(HTTPField(name: .contentType, value: contentType.encoded))
+    var updatedRequest = request
+    updatedRequest.headerFields = headerFields
+
+    if contentLength <= MultipartForm.encodingMemoryThreshold {
+      let data = try multipartForm.data(streamBufferSize: multipartForm.streamBufferSize)
+      return try await upload(for: updatedRequest, from: data, delegate: delegate)
+    } else {
+      let fileManager = multipartForm.fileManager
+      let tempDirectoryURL = fileManager.temporaryDirectory
+      let directoryURL = tempDirectoryURL.appendingPathComponent("com.waqarmalik.HTTPTransferable/multipart.form.data")
+      let fileName = UUID().uuidString
+      let fileURL = directoryURL.appendingPathComponent(fileName)
+      try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+      do {
+        try multipartForm.read {
+          try $0.writeEncodedData(to: fileURL)
+        }
+        let result = try await upload(for: updatedRequest, fromFile: fileURL, delegate: delegate)
+        try? fileManager.removeItem(at: fileURL)
+        return result
+      } catch {
+        // Cleanup after attempted write if it fails.
+        try? fileManager.removeItem(at: fileURL)
+        throw error
+      }
+    }
   }
 
   /// Convenience method to download using an `HTTPRequestConvertible`; creates and resumes a `URLSessionDownloadTask` internally.

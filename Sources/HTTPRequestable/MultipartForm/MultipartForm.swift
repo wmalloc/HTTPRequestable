@@ -18,11 +18,14 @@ private let logger = Logger(.disabled)
 
 /// https://datatracker.ietf.org/doc/html/rfc7578
 open class MultipartForm: AnyMultipartFormBodyPart {
+  public static let encodingMemoryThreshold: UInt64 = 10000000
+
   public let boundary: String
   public var headers: [HTTPField]
   public let contentType: KeyedItem<String>
   public private(set) var bodyParts: [MultipartFormBodyPart] = []
   let fileManager: FileManager
+  let streamBufferSize: Int
 
   public var contentLength: UInt64 {
     bodyParts.reduce(0) {
@@ -35,6 +38,7 @@ open class MultipartForm: AnyMultipartFormBodyPart {
     self.boundary = boundary
     self.contentType = KeyedItem(item: HTTPContentType.multipartForm.rawValue, parameters: ["boundary": boundary])
     self.headers = [HTTPField.contentType(contentType.encoded)]
+    self.streamBufferSize = 1024
   }
 
   public func append(stream: InputStream, withLength length: UInt64, headers: [HTTPField]) {
@@ -97,7 +101,7 @@ open class MultipartForm: AnyMultipartFormBodyPart {
     append(stream: stream, withLength: bodyContentLength, headers: headers)
   }
 
-  public func data(streamBufferSize: Int = 1024) throws -> Data {
+  public func data(streamBufferSize: Int) throws -> Data {
     logger.trace("[IN]: \(#function)")
     headers.append(HTTPField(name: .contentLength, value: String(contentLength)))
     var encoded = Data()
