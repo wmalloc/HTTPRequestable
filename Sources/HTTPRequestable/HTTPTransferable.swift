@@ -294,7 +294,7 @@ public extension HTTPTransferable {
     let contentLength = multipartForm.contentLength
     let updatedRequest = request.append(headerField: HTTPField(name: .contentLength, value: "\(contentLength)"))
       .append(headerField: HTTPField(name: .contentType, value: contentType.encoded))
-    
+
     if contentLength <= MultipartForm.encodingMemoryThreshold {
       /// if we have enough memory to store data
       let data = try multipartForm.data(streamBufferSize: multipartForm.streamBufferSize)

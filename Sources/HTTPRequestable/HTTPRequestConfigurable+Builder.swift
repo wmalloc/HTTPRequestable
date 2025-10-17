@@ -1,6 +1,5 @@
 //
-//  File.swift
-//  HTTPRequestable
+//  HTTPRequestConfigurable+Builder.swift
 //
 //  Created by Waqar Malik on 10/16/25.
 //
@@ -9,10 +8,9 @@ import Foundation
 import HTTPTypes
 import HTTPTypesFoundation
 
-
 public extension HTTPRequestConfigurable {
   /// Appends an HTTP header field to the request's header collection, preserving any existing headers.
-  /// 
+  ///
   /// - Parameter field: The `HTTPField` to append. If a header with the same name already exists,
   ///   this method will add another instance of the header rather than replacing it, which is useful
   ///   for headers that support multiple values (e.g., `Set-Cookie`).
@@ -20,13 +18,13 @@ public extension HTTPRequestConfigurable {
   /// - Note: If the receiver currently has no `headerFields`, a new `HTTPFields` collection is created.
   /// - SeeAlso: `set(headerField:)` for replacing the value of a header field.
   func append(headerField field: HTTPField) -> Self {
-    var fields = self.headerFields ?? HTTPFields()
+    var fields = headerFields ?? HTTPFields()
     fields.append(field)
     var updated = self
     updated.headerFields = fields
     return updated
   }
-  
+
   /// Sets or replaces an HTTP header field in the request's header collection.
   ///
   /// - Parameter field: The `HTTPField` to set. If a header with the same name already exists,
@@ -35,7 +33,7 @@ public extension HTTPRequestConfigurable {
   /// - Note: If the receiver currently has no `headerFields`, a new `HTTPFields` collection is created.
   /// - SeeAlso: `append(headerField:)` to add another instance of a header without replacing existing values.
   func set(headerField field: HTTPField) -> Self {
-    var fields = self.headerFields ?? HTTPFields()
+    var fields = headerFields ?? HTTPFields()
     fields[field.name] = field.value
     var updated = self
     updated.headerFields = fields
@@ -51,7 +49,7 @@ public extension HTTPRequestConfigurable {
   /// - Note: If the receiver currently has no `queryItems`, a new array is created and the item is added.
   /// - SeeAlso: Consider providing an overload to append multiple query items for batch updates.
   func append(queryItem: URLQueryItem) -> Self {
-    var queryItems = self.queryItems ?? []
+    var queryItems = queryItems ?? []
     queryItems.append(queryItem)
     var updated = self
     updated.queryItems = queryItems
