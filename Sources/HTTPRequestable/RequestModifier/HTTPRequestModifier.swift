@@ -33,7 +33,7 @@ public protocol HTTPRequestModifier: Sendable {
   ///   - session: The `URLSession` through which the request will be sent. This parameter is provided so that you can adjust the request based on the session's configuration or other properties.
   /// - Throws: An error of type `Error` if there is an issue with the interceptor logic, such as invalid input.
   ///
-  /// - Note: The `HTTPRequest` type must conform to `HTTPRequestable` for this method to work correctly.
+  /// - Note: The `URLRequest` type must conform to `HTTPRequestable` for this method to work correctly.
   /// - Note: This method is called automatically by the `object(for:)` and `data(for:)` methods to allow for request customization.
   ///
   /// - SeeAlso: `HTTPRequestable`, `URLSession`

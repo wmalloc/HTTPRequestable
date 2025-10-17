@@ -122,19 +122,22 @@ extension Quality: ExpressibleByArrayLiteral {
 }
 
 extension Quality: MutableCollection {
-  public var startIndex: Int {
+  public typealias Index = [Item].Index
+  public typealias Element = Quality.Item
+
+  public var startIndex: Index {
     items.startIndex
   }
 
-  public var endIndex: Int {
+  public var endIndex: Index {
     items.endIndex
   }
 
-  public func index(after index: Int) -> Int {
+  public func index(after index: Index) -> Index {
     items.index(after: index)
   }
 
-  public subscript(position: Int) -> Item {
+  public subscript(position: Index) -> Element {
     get { items[position] }
     set { items[position] = newValue }
   }

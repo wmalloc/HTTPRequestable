@@ -1,6 +1,5 @@
 //
 //  QualityEncodedTests.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 10/25/24.
 //

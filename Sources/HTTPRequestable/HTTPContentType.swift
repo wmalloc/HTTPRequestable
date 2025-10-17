@@ -28,7 +28,7 @@ public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
   /// - Parameter rawValue: The raw string value of the content type.
   public init(rawValue: String) {
     self.rawValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
-    self.mimeType = self.rawValue.mimeType ?? ""
+    self.mimeType = Self.mimeType(for: self.rawValue) ?? ""
   }
 
   /// Splits a string and creates content types from the MIME type only.
@@ -40,6 +40,10 @@ public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
     return value.split(separator: ",")
       .compactMap { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
       .map(Self.init(rawValue:))
+  }
+
+  static func mimeType(for value: String) -> String? {
+    value.split(separator: ";", maxSplits: 1).first.map(String.init)?.trimmingCharacters(in: .whitespacesAndNewlines)
   }
 }
 
@@ -102,14 +106,14 @@ extension HTTPContentType: Decodable {
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
     self.rawValue = try container.decode(String.self)
-    self.mimeType = rawValue.mimeType ?? ""
+    self.mimeType = Self.mimeType(for: rawValue) ?? ""
   }
 }
 
 public extension HTTPContentType {
   /// Allows comparison of raw string values.
   static func == (lhs: HTTPContentType, rhs: StringLiteralType) -> Bool {
-    lhs.mimeType == rhs.mimeType
+    lhs.mimeType == HTTPContentType.mimeType(for: rhs)
   }
 }
 
@@ -161,11 +165,4 @@ public extension HTTPContentType {
 
   /// XML content type.
   static var xml: Self { "application/xml" }
-}
-
-extension String {
-  /// Extracts the MIME type from a string.
-  var mimeType: String? {
-    split(separator: ";", maxSplits: 1).first.map(String.init)?.trimmingCharacters(in: .whitespacesAndNewlines)
-  }
 }
