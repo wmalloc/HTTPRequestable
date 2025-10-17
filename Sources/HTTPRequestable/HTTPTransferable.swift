@@ -290,28 +290,21 @@ public extension HTTPTransferable {
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
   func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
-    let contentLength = multipartForm.contentLength
-    var headerFields = request.headerFields ?? [:]
-    headerFields.append(HTTPField(name: .contentLength, value: "\(multipartForm.contentLength)"))
     let contentType = multipartForm.contentType
-    headerFields.append(HTTPField(name: .contentType, value: contentType.encoded))
-    var updatedRequest = request
-    updatedRequest.headerFields = headerFields
-
+    let contentLength = multipartForm.contentLength
+    let updatedRequest = request.append(headerField: HTTPField(name: .contentLength, value: "\(contentLength)"))
+      .append(headerField: HTTPField(name: .contentType, value: contentType.encoded))
+    
     if contentLength <= MultipartForm.encodingMemoryThreshold {
+      /// if we have enough memory to store data
       let data = try multipartForm.data(streamBufferSize: multipartForm.streamBufferSize)
       return try await upload(for: updatedRequest, from: data, delegate: delegate)
     } else {
+      /// write the data to file and upload the file
       let fileManager = multipartForm.fileManager
-      let tempDirectoryURL = fileManager.temporaryDirectory
-      let directoryURL = tempDirectoryURL.appendingPathComponent("com.waqarmalik.HTTPTransferable/multipart.form.data")
-      let fileName = UUID().uuidString
-      let fileURL = directoryURL.appendingPathComponent(fileName)
-      try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+      let fileURL = try fileManager.tempFile()
       do {
-        try multipartForm.read {
-          try $0.writeEncodedData(to: fileURL)
-        }
+        try multipartForm.write(encodedDataTo: fileURL, streamBufferSize: multipartForm.streamBufferSize)
         let result = try await upload(for: updatedRequest, fromFile: fileURL, delegate: delegate)
         try? fileManager.removeItem(at: fileURL)
         return result
@@ -361,5 +354,15 @@ public extension HTTPTransferable {
   func object<R: HTTPRequestConfigurable>(for request: R, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> R.ResultType {
     try await data(for: request, delegate: delegate)
       .transformed(using: request.responseDataTransformer)
+  }
+}
+
+extension FileManager {
+  func tempFile() throws -> URL {
+    let directoryURL = temporaryDirectory.appendingPathComponent("com.waqarmalik.HTTPTransferable/multipart.form.data")
+    let fileName = UUID().uuidString
+    let fileURL = directoryURL.appendingPathComponent(fileName)
+    try createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+    return fileURL
   }
 }

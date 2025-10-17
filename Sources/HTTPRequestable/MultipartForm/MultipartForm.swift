@@ -33,12 +33,12 @@ open class MultipartForm: AnyMultipartFormBodyPart {
     }
   }
 
-  public init(fileManager: FileManager = .default, boundary: String = UUID().uuidString) {
+  public init(fileManager: FileManager = .default, boundary: String = UUID().uuidString, streamBufferSize: Int = 1024) {
     self.fileManager = fileManager
     self.boundary = boundary
     self.contentType = KeyedItem(item: HTTPContentType.multipartForm.rawValue, parameters: ["boundary": boundary])
     self.headers = [HTTPField.contentType(contentType.encoded)]
-    self.streamBufferSize = 1024
+    self.streamBufferSize = streamBufferSize
   }
 
   public func append(stream: InputStream, withLength length: UInt64, headers: [HTTPField]) {
