@@ -122,7 +122,7 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   /// that conforms to `URLSessionTaskDelegate` for customizing the behavior of the request.
   ///
   /// - Parameters:
-  ///   - request: The `HTTPRequestConvertible` object representing the HTTP upload request. This protocol defines properties necessary to create an URLRequest.
+  ///   - request: The `HTTPRequestConfigurable` object representing the HTTP upload request. This protocol defines properties necessary to create an URLRequest.
   ///   - multipartForm: The data body to upload as multipartform.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
   /// - Returns: An `HTTPAnyResponse` object containing the data received from the server in response to the request.
@@ -131,8 +131,8 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   /// - Note: The `HTTPRequestConvertible` protocol must be implemented by the request object for this method to work correctly.
   /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
-  /// - SeeAlso: `HTTPRequestConvertible`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
-  func upload(for request: some HTTPRequestConvertible, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  /// - SeeAlso: `HTTPRequestConfigurable`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
+  func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
 
   /// Convenience method to download using an `HTTPRequestConvertible`; creates and resumes a `URLSessionDownloadTask` internally.
   /// - Parameters:

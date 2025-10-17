@@ -36,7 +36,7 @@ struct MultiformDataTests {
     let imageDataString = "{\"homePage\": \"https://www.apple.com\"}"
     let imageString = try #require(imageDataString.data(using: .utf8)?.base64EncodedData())
     multiformData.append(data: imageString, withName: "\"Image\"", mimeType: "application/jpeg;base64")
-    let encoedData = try multiformData.data()
+    let encoedData = try multiformData.data(streamBufferSize: multiformData.streamBufferSize)
     let data = try Bundle.module.data(forResource: "MultipartFormData", withExtension: "txt")
     #expect(data == encoedData)
   }
