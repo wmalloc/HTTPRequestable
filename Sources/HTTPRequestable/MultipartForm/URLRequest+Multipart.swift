@@ -1,20 +1,17 @@
 //
-//  URLRequest+HTTPFields.swift
+//  URLRequest+Multipart.swift
 //
 //  Created by Waqar Malik on 1/14/23.
 //
 
 import Foundation
-import HTTPRequestable
 import HTTPTypes
 
 public extension URLRequest {
+  /// Append the multipart form data to request, and header fields
   @discardableResult
   func setMultipartFormData(_ multipartForm: MultipartForm) throws -> Self {
-    let request = self
-    try request.setHttpBody(multipartForm.encoded(), contentType: multipartForm.contentType.encoded)
+    try setHttpBody(multipartForm.data(streamBufferSize: multipartForm.streamBufferSize), contentType: multipartForm.contentType.encoded)
       .setHeader(HTTPField(name: .contentLength, value: "\(multipartForm.contentLength)"))
-      .setHeader(HTTPField(name: .contentType, value: multipartForm.contentType.encoded))
-    return self
   }
 }

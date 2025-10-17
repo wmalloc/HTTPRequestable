@@ -22,10 +22,10 @@ public typealias HTTPMethod = HTTPRequest.Method
 public typealias Transformer<InputType: Sendable, OutputType: Sendable> = @Sendable (InputType) throws -> OutputType
 
 /// HTTP Request
-@available(*, deprecated, renamed: "HTTPRequestConvertible", message: "Renamed to HTTPRequestConvertible")
+@available(*, deprecated, renamed: "HTTPRequestConfigurable", message: "Renamed to HTTPRequestConfigurable")
 public typealias URLRequestable = HTTPRequestConfigurable
 
-@available(*, deprecated, renamed: "HTTPRequestConvertible", message: "Renamed to HTTPRequestConvertible")
+@available(*, deprecated, renamed: "HTTPRequestConfigurable", message: "Renamed to HTTPRequestConfigurable")
 public typealias HTTPRequestable = HTTPRequestConfigurable
 
 /// URL/HTTP Request builder protocol
@@ -114,6 +114,24 @@ public extension HTTPRequestConfigurable {
 }
 
 public extension HTTPRequestConfigurable where ResultType: Decodable {
+  /// A convenience transformer that decodes raw JSON `Data` into the conforming `ResultType`.
+  ///
+  /// - Discussion:
+  ///   Use this transformer when your `ResultType` conforms to `Decodable` and the server
+  ///   response is JSON. It constructs a new `JSONDecoder` and attempts to decode the given
+  ///   `Data` into `ResultType`.
+  ///
+  /// - Returns: A `Transformer<Data, ResultType>` closure that decodes the input data using `JSONDecoder`.
+  ///
+  /// - Throws: Rethrows any decoding errors produced by `JSONDecoder.decode(_:from:)`,
+  ///   such as `DecodingError.dataCorrupted`, `DecodingError.keyNotFound`,
+  ///   `DecodingError.typeMismatch`, or `DecodingError.valueNotFound`.
+  ///
+  /// - Note:
+  ///   - The decoder uses default `JSONDecoder` configuration. If you need custom date,
+  ///     key, or data strategies, consider providing your own transformer or extending
+  ///     this property to accept a configured `JSONDecoder`.
+  ///   - This is only available when `ResultType` conforms to `Decodable`.
   static var jsonDecoder: Transformer<Data, ResultType> {
     { data in
       try JSONDecoder().decode(ResultType.self, from: data)

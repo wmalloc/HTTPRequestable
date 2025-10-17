@@ -51,19 +51,22 @@ public struct KeyedItem<ItemType: Codable & Equatable & Sendable>: Equatable, Se
 }
 
 extension KeyedItem: Collection {
-  public var startIndex: Dictionary<String, String>.Index {
+  public typealias Index = Dictionary<String, String>.Index
+  public typealias Element = Dictionary<String, String>.Element
+
+  public var startIndex: Index {
     parameters.startIndex
   }
 
-  public var endIndex: Dictionary<String, String>.Index {
+  public var endIndex: Index {
     parameters.endIndex
   }
 
-  public func index(after index: Dictionary<String, String>.Index) -> Dictionary<String, String>.Index {
+  public func index(after index: Index) -> Index {
     parameters.index(after: index)
   }
 
-  public subscript(position: Dictionary<String, String>.Index) -> Dictionary<String, String>.Element {
+  public subscript(position: Index) -> Element {
     parameters[position]
   }
 }
