@@ -9,12 +9,18 @@ import Foundation
 import OSLog
 import SwiftUI
 
-@MainActor @Observable
+@Observable
 class SampleViewModel {
-  var items: [Item] = []
+  @MainActor var items: [Item] = []
+
+  var task: Task<Void, Error>? {
+    didSet {
+      oldValue?.cancel()
+    }
+  }
 
   func topStories() {
-    Task {
+    task = Task {
       do {
         try await topStories()
       } catch {
@@ -26,8 +32,10 @@ class SampleViewModel {
   func topStories() async throws {
     let items = try await HackerNews.shared.topStories()
 
-    withAnimation {
-      self.items = items
+    await MainActor.run {
+      withAnimation {
+        self.items = items
+      }
     }
   }
 }
