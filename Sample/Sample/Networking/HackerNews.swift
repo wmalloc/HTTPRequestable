@@ -23,7 +23,6 @@ final class HackerNews: HTTPTransferable {
   private(set) var interceptors: [any HTTPInterceptor] = []
 
   private(set) var environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
-    .setQueryItems([URLQueryItem(name: "print", value: "pretty")])
   let session: URLSession
   let serverTrustEvaulator = ServerTrustEvaluator()
 
@@ -33,7 +32,6 @@ final class HackerNews: HTTPTransferable {
 }
 
 extension HackerNews {
-  @HackerNewsActor
   func topStories(limit: Int = 20) async throws -> [Item] {
     let stories = try await stories(type: "topstories")
     var items: [Item] = []
