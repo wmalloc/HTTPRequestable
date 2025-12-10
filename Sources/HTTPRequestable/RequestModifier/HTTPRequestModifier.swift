@@ -21,7 +21,7 @@ public protocol HTTPRequestModifier: Sendable {
   /// - Note: The `HTTPRequest` type must conform to `HTTPRequestable` for this method to work correctly.
   /// - Note: This method is called automatically by the `object(for:)` and `data(for:)` methods to allow for request customization.
   ///
-  /// - SeeAlso: `HTTPRequestable`, `URLSession`
+  /// - SeeAlso: `HTTPRequestConfigurable`, `URLSession`
   func modify(_ request: inout HTTPRequest, for session: URLSession) async throws
 
   /// Intercepts and customizes the HTTP request before it is sent through a URLSession.
@@ -36,7 +36,7 @@ public protocol HTTPRequestModifier: Sendable {
   /// - Note: The `URLRequest` type must conform to `HTTPRequestable` for this method to work correctly.
   /// - Note: This method is called automatically by the `object(for:)` and `data(for:)` methods to allow for request customization.
   ///
-  /// - SeeAlso: `HTTPRequestable`, `URLSession`
+  /// - SeeAlso: `HTTPRequestConfigurable`, `URLSession`
   func modify(_ request: inout URLRequest, for session: URLSession) async throws
 }
 

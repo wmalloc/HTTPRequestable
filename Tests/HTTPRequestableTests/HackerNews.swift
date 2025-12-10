@@ -21,9 +21,7 @@ final class HackerNews: HTTPTransferable {
 
   var requestModifiers: [any HTTPRequestModifier] = []
   var interceptors: [any HTTPInterceptor] = []
-
   let session: URLSession
-
   let environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
 
   nonisolated init(session: URLSession = .shared) {

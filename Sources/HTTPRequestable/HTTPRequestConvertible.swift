@@ -32,25 +32,6 @@ import HTTPTypesFoundation
 /// - If you need a higher-level, configurable builder (e.g., with base URL, default headers,
 ///   and query composition), consider using `HTTPRequestConfigurable` instead.
 ///
-/// Example
-/// ```swift
-/// struct GetUserRoute: HTTPRequestConvertible {
-///     let userID: String
-///
-///     var httpRequest: HTTPRequest {
-///         get throws {
-///             var components = URLComponents()
-///             components.scheme = "https"
-///             components.host = "api.example.com"
-///             components.path = "/v1/users/\(userID)"
-///
-///             guard let url = components.url else { throw URLError(.badURL) }
-///             return try HTTPRequest(method: .get, url: url)
-///         }
-///     }
-/// }
-/// ```
-///
 /// See Also
 /// - `HTTPRequestConfigurable` for composable request building
 /// - `HTTPTypes.HTTPRequest`
