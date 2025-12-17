@@ -47,18 +47,6 @@ public protocol HTTPTransferable: AnyObject, Sendable {
   ///   - Any error thrown by `URLSession` during task creation or execution.
   ///   - Network‑level errors such as connection failures or timeouts.
   ///
-  /// Example usage:
-  ///
-  /// ```swift
-  /// let request = HTTPRequest(url: URL(string: "https://api.example.com")!)
-  /// do {
-  ///     let response = try await client.data(for: request, httpBody: nil, delegate: nil)
-  ///     // Handle `response`
-  /// } catch {
-  ///     os_log("Network error: %@", error)
-  /// }
-  /// ```
-  ///
   /// This method is designed to be called from an asynchronous context (`async/await`)
   /// and will automatically propagate any networking errors up the call chain.
   func data(for request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse

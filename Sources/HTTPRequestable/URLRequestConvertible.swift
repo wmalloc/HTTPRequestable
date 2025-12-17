@@ -33,7 +33,6 @@ import Foundation
 ///     try await URLSession.shared.data(for: convertible.urlRequest)
 ///   }
 ///   ```
-
 /// A fully-formed `URLRequest` representation of the receiver.
 /// - Returns: A `URLRequest` suitable for use with `URLSession` and related networking APIs.
 /// - Throws: An error if a valid request cannot be created (e.g., the underlying URL is

@@ -58,9 +58,9 @@ public extension URLSession {
     return HTTPAnyResponse(request: updateRequest, response: response, data: data)
   }
 
-  /// Convenience method to upload data using an `HTTPRequestConvertible`, creates and resumes a `URLSessionUploadTask` internally.
+  /// Convenience method to upload data using an `HTTPRequestConfigurable`, creates and resumes a `URLSessionUploadTask` internally.
   /// - Parameters:
-  ///   - request: The `HTTPRequestConvertible` for which to upload data.
+  ///   - request: The `HTTPRequestConfigurable` for which to upload data.
   ///   - multipartForm: Data to upload in multipart form.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
