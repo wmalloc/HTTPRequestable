@@ -24,10 +24,10 @@ final class HackerNews: HTTPTransferable {
 
   private(set) var environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
   let session: URLSession
-  let serverTrustEvaulator = ServerTrustEvaluator()
+  let serverTrustEvaluator = ServerTrustEvaluator()
 
   nonisolated init() {
-    self.session = URLSession(configuration: .default, delegate: serverTrustEvaulator, delegateQueue: nil)
+    self.session = URLSession(configuration: .default, delegate: serverTrustEvaluator, delegateQueue: nil)
   }
 }
 

@@ -8,6 +8,7 @@
 #if canImport(Security)
 import Foundation
 import HTTPRequestable
+import OSLog
 @preconcurrency import Security
 
 public final class ServerTrustEvaluator: NSObject, HTTPServerTrustEvaluating, URLSessionDelegate, @unchecked Sendable {
@@ -21,6 +22,7 @@ public final class ServerTrustEvaluator: NSObject, HTTPServerTrustEvaluating, UR
   ///
   /// - Parameter certificates: A set of certificates to use for trust evaluation. Defaults to an empty set.
   public init(certificates: Set<SecCertificate> = Set(Bundle.main.certificates)) {
+    os_log(.info, "Total Certificates = %d", certificates.count)
     self.certificates = certificates
   }
 

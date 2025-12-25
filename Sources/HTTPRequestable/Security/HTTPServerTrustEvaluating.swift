@@ -8,13 +8,18 @@
 #if canImport(Security)
 import Foundation
 @preconcurrency import Security
+import OSLog
+
+#if DEBUG
+private let logger = Logger(.init(category: "HTTPRequestable"))
+#else
+private let logger = Logger(.disabled)
+#endif
 
 /**
  # HTTPServerTrustEvaluating
-
  This file provides the `HTTPServerTrustEvaluating` protocol and its default implementations,
  as well as the `ServerTrustEvaluator` class for handling server trust evaluation.
-
  */
 
 public protocol HTTPServerTrustEvaluating {
@@ -54,6 +59,7 @@ public protocol HTTPServerTrustEvaluating {
 public extension HTTPServerTrustEvaluating {
   /// Default implementation for evaluating a server trust challenge.
   func evaluate(challenge: URLAuthenticationChallenge, certificates: Set<SecCertificate>) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+    logger.trace("[IN]: \(#function)")
     guard let trust = challenge.protectionSpace.serverTrust else {
       return (.cancelAuthenticationChallenge, nil)
     }
@@ -67,12 +73,14 @@ public extension HTTPServerTrustEvaluating {
 
   /// Default implementation for evaluating a server trust challenge asynchronously.
   func evaluate(challenge: URLAuthenticationChallenge, certificates: Set<SecCertificate>, completion: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    logger.trace("[IN]: \(#function)")
     let result = evaluate(challenge: challenge, certificates: certificates)
     completion(result.0, result.1)
   }
 
   /// Default implementation for accepting a server trust challenge without validation.
   func accept(challenge: URLAuthenticationChallenge, certificates: Set<SecCertificate>) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+    logger.trace("[IN]: \(#function)")
     guard let trust = challenge.protectionSpace.serverTrust else {
       return (.cancelAuthenticationChallenge, nil)
     }
@@ -84,6 +92,7 @@ public extension HTTPServerTrustEvaluating {
 
   /// Default implementation for evaluating a server trust object.
   func evaluate(trust: SecTrust, certificates: Set<SecCertificate>) throws(TrustError) {
+    logger.trace("[IN]: \(#function)")
     guard let trustCertificates = trust.certificates else {
       throw .certificateNotFound
     }
