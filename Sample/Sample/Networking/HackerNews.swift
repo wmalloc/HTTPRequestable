@@ -1,6 +1,5 @@
 //
 //  HackerNews.swift
-//  Sample
 //
 //  Created by Waqar Malik on 9/7/24.
 //
@@ -24,11 +23,18 @@ final class HackerNews: HTTPTransferable {
 
   private(set) var environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
   let session: URLSession
-  let serverTrustEvaulator = ServerTrustEvaluator()
+
+  #if canImport(Security)
+  let serverTrustEvaluator = ServerTrustEvaluator()
 
   nonisolated init() {
-    self.session = URLSession(configuration: .default, delegate: serverTrustEvaulator, delegateQueue: nil)
+    self.session = URLSession(configuration: .default, delegate: serverTrustEvaluator, delegateQueue: nil)
   }
+  #else
+  nonisolated init() {
+    self.session = URLSession(configuration: .default, delegate: nil, delegateQueue: nil)
+  }
+  #endif
 }
 
 extension HackerNews {
