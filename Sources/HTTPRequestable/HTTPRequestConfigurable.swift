@@ -113,26 +113,32 @@ public extension HTTPRequestConfigurable {
   }
 }
 
+public extension HTTPRequestConfigurable where ResultType == Data {
+  /// Identity transformer for requests whose result type is `Data`.
+  ///
+  /// Many requests return raw binary data that the caller wishes to
+  /// consume directly.  This extension supplies a default `responseDataTransformer`
+  /// that simply forwards the data unchanged, so no custom decoding is
+  /// required.  Conforming types can override this property if they need
+  /// to perform additional processing (e.g. validation or logging).
+  ///
+  /// The transformer has the signature `Transformer<Data, ResultType>`
+  /// and is implemented as `{ $0 }`, i.e. “return the input”.
+  ///
+  /// - Returns: A closure that returns its argument unchanged.
+  var responseDataTransformer: Transformer<Data, ResultType>? { { $0 } }
+}
+
 public extension HTTPRequestConfigurable where ResultType: Decodable {
-  /// A convenience transformer that decodes raw JSON `Data` into the conforming `ResultType`.
+  /// Default JSON decoder for requests whose result type is `Decodable`.
   ///
-  /// - Discussion:
-  ///   Use this transformer when your `ResultType` conforms to `Decodable` and the server
-  ///   response is JSON. It constructs a new `JSONDecoder` and attempts to decode the given
-  ///   `Data` into `ResultType`.
+  /// This property forwards to the static `jsonDecoder` defined on
+  /// the type.  It allows concrete request types to provide a reusable
+  /// decoder while still exposing an instance‑level transformer that
+  /// matches the `HTTPRequestConfigurable` protocol requirement.
   ///
-  /// - Returns: A `Transformer<Data, ResultType>` closure that decodes the input data using `JSONDecoder`.
-  ///
-  /// - Throws: Rethrows any decoding errors produced by `JSONDecoder.decode(_:from:)`,
-  ///   such as `DecodingError.dataCorrupted`, `DecodingError.keyNotFound`,
-  ///   `DecodingError.typeMismatch`, or `DecodingError.valueNotFound`.
-  ///
-  /// - Note:
-  ///   - The decoder uses default `JSONDecoder` configuration. If you need custom date,
-  ///     key, or data strategies, consider providing your own transformer or extending
-  ///     this property to accept a configured `JSONDecoder`.
-  ///   - This is only available when `ResultType` conforms to `Decodable`.
-  static var jsonDecoder: Transformer<Data, ResultType> {
+  /// - Returns: The static JSON‑decoder for this request type.
+  var responseDataTransformer: Transformer<Data, ResultType>? {
     { data in
       try JSONDecoder().decode(ResultType.self, from: data)
     }
