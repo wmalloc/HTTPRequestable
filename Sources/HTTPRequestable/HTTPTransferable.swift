@@ -16,13 +16,56 @@ private let logger = Logger(.init(category: "HTTPTransferable"))
 private let logger = Logger(.disabled)
 #endif
 
+import Foundation
+
+/// A contract that enables an object to perform HTTP‑based network
+/// operations.
+///
+/// The protocol is designed for reference types (`AnyObject`) that
+/// can be used concurrently (conforming to `Sendable`).  It builds on
+/// the lower‑level `HTTPTransportable` protocol, adding a session and
+/// two asynchronous collections that allow callers to tweak the request
+/// before it is sent and to react to the response afterward.
+///
+/// Typical conformances are view‑model or service objects that need
+/// access to a shared `URLSession` and want to provide pluggable
+/// behaviour such as logging, authentication, or response‑caching.
 public protocol HTTPTransferable: AnyObject, HTTPTransportable, Sendable {
+  /// The `URLSession` used to execute all network requests.
+  ///
+  /// Conforming types usually provide a shared session (e.g.
+  /// `URLSession.shared`) or inject a custom configuration for
+  /// testing.  The session is read‑only; any changes should be made
+  /// via the initialiser or dependency injection.
   var session: URLSession { get }
 
-  /// Request Modifiers
+  // MARK: Request Modifiers
+
+  /// An array of objects that can mutate an outgoing request.
+  ///
+  /// Each element must conform to `HTTPRequestModifier`.  The array
+  /// is produced asynchronously because the modifiers may need to
+  /// perform I/O (e.g. fetch a token from secure storage).
+  ///
+  /// - Returns: A list of modifiers that will be applied in the
+  ///   order they appear.  The default implementation can simply
+  ///   return an empty array.
   var requestModifiers: [any HTTPRequestModifier] { get async }
 
-  /// Response Interceptors
+  // MARK: Response Interceptors
+
+  /// An array of objects that can inspect or transform a received
+  /// response.
+  ///
+  /// Each element must conform to `HTTPInterceptor`.  The array is
+  /// produced asynchronously for the same reasons as
+  /// `requestModifiers`.  Interceptors are invoked after a request
+  /// completes, allowing error handling, logging, or response
+  /// transformation.
+  ///
+  /// - Returns: A list of interceptors that will be applied in the
+  ///   order they appear.  The default implementation can simply
+  ///   return an empty array.
   var interceptors: [any HTTPInterceptor] { get async }
 }
 
@@ -178,27 +221,41 @@ public extension HTTPTransferable {
     try await session.bytes(for: request, delegate: delegate)
   }
 
-  /**
-   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
-
-   - Parameters:
-     - request: Request where to get the data from
-     - delegate: Delegate to handle the request, defaults to nil
-   - returns: Transformed Object
-   */
+  /// Creates an object from the data returned by a request.
+  ///
+  /// This convenience wrapper combines two steps that are common when
+  /// performing network operations:
+  ///
+  /// 1. It sends the supplied `request` through the underlying
+  ///    `URLSession`, optionally using a custom `URLSessionTaskDelegate`.
+  /// 2. It transforms the raw `Data` into the type expected by the
+  ///    request via the request’s `responseDataTransformer`.
+  ///
+  /// The function is marked **`@inlinable`** so the compiler can
+  /// inline it across module boundaries, improving performance for
+  /// small, frequently‑used requests.
+  ///
+  /// - Parameters:
+  ///   - request: The `HTTPRequestConfigurable` instance that
+  ///     describes the network call.  Its generic `ResultType` is the
+  ///     type returned by this method.
+  ///   - delegate: An optional `URLSessionTaskDelegate` that can
+  ///     intercept callbacks for the underlying task.  If omitted,
+  ///     the session’s default delegate is used.
+  ///
+  /// - Returns: The object obtained by applying
+  ///   `request.responseDataTransformer` to the raw data.
+  ///
+  /// - Throws: Any error thrown by either `data(for:delegate:)` or
+  ///   the transformer.  Common errors include network failures,
+  ///   decoding errors, and custom validation failures.
+  ///
+  /// This method is typically used inside a higher‑level service or
+  /// repository that hides the details of HTTP communication from its
+  /// callers.
   @inlinable
   func object<R: HTTPRequestConfigurable>(for request: R, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> R.ResultType {
     try await data(for: request, delegate: delegate)
       .transformed(using: request.responseDataTransformer)
-  }
-}
-
-extension FileManager {
-  func tempFile() throws -> URL {
-    let directoryURL = temporaryDirectory.appendingPathComponent("com.waqarmalik.HTTPTransferable/multipart.form.data")
-    let fileName = UUID().uuidString
-    let fileURL = directoryURL.appendingPathComponent(fileName)
-    try createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
-    return fileURL
   }
 }

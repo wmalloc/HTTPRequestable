@@ -1,6 +1,5 @@
 //
 //  HackerNews.swift
-//  Sample
 //
 //  Created by Waqar Malik on 9/7/24.
 //
