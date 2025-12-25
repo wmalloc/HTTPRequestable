@@ -7,8 +7,8 @@
 
 #if canImport(Security)
 import Foundation
-@preconcurrency import Security
 import OSLog
+@preconcurrency import Security
 
 #if DEBUG
 private let logger = Logger(.init(category: "HTTPRequestable"))
