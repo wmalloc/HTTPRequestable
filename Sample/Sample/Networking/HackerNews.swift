@@ -24,17 +24,10 @@ final class HackerNews: HTTPTransferable {
   private(set) var environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
   let session: URLSession
 
-  #if canImport(Security)
-  let serverTrustEvaluator = ServerTrustEvaluator()
-
-  nonisolated init() {
-    self.session = URLSession(configuration: .default, delegate: serverTrustEvaluator, delegateQueue: nil)
-  }
-  #else
   nonisolated init() {
     self.session = URLSession(configuration: .default, delegate: nil, delegateQueue: nil)
+    requestModifiers.append(DefaultHeadersModifier())
   }
-  #endif
 }
 
 extension HackerNews {
@@ -55,11 +48,11 @@ extension HackerNews {
   }
 
   func stories(type: String) async throws -> [Int] {
-    let request = try StoryListRequest(environment: environment, storyType: type)
+    let request = try StoryListRequest(environment, storyType: type)
     return try await object(for: request)
   }
 
   func item(id: Int) async throws -> Item {
-    try await object(for: ItemRequest(environment: environment, item: id))
+    try await object(for: ItemRequest(environment, item: id))
   }
 }

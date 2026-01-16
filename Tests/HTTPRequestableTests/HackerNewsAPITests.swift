@@ -26,7 +26,7 @@ struct HackerNewsAPITests {
 
   @Test("Mocked Top Stories")
   func mockTopStories() async throws {
-    let request = try StoryListRequest(environment: api.environment, storyType: "topstories").byAddingTestIdentifierHeader()
+    let request = try StoryListRequest(api.environment, storyType: "topstories").byAddingTestIdentifierHeader()
     let url = try request.url
     try await MockURLProtocol.setRequestHandler({ _ in
       let data = try Bundle.module.data(forResource: "topstories", withExtension: "json")
@@ -44,7 +44,7 @@ struct HackerNewsAPITests {
 
   @Test("Mocked New Stories")
   func mockNewStories() async throws {
-    let request = try StoryListRequest(environment: api.environment, storyType: "newstories").byAddingTestIdentifierHeader()
+    let request = try StoryListRequest(api.environment, storyType: "newstories").byAddingTestIdentifierHeader()
     let url = try request.url
     try await MockURLProtocol.setRequestHandler({ _ in
       let data = try Bundle.module.data(forResource: "newstories", withExtension: "json")
@@ -62,7 +62,7 @@ struct HackerNewsAPITests {
 
   @Test("Mocked Best Stories")
   func mockBestStories() async throws {
-    let request = try StoryListRequest(environment: api.environment, storyType: "beststories").byAddingTestIdentifierHeader()
+    let request = try StoryListRequest(api.environment, storyType: "beststories").byAddingTestIdentifierHeader()
     let url = try request.url
     try await MockURLProtocol.setRequestHandler({ _ in
       let data = try Bundle.module.data(forResource: "beststories", withExtension: "json")

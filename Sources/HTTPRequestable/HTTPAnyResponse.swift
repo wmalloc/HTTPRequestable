@@ -141,19 +141,6 @@ public extension HTTPAnyResponse {
   }
 }
 
-/// A helper that applies an optional ``Transformer`` to the response body.
-///
-/// The method will throw if either:
-///   * No transformer is supplied – callers are expected to provide one.
-///   * The response contains no data (`data == nil`).
-///
-/// ```swift
-/// let decoded: MyModel = try response.transformed(using: JSONDecoder().decode)
-/// ```
-///
-/// - Parameter transformer: A closure that turns raw `Data` into the desired type.
-/// - Throws: ``URLError`` when the data is missing or a decoding error occurs.
-/// - Returns: The transformed value.
 public extension HTTPAnyResponse {
   /// Transforms the underlying data with the supplied transformer.
   ///

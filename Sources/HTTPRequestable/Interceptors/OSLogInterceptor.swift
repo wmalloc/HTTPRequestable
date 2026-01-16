@@ -32,20 +32,7 @@ public struct OSLogInterceptor {
   public init(logType: OSLogType = .default) {
     self.logType = logType
   }
-}
-
-extension OSLogInterceptor: HTTPRequestModifier {
-  /// Logs the debug description of the HTTP request before it is sent.
-  ///
-  /// - Parameters:
-  ///   - request: The `HTTPRequest` to modify.
-  ///   - session: The `URLSession` associated with the request.
-  public func modify(_ request: inout HTTPRequest, for session: URLSession) async throws {
-    os_log(logType, log: logger, "%{private}@", request.debugDescription)
-  }
-}
-
-extension OSLogInterceptor: HTTPInterceptor {
+  
   /// Logs the HTTP request and optional data.
   ///
   /// - Parameters:
@@ -90,7 +77,24 @@ extension OSLogInterceptor: HTTPInterceptor {
       os_log(logType, log: logger, "\n%{private}@", "\(error)")
     }
   }
+}
 
+extension OSLogInterceptor: HTTPRequestModifier {
+  /// Logs the debug description of the HTTP request before it is sent.
+  ///
+  /// - Parameters:
+  ///   - request: The `HTTPRequest` to modify.
+  ///   - session: The `URLSession` associated with the request.
+  public func modify(_ request: inout HTTPRequest, for session: URLSession?) async throws {
+    os_log(logType, log: logger, "%{private}@", request.debugDescription)
+  }
+
+  public func modify(_ request: inout URLRequest, for session: URLSession?) async throws {
+    os_log(logType, log: logger, "%{private}@", request.debugDescription)
+  }
+}
+
+extension OSLogInterceptor: HTTPInterceptor {
   /// Intercepts the HTTP request and logs the request and response details.
   ///
   /// - Parameters:

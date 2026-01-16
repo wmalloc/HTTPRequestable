@@ -6,7 +6,7 @@
 
 import Foundation
 
-/// A lightweight protocol for values that can be converted to a `Foundation.URLRequest`.
+/// A lightweight protocol for values that can be converted to a `URLRequest`.
 ///
 /// Conforming types expose a throwing `urlRequest` property that produces a ready-to-send
 /// `URLRequest`, making them interchangeable in APIs that perform networking (e.g.,

@@ -16,7 +16,7 @@ struct StoryListRequest: HTTPRequestConfigurable {
   var queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
   let path: String?
 
-  init(environment: HTTPEnvironment, storyType: String) throws {
+  init(_ environment: HTTPEnvironment, storyType: String) throws {
     precondition(!storyType.isEmpty, "Story type cannot be empty")
     self.environment = environment
     self.path = "/\(storyType).json"

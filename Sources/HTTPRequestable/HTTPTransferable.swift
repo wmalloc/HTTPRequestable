@@ -141,7 +141,7 @@ public extension HTTPTransferable {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
     let next: HTTPInterceptor.Next = {
-      let (data, response) = try await self.session.upload(for: updatedRequest, fromFile: fileURL, delegate: $1)
+      let (data, response) = try await self.session.upload(for: $0, fromFile: fileURL, delegate: $1)
       return HTTPAnyResponse(request: $0, response: response, data: data)
     }
     return try await send(request: updatedRequest, next: next, delegate: delegate)
@@ -205,7 +205,7 @@ public extension HTTPTransferable {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
     let next: HTTPInterceptor.Next = {
-      let (url, response) = try await self.session.download(for: updatedRequest, delegate: $1)
+      let (url, response) = try await self.session.download(for: $0, delegate: $1)
       return HTTPAnyResponse(request: $0, response: response, data: nil, fileURL: url)
     }
     return try await send(request: updatedRequest, next: next, delegate: delegate)

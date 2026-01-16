@@ -10,7 +10,7 @@ import HTTPTypesFoundation
 import OSLog
 
 #if DEBUG
-private let logger = Logger(.init(category: "HTTPRequestable"))
+private let logger = Logger(.init(category: "HTTPRequestConfigurable"))
 #else
 private let logger = Logger(.disabled)
 #endif
@@ -71,6 +71,7 @@ public extension HTTPRequestConfigurable {
   @inlinable
   var httpBody: Data? { nil }
 
+  /// URLConvertible
   var url: URL {
     get throws {
       logger.trace("[IN]: \(#function)")
@@ -94,12 +95,14 @@ public extension HTTPRequestConfigurable {
     }
   }
 
+  /// HTTPRequestConvertible
   var httpRequest: HTTPRequest {
     get throws {
       try HTTPRequest(method: method, url: url, headerFields: headerFields ?? HTTPFields())
     }
   }
 
+  /// URLRequestConvertible
   var urlRequest: URLRequest {
     get throws {
       logger.trace("[IN]: \(#function)")
