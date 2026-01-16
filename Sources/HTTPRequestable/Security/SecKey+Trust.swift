@@ -9,13 +9,6 @@
 import Foundation
 @preconcurrency import Security
 
-/// This extension provides convenience methods for working with `SecKey` objects.
-///
-/// `SecKey` is an opaque type that represents a cryptographic key. It is used in various
-/// cryptographic operations, such as encryption, decryption, signing, and verification.
-///
-/// The `data` property in this extension allows you to extract the raw key data from a `SecKey` object.
-/// This can be useful for exporting the key or performing custom cryptographic operations.
 public extension SecKey {
   /// Retrieves the raw data representation of the key.
   ///

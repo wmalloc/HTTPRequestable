@@ -8,7 +8,6 @@
 import Foundation
 import HTTPTypes
 
-/// Raw response from the api call
 @frozen
 public struct HTTPAnyResponse: Hashable, Sendable {
   /// Request that was sent to the server
