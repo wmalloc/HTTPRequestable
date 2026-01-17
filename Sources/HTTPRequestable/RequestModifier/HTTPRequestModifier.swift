@@ -22,7 +22,7 @@ public protocol HTTPRequestModifier: Sendable {
   /// - Note: This method is called automatically by the `object(for:)` and `data(for:)` methods to allow for request customization.
   ///
   /// - SeeAlso: `HTTPRequestConfigurable`, `URLSession`
-  func modify(_ request: inout HTTPRequest, for session: URLSession) async throws
+  func modify(_ request: inout HTTPRequest, for session: URLSession?) async throws
 
   /// Intercepts and customizes the HTTP request before it is sent through a URLSession.
   ///
@@ -37,12 +37,12 @@ public protocol HTTPRequestModifier: Sendable {
   /// - Note: This method is called automatically by the `object(for:)` and `data(for:)` methods to allow for request customization.
   ///
   /// - SeeAlso: `HTTPRequestConfigurable`, `URLSession`
-  func modify(_ request: inout URLRequest, for session: URLSession) async throws
+  func modify(_ request: inout URLRequest, for session: URLSession?) async throws
 }
 
 /// Default implemenation
 public extension HTTPRequestModifier {
-  func modify(_ request: inout HTTPRequest, for session: URLSession) async throws {}
+  func modify(_ request: inout HTTPRequest, for session: URLSession?) async throws {}
 
-  func modify(_ request: inout URLRequest, for session: URLSession) async throws {}
+  func modify(_ request: inout URLRequest, for session: URLSession?) async throws {}
 }

@@ -16,5 +16,5 @@ struct Item: Codable, Hashable, Sendable, Identifiable {
   let time: Date
   let title: String
   let type: String
-  let url: URL
+  let url: URL?
 }

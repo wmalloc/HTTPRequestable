@@ -10,7 +10,7 @@ import HTTPTypesFoundation
 import OSLog
 
 #if DEBUG
-private let logger = Logger(.init(category: "HTTPRequestable"))
+private let logger = Logger(.init(category: "HTTPRequestConfigurable"))
 #else
 private let logger = Logger(.disabled)
 #endif
@@ -19,7 +19,7 @@ private let logger = Logger(.disabled)
 public typealias HTTPMethod = HTTPRequest.Method
 
 /// How to transform the resulting data
-public typealias Transformer<InputType: Sendable, OutputType: Sendable> = @Sendable (InputType) throws -> OutputType
+public typealias Transformer<InputType, OutputType> = (InputType) throws -> OutputType
 
 /// HTTP Request
 @available(*, deprecated, renamed: "HTTPRequestConfigurable", message: "Renamed to HTTPRequestConfigurable")
@@ -29,8 +29,8 @@ public typealias URLRequestable = HTTPRequestConfigurable
 public typealias HTTPRequestable = HTTPRequestConfigurable
 
 /// URL/HTTP Request builder protocol
-public protocol HTTPRequestConfigurable: URLConvertible, URLRequestConvertible, HTTPRequestConvertible, Sendable {
-  associatedtype ResultType: Sendable
+public protocol HTTPRequestConfigurable: URLConvertible, URLRequestConvertible, HTTPRequestConvertible {
+  associatedtype ResultType
 
   /// Environment containing base URL and other configuration settings
   var environment: HTTPEnvironment { get }
@@ -71,6 +71,7 @@ public extension HTTPRequestConfigurable {
   @inlinable
   var httpBody: Data? { nil }
 
+  /// URLConvertible
   var url: URL {
     get throws {
       logger.trace("[IN]: \(#function)")
@@ -94,12 +95,14 @@ public extension HTTPRequestConfigurable {
     }
   }
 
+  /// HTTPRequestConvertible
   var httpRequest: HTTPRequest {
     get throws {
       try HTTPRequest(method: method, url: url, headerFields: headerFields ?? HTTPFields())
     }
   }
 
+  /// URLRequestConvertible
   var urlRequest: URLRequest {
     get throws {
       logger.trace("[IN]: \(#function)")

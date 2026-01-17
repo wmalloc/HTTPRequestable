@@ -34,7 +34,7 @@ final class HackerNews: HTTPTransferable {
 
 extension HackerNews {
   func storyList(type: String) async throws -> StoryListRequest.ResultType {
-    let request = try StoryListRequest(environment: environment, storyType: type)
+    let request = try StoryListRequest(environment, storyType: type)
     return try await object(for: request, delegate: nil)
   }
 }

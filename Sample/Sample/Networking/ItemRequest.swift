@@ -16,7 +16,7 @@ struct ItemRequest: HTTPRequestConfigurable {
   var queryItems: [URLQueryItem]?
   let path: String?
 
-  init(environment: HTTPEnvironment, item: Int) throws {
+  init(_ environment: HTTPEnvironment, item: Int) throws {
     self.environment = environment
     self.path = "/item/\(item).json"
   }

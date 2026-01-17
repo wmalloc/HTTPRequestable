@@ -8,7 +8,7 @@ import Foundation
 
 /// A lightweight protocol for values that can be converted to a valid `URL`.
 ///
-/// Conforming types expose a throwing `url` property that produces a `Foundation.URL`,
+/// Conforming types expose a throwing `url` property that produces a `URL`,
 /// allowing them to be used interchangeably in APIs that require a URL (for example,
 /// when constructing HTTP requests).
 ///
@@ -40,7 +40,7 @@ import Foundation
 /// The `url` property returns a validated, fully-formed URL representation of the receiver.
 /// - Returns: A `URL` suitable for use in networking or file operations.
 /// - Throws: An error if the value cannot be represented as a valid URL.
-public protocol URLConvertible: Sendable {
+public protocol URLConvertible {
   var url: URL { get throws }
 }
 

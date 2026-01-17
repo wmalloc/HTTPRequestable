@@ -72,7 +72,7 @@ public protocol HTTPTransportable {
 
   /// Uploads data to the server as part of an HTTP request asynchronously.
   ///
-  /// This method sends the specified `HTTPRequestConvertible` object to a server and waits for the response, including data body. The request can optionally include a delegate
+  /// This method sends the specified `HTTPRequestConfigurable` object to a server and waits for the response, including data body. The request can optionally include a delegate
   /// that conforms to `URLSessionTaskDelegate` for customizing the behavior of the request.
   ///
   /// - Parameters:

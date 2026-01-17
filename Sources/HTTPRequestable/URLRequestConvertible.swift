@@ -6,7 +6,7 @@
 
 import Foundation
 
-/// A lightweight protocol for values that can be converted to a `Foundation.URLRequest`.
+/// A lightweight protocol for values that can be converted to a `URLRequest`.
 ///
 /// Conforming types expose a throwing `urlRequest` property that produces a ready-to-send
 /// `URLRequest`, making them interchangeable in APIs that perform networking (e.g.,
@@ -37,7 +37,7 @@ import Foundation
 /// - Returns: A `URLRequest` suitable for use with `URLSession` and related networking APIs.
 /// - Throws: An error if a valid request cannot be created (e.g., the underlying URL is
 ///   invalid or required components are missing).
-public protocol URLRequestConvertible: Sendable {
+public protocol URLRequestConvertible {
   var urlRequest: URLRequest { get throws }
 }
 
