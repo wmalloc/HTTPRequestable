@@ -19,7 +19,7 @@ private let logger = Logger(.disabled)
 public typealias HTTPMethod = HTTPRequest.Method
 
 /// How to transform the resulting data
-public typealias Transformer<InputType: Sendable, OutputType: Sendable> = @Sendable (InputType) throws -> OutputType
+public typealias Transformer<InputType, OutputType> = (InputType) throws -> OutputType
 
 /// HTTP Request
 @available(*, deprecated, renamed: "HTTPRequestConfigurable", message: "Renamed to HTTPRequestConfigurable")
@@ -29,8 +29,8 @@ public typealias URLRequestable = HTTPRequestConfigurable
 public typealias HTTPRequestable = HTTPRequestConfigurable
 
 /// URL/HTTP Request builder protocol
-public protocol HTTPRequestConfigurable: URLConvertible, URLRequestConvertible, HTTPRequestConvertible, Sendable {
-  associatedtype ResultType: Sendable
+public protocol HTTPRequestConfigurable: URLConvertible, URLRequestConvertible, HTTPRequestConvertible {
+  associatedtype ResultType
 
   /// Environment containing base URL and other configuration settings
   var environment: HTTPEnvironment { get }

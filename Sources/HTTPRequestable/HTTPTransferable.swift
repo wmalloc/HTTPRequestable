@@ -30,7 +30,7 @@ import Foundation
 /// Typical conformances are view‑model or service objects that need
 /// access to a shared `URLSession` and want to provide pluggable
 /// behaviour such as logging, authentication, or response‑caching.
-public protocol HTTPTransferable: AnyObject, HTTPTransportable, Sendable {
+public protocol HTTPTransferable: AnyObject, HTTPTransportable {
   /// The `URLSession` used to execute all network requests.
   ///
   /// Conforming types usually provide a shared session (e.g.

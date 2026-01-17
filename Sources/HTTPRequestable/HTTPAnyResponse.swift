@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 
 @frozen
-public struct HTTPAnyResponse: Hashable, Sendable {
+public struct HTTPAnyResponse: Hashable {
   /// Request that was sent to the server
   public let request: HTTPRequest
 

@@ -13,7 +13,7 @@ import Foundation
  */
 
 @frozen
-public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
+public struct HTTPContentType: RawRepresentable, Hashable {
   /// The raw string value of the content type.
   public var rawValue: String // ISOLatin1String
 

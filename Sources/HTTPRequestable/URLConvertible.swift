@@ -40,7 +40,7 @@ import Foundation
 /// The `url` property returns a validated, fully-formed URL representation of the receiver.
 /// - Returns: A `URL` suitable for use in networking or file operations.
 /// - Throws: An error if the value cannot be represented as a valid URL.
-public protocol URLConvertible: Sendable {
+public protocol URLConvertible {
   var url: URL { get throws }
 }
 

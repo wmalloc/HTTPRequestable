@@ -39,7 +39,7 @@ import HTTPTypesFoundation
 ///
 /// Requirements:
 /// - `httpRequest`: A fully formed `HTTPRequest` ready to execute or to convert into a `URLRequest`.
-public protocol HTTPRequestConvertible: Sendable {
+public protocol HTTPRequestConvertible {
   /// returns fully formed request
   var httpRequest: HTTPRequest { get throws }
 }
