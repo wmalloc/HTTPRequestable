@@ -31,7 +31,8 @@ public final class ServerTrustEvaluator: NSObject, HTTPServerTrustEvaluating, UR
   ///   - challenge: The authentication challenge to handle.
   /// - Returns: A tuple containing the disposition and credential for the challenge.
   public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-    isCertificatePinningEnabled ? evaluate(challenge: challenge, certificates: certificates) : accept(challenge: challenge, certificates: certificates)
+    isCertificatePinningEnabled ? evaluate(challenge: challenge, certificates: certificates) :
+      accept(challenge: challenge, certificates: certificates)
   }
 }
 #endif

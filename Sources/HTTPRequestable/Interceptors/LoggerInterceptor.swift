@@ -32,21 +32,7 @@ public struct LoggerInterceptor {
   public init(logLevel: OSLogType = .default) {
     self.logLevel = logLevel
   }
-}
-
-extension LoggerInterceptor: HTTPRequestModifier {
-  /// Logs the debug description of the HTTP request before it is sent.
-  ///
-  /// - Parameters:
-  ///   - request: The `HTTPRequest` to modify.
-  ///   - session: The `URLSession` associated with the request.
-  public func modify(_ request: inout HTTPRequest, for session: URLSession) async throws {
-    let debugDescription = request.debugDescription
-    logger.log(level: logLevel, "\(debugDescription, privacy: .private)")
-  }
-}
-
-extension LoggerInterceptor: HTTPInterceptor {
+  
   /// Logs the HTTP request and optional data.
   ///
   /// - Parameters:
@@ -91,7 +77,26 @@ extension LoggerInterceptor: HTTPInterceptor {
       logger.log(level: level, "\(error)")
     }
   }
+}
 
+extension LoggerInterceptor: HTTPRequestModifier {
+  /// Logs the debug description of the HTTP request before it is sent.
+  ///
+  /// - Parameters:
+  ///   - request: The `HTTPRequest` to modify.
+  ///   - session: The `URLSession` associated with the request.
+  public func modify(_ request: inout HTTPRequest, for session: URLSession?) async throws {
+    let debugDescription = request.debugDescription
+    logger.log(level: logLevel, "\(debugDescription, privacy: .private)")
+  }
+
+  public func modify(_ request: inout URLRequest, for session: URLSession?) async throws {
+    let debugDescription = request.debugDescription
+    logger.log(level: logLevel, "\(debugDescription, privacy: .private)")
+  }
+}
+
+extension LoggerInterceptor: HTTPInterceptor {
   /// Intercepts the HTTP request and logs the request and response details.
   ///
   /// - Parameters:

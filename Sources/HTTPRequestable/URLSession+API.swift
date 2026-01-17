@@ -35,8 +35,7 @@ extension URLSession {
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
   func send(request: HTTPRequest, next interceptor: HTTPInterceptor.Next, interceptors: any Collection<any HTTPInterceptor> = [],
-            delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse
-  {
+            delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     var next = interceptor
     for try interceptor in interceptors.reversed() {

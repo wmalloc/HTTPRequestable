@@ -61,7 +61,7 @@ final class HackerNews: HTTPTransferable, @unchecked Sendable {
   }
 
  func storyList(type: String) async throws -> StoryList.ResultType {
-    let request = try StoryListRequest(environment: environment, storyType: type)
+    let request = try StoryListRequest(environment, storyType: type)
     return try await object(for: request, delegate: nil).value ?? []
   }
 }
@@ -82,7 +82,7 @@ struct StoryListRequest: HTTPRequestConfigurable {
     Self.jsonDecoder
   }
   
-  init(environment: HTTPEnvironment, storyType: String) throws {
+  init(_ environment: HTTPEnvironment, storyType: String) throws {
     precondition(!storyType.isEmpty, "Story type cannot be empty")
     self.environment = environment
     self.path = "/\(storyType).json"

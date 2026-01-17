@@ -8,7 +8,7 @@ import Foundation
 import HTTPTypes
 import HTTPTypesFoundation
 
-/// A lightweight protocol for types that can produce a fully formed `HTTPTypes.HTTPRequest`.
+/// A lightweight protocol for types that can produce a fully formed `HTTPRequest`.
 ///
 /// Conform to `HTTPRequestConvertible` when you already have enough information to construct
 /// a complete `HTTPRequest` (method, scheme, authority/host, path, query, and header fields).
@@ -34,12 +34,12 @@ import HTTPTypesFoundation
 ///
 /// See Also
 /// - `HTTPRequestConfigurable` for composable request building
-/// - `HTTPTypes.HTTPRequest`
-/// - `HTTPTypesFoundation.URLRequest.init(httpRequest:)`
+/// - `HTTPRequest`
+/// - `URLRequest.init(httpRequest:)`
 ///
 /// Requirements:
 /// - `httpRequest`: A fully formed `HTTPRequest` ready to execute or to convert into a `URLRequest`.
-public protocol HTTPRequestConvertible: Sendable {
+public protocol HTTPRequestConvertible {
   /// returns fully formed request
   var httpRequest: HTTPRequest { get throws }
 }
