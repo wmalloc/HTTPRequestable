@@ -14,15 +14,14 @@ import HTTPTypes
 /// are not already present.  This makes it trivial to add a common set of
 /// headers (e.g., `User-Agent`, `Accept‑Encoding`) to every request.
 public final class DefaultHeadersModifier: HTTPRequestModifier {
-  
   /// The collection of header fields that will be applied.
   ///
   /// This property is immutable; all mutation occurs through the
   /// `modify(_:for:)` method.  It is stored as an `HTTPFields`
   /// instance for efficient lookup and concatenation.
-  /// 
+  ///
   let headerFields: HTTPFields
-  
+
   /// Creates a modifier using the library’s built‑in default headers.
   ///
   /// The default set is defined by `HTTPFields.defaultHeaders` and
@@ -34,7 +33,7 @@ public final class DefaultHeadersModifier: HTTPRequestModifier {
   public init(headerFields: HTTPFields = .defaultHeaders) {
     self.headerFields = headerFields
   }
-  
+
   /// Creates a modifier from an arbitrary collection of `HTTPField`s.
   ///
   /// This initializer is handy when you have a list of fields that
@@ -46,7 +45,7 @@ public final class DefaultHeadersModifier: HTTPRequestModifier {
   public init(fields: any Collection<HTTPField>) {
     self.headerFields = HTTPFields(fields)
   }
-  
+
   /// Creates a modifier from a dictionary of header names and values.
   ///
   /// Keys are interpreted as raw header field names; they are
@@ -65,7 +64,7 @@ public final class DefaultHeadersModifier: HTTPRequestModifier {
     }
     self.headerFields = fields
   }
-  
+
   /// Applies the default headers to a mutable `HTTPRequest` instance.
   ///
   /// If any of the three common header fields are missing, they will be
@@ -83,7 +82,7 @@ public final class DefaultHeadersModifier: HTTPRequestModifier {
       }
     }
   }
-  
+
   /// Applies the default headers to a mutable `URLRequest` instance.
   ///
   /// The logic mirrors that of the `HTTPRequest` overload: any missing

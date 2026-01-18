@@ -12,7 +12,7 @@ struct ItemRequest: HTTPRequestConfigurable {
   typealias ResultType = Item
 
   let environment: HTTPEnvironment
-  var headerFields: HTTPFields? = .init([.accept(.json)])
+  var headerFields: HTTPFields?
   var queryItems: [URLQueryItem]?
   let path: String?
 
