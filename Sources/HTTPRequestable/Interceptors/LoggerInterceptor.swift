@@ -32,7 +32,7 @@ public struct LoggerInterceptor {
   public init(logLevel: OSLogType = .default) {
     self.logLevel = logLevel
   }
-  
+
   /// Logs the HTTP request and optional data.
   ///
   /// - Parameters:

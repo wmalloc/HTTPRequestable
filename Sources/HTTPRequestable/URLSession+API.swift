@@ -38,7 +38,7 @@ extension URLSession {
             delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     var next = interceptor
-    for try interceptor in interceptors.reversed() {
+    for interceptor in interceptors.reversed() {
       let _next = next
       next = {
         try await interceptor.intercept(for: $0, next: _next, delegate: $1)

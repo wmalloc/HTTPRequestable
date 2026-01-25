@@ -17,7 +17,7 @@ opt_in_rules: # some rules are only opt-in
   - private_swiftui_state
   - prohibited_interface_builder
   - redundant_nil_coalescing
-  - redundant_self_in_closure
+  - redundant_self
   - redundant_type_annotation
   - sorted_first_last
   - sorted_imports

@@ -11,7 +11,13 @@ struct ItemDetailView: View {
   let item: Item
 
   var body: some View {
-    Text(item.title)
+    VStack(alignment: .leading, spacing: 4) {
+      Text(item.title)
+        .font(.body)
+      Text("\(item.score) points by \(item.by)")
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
+    }
   }
 }
 

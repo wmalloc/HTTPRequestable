@@ -16,13 +16,11 @@ private let logger = Logger(.init(category: "HTTPTransferable"))
 private let logger = Logger(.disabled)
 #endif
 
-import Foundation
-
 /// A contract that enables an object to perform HTTP‑based network
 /// operations.
 ///
 /// The protocol is designed for reference types (`AnyObject`) that
-/// can be used concurrently (conforming to `Sendable`).  It builds on
+/// can be shared across tasks.  It builds on
 /// the lower‑level `HTTPTransportable` protocol, adding a session and
 /// two asynchronous collections that allow callers to tweak the request
 /// before it is sent and to react to the response afterward.
@@ -77,7 +75,7 @@ extension HTTPTransferable {
   func httpRequest(_ request: some HTTPRequestConvertible) async throws -> HTTPRequest {
     logger.trace("[IN]: \(#function)")
     var updatedRequest = try request.httpRequest
-    for try modifier in await requestModifiers {
+    for modifier in await requestModifiers {
       try await modifier.modify(&updatedRequest, for: session)
     }
     return updatedRequest
@@ -102,7 +100,8 @@ extension HTTPTransferable {
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
   func send(request: HTTPRequest, next interceptor: HTTPInterceptor.Next, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
-    return try await session.send(request: request, next: interceptor, interceptors: interceptors, delegate: delegate)
+    let chain = await interceptors
+    return try await session.send(request: request, next: interceptor, interceptors: chain, delegate: delegate)
   }
 }
 
@@ -169,7 +168,7 @@ public extension HTTPTransferable {
   ///   - multipartForm: Data to upload.
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
-  func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
+  func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     let contentType = multipartForm.contentType
     let contentLength = multipartForm.contentLength
     let updatedRequest = request.append(headerField: HTTPField(name: .contentLength, value: "\(contentLength)"))
