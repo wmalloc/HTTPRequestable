@@ -13,7 +13,7 @@ import HTTPTypes
 /// applied, the fields are appended to the request’s header list if they
 /// are not already present.  This makes it trivial to add a common set of
 /// headers (e.g., `User-Agent`, `Accept‑Encoding`) to every request.
-public final class DefaultHeadersModifier: HTTPRequestModifier {
+public final class DefaultHeadersModifier: HTTPRequestModifier, @unchecked Sendable {
   /// The collection of header fields that will be applied.
   ///
   /// This property is immutable; all mutation occurs through the
@@ -58,8 +58,8 @@ public final class DefaultHeadersModifier: HTTPRequestModifier {
   public init(headers: [String: String]) {
     var fields = HTTPFields()
     for (key, value) in headers {
-      guard let fieldname = HTTPField.Name(key) else { continue }
-      let field = HTTPField(name: fieldname, value: value)
+      guard let fieldName = HTTPField.Name(key) else { continue }
+      let field = HTTPField(name: fieldName, value: value)
       fields.append(field)
     }
     self.headerFields = fields
@@ -77,7 +77,8 @@ public final class DefaultHeadersModifier: HTTPRequestModifier {
   ///
   public func modify(_ request: inout HTTPRequest, for session: URLSession?) async throws {
     for field in headerFields {
-      if !request.headerFields.contains(field) {
+      let nameExists = request.headerFields.contains { $0.name == field.name }
+      if !nameExists {
         request.headerFields.append(field)
       }
     }
