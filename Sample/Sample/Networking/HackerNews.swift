@@ -26,7 +26,10 @@ final class HackerNews: HTTPTransferable {
 
   nonisolated init() {
     self.session = URLSession(configuration: .default, delegate: nil, delegateQueue: nil)
-    requestModifiers.append(DefaultHeadersModifier())
+    var fields = HTTPFields.defaultHeaders
+    fields.append(HTTPField(name: .accept, contentType: .json))
+    fields.append(HTTPField(name: .contentType, contentType: .json))
+    requestModifiers.append(DefaultHeadersModifier(headerFields: fields))
   }
 }
 

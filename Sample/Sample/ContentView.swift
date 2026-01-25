@@ -12,19 +12,15 @@ struct ContentView: View {
 
   var body: some View {
     NavigationStack {
-      Section("Top Stories") {
-        List(viewModel.items) { item in
-          Text(item.title)
-        }
-        .listStyle(.plain)
+      List(viewModel.items) { item in
+        ItemDetailView(item: item)
       }
+      .listStyle(.plain)
       .refreshable {
         Task {
           viewModel.topStories()
         }
       }
-      .navigationTitle("Hacker News")
-      .navigationBarTitleDisplayMode(.inline)
       .onAppear {
         viewModel.topStories()
       }

@@ -13,16 +13,15 @@ import HTTPTypes
 /// applied, the fields are appended to the request’s header list if they
 /// are not already present.  This makes it trivial to add a common set of
 /// headers (e.g., `User-Agent`, `Accept‑Encoding`) to every request.
-public final class DefaultHeadersModifier: HTTPRequestModifier {
-  
+public final class DefaultHeadersModifier: HTTPRequestModifier, @unchecked Sendable {
   /// The collection of header fields that will be applied.
   ///
   /// This property is immutable; all mutation occurs through the
   /// `modify(_:for:)` method.  It is stored as an `HTTPFields`
   /// instance for efficient lookup and concatenation.
-  /// 
+  ///
   let headerFields: HTTPFields
-  
+
   /// Creates a modifier using the library’s built‑in default headers.
   ///
   /// The default set is defined by `HTTPFields.defaultHeaders` and
@@ -34,7 +33,7 @@ public final class DefaultHeadersModifier: HTTPRequestModifier {
   public init(headerFields: HTTPFields = .defaultHeaders) {
     self.headerFields = headerFields
   }
-  
+
   /// Creates a modifier from an arbitrary collection of `HTTPField`s.
   ///
   /// This initializer is handy when you have a list of fields that
@@ -46,7 +45,7 @@ public final class DefaultHeadersModifier: HTTPRequestModifier {
   public init(fields: any Collection<HTTPField>) {
     self.headerFields = HTTPFields(fields)
   }
-  
+
   /// Creates a modifier from a dictionary of header names and values.
   ///
   /// Keys are interpreted as raw header field names; they are
@@ -59,13 +58,13 @@ public final class DefaultHeadersModifier: HTTPRequestModifier {
   public init(headers: [String: String]) {
     var fields = HTTPFields()
     for (key, value) in headers {
-      guard let fieldname = HTTPField.Name(key) else { continue }
-      let field = HTTPField(name: fieldname, value: value)
+      guard let fieldName = HTTPField.Name(key) else { continue }
+      let field = HTTPField(name: fieldName, value: value)
       fields.append(field)
     }
     self.headerFields = fields
   }
-  
+
   /// Applies the default headers to a mutable `HTTPRequest` instance.
   ///
   /// If any of the three common header fields are missing, they will be
@@ -78,12 +77,13 @@ public final class DefaultHeadersModifier: HTTPRequestModifier {
   ///
   public func modify(_ request: inout HTTPRequest, for session: URLSession?) async throws {
     for field in headerFields {
-      if !request.headerFields.contains(field) {
+      let nameExists = request.headerFields.contains { $0.name == field.name }
+      if !nameExists {
         request.headerFields.append(field)
       }
     }
   }
-  
+
   /// Applies the default headers to a mutable `URLRequest` instance.
   ///
   /// The logic mirrors that of the `HTTPRequest` overload: any missing
