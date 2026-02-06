@@ -28,7 +28,7 @@ private let logger = Logger(.disabled)
 /// Typical conformances are view‑model or service objects that need
 /// access to a shared `URLSession` and want to provide pluggable
 /// behaviour such as logging, authentication, or response‑caching.
-public protocol HTTPTransferable: AnyObject, HTTPTransportable {
+public protocol HTTPTransferable: HTTPTransportable {
   /// The `URLSession` used to execute all network requests.
   ///
   /// Conforming types usually provide a shared session (e.g.
@@ -98,10 +98,10 @@ extension HTTPTransferable {
   /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
-  func send(request: HTTPRequest, next interceptor: HTTPInterceptor.Next, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  func execute(request: HTTPRequest, next interceptor: HTTPInterceptor.Next, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
     logger.trace("[IN]: \(#function)")
     let chain = await interceptors
-    return try await session.send(request: request, next: interceptor, interceptors: chain, delegate: delegate)
+    return try await session.execute(request: request, next: interceptor, interceptors: chain, delegate: delegate)
   }
 }
 
@@ -117,7 +117,7 @@ public extension HTTPTransferable {
     let next: HTTPInterceptor.Next = {
       try await self.session.data(for: $0, httpBody: body, delegate: $1)
     }
-    return try await send(request: request, next: next, delegate: delegate)
+    return try await execute(request: request, next: next, delegate: delegate)
   }
 
   /// Send the request and get the raw data back
@@ -143,7 +143,7 @@ public extension HTTPTransferable {
       let (data, response) = try await self.session.upload(for: $0, fromFile: fileURL, delegate: $1)
       return HTTPAnyResponse(request: $0, response: response, data: data)
     }
-    return try await send(request: updatedRequest, next: next, delegate: delegate)
+    return try await execute(request: updatedRequest, next: next, delegate: delegate)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConvertible`, creates and resumes a `URLSessionUploadTask` internally.
@@ -159,7 +159,7 @@ public extension HTTPTransferable {
       let (data, response) = try await self.session.upload(for: $0, from: bodyData, delegate: $1)
       return HTTPAnyResponse(request: $0, response: response, data: data)
     }
-    return try await send(request: updatedRequest, next: next, delegate: delegate)
+    return try await execute(request: updatedRequest, next: next, delegate: delegate)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConfigurable`, creates and resumes a `URLSessionUploadTask` internally.
@@ -175,11 +175,11 @@ public extension HTTPTransferable {
       .append(headerField: HTTPField(name: .contentType, value: contentType.encoded))
 
     if contentLength <= MultipartForm.encodingMemoryThreshold {
-      /// if we have enough memory to store data
+      // if we have enough memory to store data
       let data = try multipartForm.data(streamBufferSize: multipartForm.streamBufferSize)
       return try await upload(for: updatedRequest, from: data, delegate: delegate)
     } else {
-      /// write the data to file and upload the file
+      // write the data to file and upload the file
       let fileManager = multipartForm.fileManager
       let fileURL = try fileManager.tempFile()
       do {
@@ -207,7 +207,7 @@ public extension HTTPTransferable {
       let (url, response) = try await self.session.download(for: $0, delegate: $1)
       return HTTPAnyResponse(request: $0, response: response, data: nil, fileURL: url)
     }
-    return try await send(request: updatedRequest, next: next, delegate: delegate)
+    return try await execute(request: updatedRequest, next: next, delegate: delegate)
   }
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.

@@ -12,7 +12,7 @@ import Testing
 
 @Suite("MultiformDataTests")
 struct MultiformDataTests {
-  @Test func testBoundary() async throws {
+  @Test func testBoundary() {
     let boundary = UUID().uuidString
     let multipartData = MultipartForm(boundary: boundary)
     #expect(boundary == multipartData.boundary)
@@ -27,7 +27,7 @@ struct MultiformDataTests {
     #expect(boundary.finalBoundaryData == Data(finalBoundary.utf8))
   }
 
-  @Test func oneItem() async throws {
+  @Test func oneItem() throws {
     let boundary = "109AF0987D004171B0A8481D6401B62D"
     let profileDataString = "{\"familyName\": \"Malik\", \"givenName\": \"Waqar\"}"
     let profileData = try #require(profileDataString.data(using: .utf8))

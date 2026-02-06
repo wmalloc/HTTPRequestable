@@ -16,7 +16,7 @@ private let logger = Logger(.init(category: "HTTPRequestable"))
 private let logger = Logger(.disabled)
 #endif
 
-/**
+/* 
  # HTTPServerTrustEvaluating
  This file provides the `HTTPServerTrustEvaluating` protocol and its default implementations,
  as well as the `ServerTrustEvaluator` class for handling server trust evaluation.

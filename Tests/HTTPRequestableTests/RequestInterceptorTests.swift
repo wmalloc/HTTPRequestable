@@ -38,7 +38,7 @@ struct RequestInterceptorTests {
     #expect(urlRequest.value(forHTTPHeaderField: HTTPField.Name.contentType.rawName) == HTTPContentType.jsonUTF8.rawValue)
   }
 
-  @Test func storageTests() async throws {
+  @Test func storageTests() {
     var storage = [any HTTPRequestModifier]()
     #expect(storage.isEmpty)
     storage.append(OSLogInterceptor())

@@ -16,6 +16,7 @@ struct ContentView: View {
         ItemDetailView(item: item)
       }
       .listStyle(.plain)
+      .scrollIndicators(.hidden)
       .refreshable {
         Task {
           viewModel.topStories()

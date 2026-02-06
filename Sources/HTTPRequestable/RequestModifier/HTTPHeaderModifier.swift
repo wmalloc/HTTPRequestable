@@ -1,5 +1,5 @@
 //
-//  DefaultHeadersModifier.swift
+//  HTTPHeaderModifier.swift
 //
 //  Created by Waqar Malik on 1/14/26.
 //
@@ -13,14 +13,14 @@ import HTTPTypes
 /// applied, the fields are appended to the request’s header list if they
 /// are not already present.  This makes it trivial to add a common set of
 /// headers (e.g., `User-Agent`, `Accept‑Encoding`) to every request.
-public final class DefaultHeadersModifier: HTTPRequestModifier, @unchecked Sendable {
+public final class HTTPHeaderModifier: HTTPRequestModifier, @unchecked Sendable {
   /// The collection of header fields that will be applied.
   ///
   /// This property is immutable; all mutation occurs through the
   /// `modify(_:for:)` method.  It is stored as an `HTTPFields`
   /// instance for efficient lookup and concatenation.
   ///
-  let headerFields: HTTPFields
+  public let headerFields: HTTPFields
 
   /// Creates a modifier using the library’s built‑in default headers.
   ///
@@ -30,7 +30,7 @@ public final class DefaultHeadersModifier: HTTPRequestModifier, @unchecked Senda
   ///
   /// - Parameter headerFields: The headers to apply.  If omitted,
   ///   the predefined defaults are used.
-  public init(headerFields: HTTPFields = .defaultHeaders) {
+  public init(headerFields: HTTPFields) {
     self.headerFields = headerFields
   }
 
@@ -76,11 +76,8 @@ public final class DefaultHeadersModifier: HTTPRequestModifier, @unchecked Senda
   ///     consulted by this modifier, but the signature matches the protocol.
   ///
   public func modify(_ request: inout HTTPRequest, for session: URLSession?) async throws {
-    for field in headerFields {
-      let nameExists = request.headerFields.contains { $0.name == field.name }
-      if !nameExists {
-        request.headerFields.append(field)
-      }
+    for field in headerFields where request.headerFields[field.name] == nil {
+      request.headerFields.append(field)
     }
   }
 
@@ -96,10 +93,15 @@ public final class DefaultHeadersModifier: HTTPRequestModifier, @unchecked Senda
   ///     does not use it, but the signature must conform to the protocol.
   ///
   public func modify(_ request: inout URLRequest, for session: URLSession?) async throws {
-    for field in headerFields {
-      if request.value(forHTTPField: field.name) == nil {
-        request.setValue(field.value, forHTTPField: field.name)
-      }
+    for field in headerFields where request.value(forHTTPField: field.name) == nil {
+      request.setValue(field.value, forHTTPField: field.name)
     }
+  }
+}
+
+public extension HTTPHeaderModifier {
+  /// Default instance with standard headers
+  static var defaultHeaderModifier: HTTPHeaderModifier {
+    HTTPHeaderModifier(headerFields: .defaultHeaders)
   }
 }

@@ -6,7 +6,7 @@
 
 import Foundation
 
-/**
+/* 
  The `HTTPContentType` struct represents HTTP content types, such as `application/json` or `text/html`.
  It provides utilities for parsing, comparing, and encoding content types, making it easier to work with
  HTTP headers and MIME types.
@@ -47,7 +47,9 @@ public struct HTTPContentType: RawRepresentable, Hashable {
 /// A type that can be identified.
 extension HTTPContentType: Identifiable {
   /// The unique identifier for the content type.
-  public var id: String { rawValue }
+  public var id: String {
+    rawValue
+  }
 }
 
 /// A type that can be initialized with a string literal.
@@ -116,50 +118,82 @@ public extension HTTPContentType {
 
 public extension HTTPContentType {
   /// Any content type.
-  static var any: Self { "*/*" }
+  static var any: Self {
+    "*/*"
+  }
 
   /// CSS content type.
-  static var css: Self { "text/css" }
+  static var css: Self {
+    "text/css"
+  }
 
   /// Form Data.
-  static var formData: Self { "form-data" }
+  static var formData: Self {
+    "form-data"
+  }
 
   /// URL-encoded Form Data.
-  static var formEncoded: Self { "application/x-www-form-urlencoded" }
+  static var formEncoded: Self {
+    "application/x-www-form-urlencoded"
+  }
 
   /// GIF content type.
-  static var gif: Self { "image/gif" }
+  static var gif: Self {
+    "image/gif"
+  }
 
   /// HTML content type.
-  static var html: Self { "text/html" }
+  static var html: Self {
+    "text/html"
+  }
 
   /// JPEG content type.
-  static var jpeg: Self { "image/jpeg" }
+  static var jpeg: Self {
+    "image/jpeg"
+  }
 
   /// JSON content type.
-  static var json: Self { "application/json" }
+  static var json: Self {
+    "application/json"
+  }
 
   /// JSON content type with UTF-8 encoding.
-  static var jsonUTF8: Self { "application/json; charset=utf-8" }
+  static var jsonUTF8: Self {
+    "application/json; charset=utf-8"
+  }
 
   /// Multi-part form data.
-  static var multipartForm: Self { "multipart/form-data" }
+  static var multipartForm: Self {
+    "multipart/form-data"
+  }
 
   /// Octet Stream content type.
-  static var octetStream: Self { "application/octet-stream" }
+  static var octetStream: Self {
+    "application/octet-stream"
+  }
 
   /// Patch JSON content type.
-  static var patchjson: Self { "application/json-patch+json" }
+  static var patchjson: Self {
+    "application/json-patch+json"
+  }
 
   /// PNG content type.
-  static var png: Self { "image/png" }
+  static var png: Self {
+    "image/png"
+  }
 
   /// SVG content type.
-  static var svg: Self { "image/svg+xml" }
+  static var svg: Self {
+    "image/svg+xml"
+  }
 
   /// Plain Text content type.
-  static var textPlain: Self { "text/plain" }
+  static var textPlain: Self {
+    "text/plain"
+  }
 
   /// XML content type.
-  static var xml: Self { "application/xml" }
+  static var xml: Self {
+    "application/xml"
+  }
 }

@@ -24,11 +24,11 @@ public extension HTTPEnvironment {
   ///   - authority: The host component of the URL (e.g. `"api.example.com"`).
   ///   - scheme: The URL scheme, defaulting to `https`.
   ///   - path: Optional path component; if omitted the path is set to an empty string.
-  init(authority: String, scheme: String = "https", path: String? = nil) {
+  init(authority: String, scheme: String = "https", path: String = "") {
     self.init()
     self.scheme = scheme
     self.host = authority
-    self.path = path ?? ""
+    self.path = path
   }
 
   // MARK: - Host / Authority
