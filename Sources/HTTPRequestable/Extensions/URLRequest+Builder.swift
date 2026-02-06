@@ -7,7 +7,7 @@
 import Foundation
 import HTTPTypes
 
-/**
+/* 
  # URLRequest+Builder
 
  This extension provides a fluent interface for configuring `URLRequest` instances.
@@ -245,7 +245,7 @@ public extension URLRequest {
   }
 }
 
-/**
+/* 
  Adds missing documentation for the `URLRequest` extension methods.
  */
 

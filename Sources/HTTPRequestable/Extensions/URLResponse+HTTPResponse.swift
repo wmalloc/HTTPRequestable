@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 import HTTPTypesFoundation
 
-/**
+/* 
  # URLResponse+HTTPResponse
 
  This extension adds computed properties to `URLResponse` for working with HTTP responses.

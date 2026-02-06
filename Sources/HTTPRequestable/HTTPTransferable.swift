@@ -175,11 +175,11 @@ public extension HTTPTransferable {
       .append(headerField: HTTPField(name: .contentType, value: contentType.encoded))
 
     if contentLength <= MultipartForm.encodingMemoryThreshold {
-      /// if we have enough memory to store data
+      // if we have enough memory to store data
       let data = try multipartForm.data(streamBufferSize: multipartForm.streamBufferSize)
       return try await upload(for: updatedRequest, from: data, delegate: delegate)
     } else {
-      /// write the data to file and upload the file
+      // write the data to file and upload the file
       let fileManager = multipartForm.fileManager
       let fileURL = try fileManager.tempFile()
       do {

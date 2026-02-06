@@ -11,13 +11,13 @@ import Testing
 @Suite("HTTPContentType")
 struct HTTPContentTypeTests {
   @Test("Initializes and trims whitespace")
-  func initTrimsWhitespace() async throws {
+  func initTrimsWhitespace() {
     let contentType = HTTPContentType(rawValue: "  application/json  ")
     #expect(contentType.rawValue == "application/json")
   }
 
   @Test("Extracts mimeType correctly")
-  func testMimeType() async throws {
+  func testMimeType() {
     let contentType = HTTPContentType(rawValue: "text/html; charset=utf-8")
     #expect(contentType.mimeType == "text/html")
     let singleType = HTTPContentType(rawValue: "image/png")
@@ -25,7 +25,7 @@ struct HTTPContentTypeTests {
   }
 
   @Test("Parses multiple content types")
-  func contentTypesParsing() async throws {
+  func contentTypesParsing() {
     let parsed = HTTPContentType.contentTypes(for: "application/json, text/html; charset=utf-8 ,image/png")
     #expect(parsed.count == 3)
     #expect(parsed[0].rawValue == "application/json")
@@ -34,12 +34,12 @@ struct HTTPContentTypeTests {
   }
 
   @Test("Empty string returns empty array for contentTypes(for:)")
-  func contentTypesForEmptyString() async throws {
+  func contentTypesForEmptyString() {
     #expect(HTTPContentType.contentTypes(for: "").isEmpty)
   }
 
   @Test("StringLiteral and LosslessStringConvertible init")
-  func stringLiteralAndLosslessInit() async throws {
+  func stringLiteralAndLosslessInit() {
     let literal: HTTPContentType = "text/css"
     #expect(literal.rawValue == "text/css")
     let lossless = HTTPContentType("text/html")
@@ -47,25 +47,25 @@ struct HTTPContentTypeTests {
   }
 
   @Test("description returns rawValue")
-  func testDescription() async throws {
+  func testDescription() {
     let ctype = HTTPContentType(rawValue: "image/svg+xml")
     #expect(ctype.description == "image/svg+xml")
   }
 
   @Test("playgroundDescription returns description")
-  func testPlaygroundDescription() async throws {
+  func testPlaygroundDescription() {
     let ctype = HTTPContentType(rawValue: "image/svg+xml")
     #expect(String(describing: ctype.playgroundDescription) == "image/svg+xml")
   }
 
   @Test("Identifiable conformance")
-  func testId() async throws {
+  func testId() {
     let ctype = HTTPContentType(rawValue: "application/xml")
     #expect(ctype.id == "application/xml")
   }
 
   @Test("Encodable and Decodable round trip")
-  func codable() async throws {
+  func codable() throws {
     let ctype = HTTPContentType(rawValue: "application/json")
     let data = try JSONEncoder().encode(ctype)
     let decoded = try JSONDecoder().decode(HTTPContentType.self, from: data)
@@ -73,14 +73,14 @@ struct HTTPContentTypeTests {
   }
 
   @Test("Comparing with string literal")
-  func equalsStringLiteral() async throws {
+  func equalsStringLiteral() {
     let ctype: HTTPContentType = "application/json"
     #expect(ctype == "application/json")
     #expect(!(ctype == "text/html"))
   }
 
   @Test("Static content types are correct")
-  func staticContentTypes() async throws {
+  func staticContentTypes() {
     #expect(HTTPContentType.any.rawValue == "*/*")
     #expect(HTTPContentType.css.rawValue == "text/css")
     #expect(HTTPContentType.formData.rawValue == "form-data")
@@ -100,7 +100,7 @@ struct HTTPContentTypeTests {
   }
 
   @Test("Hashable and Sendable conformances are valid")
-  func hashableSendable() async throws {
+  func hashableSendable() {
     let set: Set<HTTPContentType> = ["application/json", "text/html", "image/png"]
     #expect(set.contains(HTTPContentType(rawValue: "application/json")))
   }

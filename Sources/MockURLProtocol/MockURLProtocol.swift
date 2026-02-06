@@ -29,9 +29,17 @@ public class MockURLProtocol: URLProtocol, @unchecked Sendable {
     }, forIdentifier: testIdentifier)
   }
 
-  override public class func canInit(with _: URLRequest) -> Bool { true }
-  override public class func canInit(with _: URLSessionTask) -> Bool { true }
-  override public class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+  override public class func canInit(with _: URLRequest) -> Bool {
+    true
+  }
+
+  override public class func canInit(with _: URLSessionTask) -> Bool {
+    true
+  }
+
+  override public class func canonicalRequest(for request: URLRequest) -> URLRequest {
+    request
+  }
 
   func executeHandler(for request: URLRequest) async throws -> (Data, HTTPURLResponse) {
     try await Self.requestHandlerStorage.executeHandler(for: request)

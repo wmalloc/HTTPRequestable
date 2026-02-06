@@ -7,7 +7,7 @@
 
 import Foundation
 
-// "br;q=1.0, gzip;q=0.9, deflate;q=0.8"
+/// "br;q=1.0, gzip;q=0.9, deflate;q=0.8"
 /// A type representing a list of items with associated quality values (q-values),
 /// commonly used in HTTP header fields for content negotiation (such as `Accept-Encoding`).
 ///

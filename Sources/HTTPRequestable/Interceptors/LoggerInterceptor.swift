@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-/**
+/* 
  # LoggerInterceptor
 
  A logging interceptor for HTTP requests and responses.

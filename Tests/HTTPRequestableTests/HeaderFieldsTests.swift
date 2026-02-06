@@ -10,7 +10,7 @@ import HTTPTypes
 import Testing
 
 struct HeaderFieldsTests {
-  @Test func convertFromRaw() async throws {
+  @Test func convertFromRaw() {
     let headers = ["Content-Type": "application/json", "Accept": "application/json"]
     let fields = HTTPFields(rawValue: headers)
     #expect(fields.count == 2)
@@ -23,7 +23,7 @@ struct HeaderFieldsTests {
     #expect(combinedFields.count == 2)
   }
 
-  @Test func addMultiple() async throws {
+  @Test func addMultiple() {
     var headers = HTTPFields()
     headers.append(HTTPField(name: .accept, value: "application/json"))
     #expect(headers.count == 1)

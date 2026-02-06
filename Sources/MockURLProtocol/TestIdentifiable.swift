@@ -22,12 +22,16 @@ public protocol TestIdentifiable {
 
 extension String: TestIdentifiable {
   /// Returns the string itself as the test identifier.
-  public var testIdentifier: String? { self }
+  public var testIdentifier: String? {
+    self
+  }
 }
 
 extension URL: TestIdentifiable {
   /// Returns the absolute URL string as the test identifier.
-  public var testIdentifier: String? { absoluteString }
+  public var testIdentifier: String? {
+    absoluteString
+  }
 }
 
 extension URLRequest: TestIdentifiable {
