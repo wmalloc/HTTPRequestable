@@ -34,8 +34,9 @@ extension URLSession {
   /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
-  func send(request: HTTPRequest, next interceptor: HTTPInterceptor.Next, interceptors: any Collection<any HTTPInterceptor> = [],
-            delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  func execute(request: HTTPRequest, next interceptor: HTTPInterceptor.Next, interceptors: any Collection<any HTTPInterceptor> = [],
+               delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse
+  {
     logger.trace("[IN]: \(#function)")
     var next = interceptor
     for interceptor in interceptors.reversed() {
@@ -109,11 +110,11 @@ extension URLSession: HTTPTransportable {
       .append(headerField: HTTPField(name: .contentType, value: contentType.encoded))
 
     if contentLength <= MultipartForm.encodingMemoryThreshold {
-      /// if we have enough memory to store data
+      // if we have enough memory to store data
       let data = try multipartForm.data(streamBufferSize: multipartForm.streamBufferSize)
       return try await upload(for: updatedRequest, from: data, delegate: delegate)
     } else {
-      /// write the data to file and upload the file
+      // write the data to file and upload the file
       let fileManager = multipartForm.fileManager
       let fileURL = try fileManager.tempFile()
       do {

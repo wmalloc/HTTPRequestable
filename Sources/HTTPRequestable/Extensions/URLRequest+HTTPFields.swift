@@ -7,7 +7,7 @@
 import Foundation
 import HTTPTypes
 
-/**
+/* 
  # URLRequest+HTTPFields
 
  This extension adds functionality to `URLRequest` for managing HTTP header fields using the `HTTPFields` type.

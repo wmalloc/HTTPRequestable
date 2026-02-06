@@ -7,7 +7,7 @@
 import Foundation
 import HTTPTypes
 
-/**
+/* 
  # URLSessionConfiguration+HTTPFields
 
  This extension adds a computed property to `URLSessionConfiguration` for managing HTTP header fields using the `HTTPFields` type.

@@ -20,7 +20,7 @@ import Testing
   }
 
   @Test("BaseHeaders")
-  func baseHeaders() async throws {
+  func baseHeaders() {
     var headers = HTTPFields()
     headers.append(.defaultUserAgent)
 
@@ -31,7 +31,7 @@ import Testing
   }
 
   @Test("URLSessionConfiguration")
-  func uRLSessionConfiguration() async throws {
+  func uRLSessionConfiguration() {
     let session = URLSessionConfiguration.default
     session.httpFields = HTTPFields.defaultHeaders
     #expect(session.httpAdditionalHeaders?.count == 3)
@@ -41,7 +41,7 @@ import Testing
   }
 
   @Test("HeaderFieldsCounts")
-  func headerFieldsCounts() async throws {
+  func headerFieldsCounts() {
     var fields = HTTPFields.defaultHeaders
     fields.append(HTTPField.accept(.json))
     #expect(fields.count == 4)
@@ -54,8 +54,8 @@ import Testing
   }
 
   @Test("URLRequestHTTPFields")
-  func uRLRequestHTTPFields() async throws {
-    var request = URLRequest(url: URL(string: "https://api.github.com")!)
+  func uRLRequestHTTPFields() throws {
+    var request = try URLRequest(url: #require(URL(string: "https://api.github.com")))
       .setMethod(.get)
     #expect(request.allHTTPHeaderFields != nil)
     #expect(request.allHTTPHeaderFields?.count == 0)
@@ -67,7 +67,7 @@ import Testing
   }
 
   @Test("HTTPFieldsRewValues")
-  func hTTPFieldsRewValues() async throws {
+  func hTTPFieldsRewValues() {
     let fields = HTTPFields.defaultHeaders
     let rawValue = fields.rawValue
     #expect(rawValue.count == 3)
@@ -77,8 +77,8 @@ import Testing
   }
 
   @Test("URLRequestHeaders")
-  func uRLRequestHeaders() async throws {
-    let request = URLRequest(url: URL(string: "https://api.github.com")!)
+  func uRLRequestHeaders() throws {
+    let request = try URLRequest(url: #require(URL(string: "https://api.github.com")))
       .setMethod(.get)
       .setUserAgent(String.url_userAgent)
       .setHttpHeaderFields(HTTPFields.defaultHeaders)
@@ -87,11 +87,11 @@ import Testing
     let headers = request.headerFields
     #expect(headers != nil)
     #expect(headers?.count == 4)
-    #expect(!headers!.contains(.contentType(.xml)))
+    #expect(headers?.contains(.contentType(.xml)) == false)
   }
 
   @Test("Dictionary")
-  func testDictionary() async throws {
+  func testDictionary() {
     var headers = HTTPFields()
     headers[.contentType] = HTTPContentType.xml.rawValue
     #expect(headers.count == 1)
@@ -108,7 +108,7 @@ import Testing
   }
 
   @Test("DefaultRequest")
-  func defaultRequest() async throws {
+  func defaultRequest() {
     let request = URLRequest(url: Self.baseURL)
     #expect(request.url?.absoluteString == Self.baseURLString)
     let contentType = request[.contentType]
@@ -127,7 +127,7 @@ import Testing
   }
 
   @Test("DefaultRequestConfigurations")
-  func defaultRequestConfigurations() async throws {
+  func defaultRequestConfigurations() {
     var request = URLRequest(url: Self.baseURL)
       .setCachePolicy(.reloadIgnoringLocalCacheData)
     #expect(request.cachePolicy == NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData)
@@ -139,8 +139,8 @@ import Testing
   }
 
   @Test("QueryItems")
-  func testQueryItems() async throws {
-    var components = URLComponents(string: Self.baseURLString)!
+  func testQueryItems() throws {
+    var components = try #require(URLComponents(string: Self.baseURLString))
     components = components.setQueryItems([URLQueryItem(name: "test1", value: "test1"), URLQueryItem(name: "test2", value: "test2")])
     #expect(components.queryItems != nil)
     #expect((components.queryItems?.count ?? 0) == 2)
@@ -152,7 +152,7 @@ import Testing
     #expect((components.queryItems?.count ?? 0) == 0)
     let absoluteString = components.url?.absoluteString
     #expect(absoluteString != nil)
-    #expect(absoluteString! == Self.baseURLString)
+    #expect(absoluteString == Self.baseURLString)
     components = components.setQueryItems([URLQueryItem(name: "test 3", value: "test 3")])
     #expect((components.queryItems?.count ?? 0) == 1)
     #expect(components.url?.absoluteString == "\(Self.baseURLString)?test%203=test%203")

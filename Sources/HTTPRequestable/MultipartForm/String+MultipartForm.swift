@@ -7,13 +7,31 @@
 import Foundation
 
 extension String {
-  static var crlf: Self { "\r\n" }
+  static var crlf: Self {
+    "\r\n"
+  }
 
-  var initialBoundary: Self { "--\(self)\(String.crlf)" }
-  var interstitialBoundary: Self { "\(String.crlf)--\(self)\(String.crlf)" }
-  var finalBoundary: Self { "\(String.crlf)--\(self)--\(String.crlf)" }
+  var initialBoundary: Self {
+    "--\(self)\(String.crlf)"
+  }
 
-  var initialBoundaryData: Data { Data(initialBoundary.utf8) }
-  var interstitialBoundaryData: Data { Data(interstitialBoundary.utf8) }
-  var finalBoundaryData: Data { Data(finalBoundary.utf8) }
+  var interstitialBoundary: Self {
+    "\(String.crlf)--\(self)\(String.crlf)"
+  }
+
+  var finalBoundary: Self {
+    "\(String.crlf)--\(self)--\(String.crlf)"
+  }
+
+  var initialBoundaryData: Data {
+    Data(initialBoundary.utf8)
+  }
+
+  var interstitialBoundaryData: Data {
+    Data(interstitialBoundary.utf8)
+  }
+
+  var finalBoundaryData: Data {
+    Data(finalBoundary.utf8)
+  }
 }

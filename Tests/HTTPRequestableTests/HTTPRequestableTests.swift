@@ -11,7 +11,7 @@ import Testing
 @Suite("HTTPRequestable")
 struct HTTPRequestableTests {
   @Test
-  func defaultHeaders() async throws {
+  func defaultHeaders() {
     let userAgent = HTTPField.defaultUserAgent
     #expect(userAgent.name == HTTPField.Name.userAgent)
     #expect(userAgent.value.contains("com.apple.dt.xctest.tool"))

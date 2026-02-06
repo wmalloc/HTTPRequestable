@@ -13,20 +13,20 @@ import Security
 import Foundation
 
 final class BundleCertificatesTests: XCTestCase {
-  // Test certificateExtensions static property
+  /// Test certificateExtensions static property
   func testCertificateExtensions() {
     let expected: Set<String> = [".cer", ".CER", ".crt", ".CRT", ".der", ".DER"]
     XCTAssertEqual(Bundle.certificateExtensions, expected)
   }
 
-  // Test paths(forResourcesOfTypes:inDirectory:) for empty bundle
+  /// Test paths(forResourcesOfTypes:inDirectory:) for empty bundle
   func testPathsForEmptyBundle() {
     let mockBundle = Bundle(for: type(of: self))
     let paths = mockBundle.paths(forResourcesOfTypes: [".cer", ".crt"], inDirectory: nil)
     XCTAssertTrue(paths.isEmpty || paths.allSatisfy(\.isEmpty))
   }
 
-  // Test certificates() returns empty for empty bundle
+  /// Test certificates() returns empty for empty bundle
   func testCertificatesReturnsEmptyForEmptyBundle() {
     let mockBundle = Bundle(for: type(of: self))
     let certs = mockBundle.certificates()
@@ -49,13 +49,13 @@ final class BundleCertificatesTests: XCTestCase {
   }
   #endif
 
-  // Test static certificates(in:inDirectory:) overload
+  /// Test static certificates(in:inDirectory:) overload
   func testStaticCertificates() {
     let certs = Bundle.certificates(in: Bundle(for: type(of: self)), inDirectory: nil)
     XCTAssertTrue(certs.isEmpty)
   }
 
-  // Test certificates computed property
+  /// Test certificates computed property
   func testCertificatesProperty() {
     let mockBundle = Bundle(for: type(of: self))
     XCTAssertEqual(mockBundle.certificates, mockBundle.certificates())

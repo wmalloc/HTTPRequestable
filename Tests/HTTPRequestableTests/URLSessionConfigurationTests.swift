@@ -9,7 +9,7 @@ import Foundation
 import Testing
 
 struct URLSessionConfigurationTests {
-  @Test func defaultHeaders() async throws {
+  @Test func defaultHeaders() throws {
     let configuration = URLSessionConfiguration.default
     configuration.httpFields = .defaultHeaders
     let headers = configuration.httpAdditionalHeaders
@@ -22,7 +22,7 @@ struct URLSessionConfigurationTests {
 
     let defaultAcceptLang = headers?["Accept-Language"] as? String
     #expect(defaultAcceptLang != nil)
-    #expect(defaultAcceptLang!.contains("en-US;q=1.0"))
+    #expect(defaultAcceptLang?.contains("en-US;q=1.0") == true)
 
     let defaultUserAgent = headers?["User-Agent"] as? String
     #expect(defaultUserAgent != nil)

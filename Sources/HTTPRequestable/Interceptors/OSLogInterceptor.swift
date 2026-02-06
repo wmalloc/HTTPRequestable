@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-/**
+/* 
  # OSLogInterceptor
 
  `OSLogInterceptor` is a utility for intercepting and logging HTTP requests and responses using Apple's unified logging system (`OSLog`).

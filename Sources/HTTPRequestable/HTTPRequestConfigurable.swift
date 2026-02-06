@@ -57,19 +57,29 @@ public protocol HTTPRequestConfigurable: URLConvertible, URLRequestConvertible, 
 /// Default imeplementation
 public extension HTTPRequestConfigurable {
   @inlinable
-  var method: HTTPMethod { .get }
+  var method: HTTPMethod {
+    .get
+  }
 
   @inlinable
-  var path: String? { nil }
+  var path: String? {
+    nil
+  }
 
   @inlinable
-  var queryItems: [URLQueryItem]? { nil }
+  var queryItems: [URLQueryItem]? {
+    nil
+  }
 
   @inlinable
-  var headerFields: HTTPFields? { nil }
+  var headerFields: HTTPFields? {
+    nil
+  }
 
   @inlinable
-  var httpBody: Data? { nil }
+  var httpBody: Data? {
+    nil
+  }
 
   /// URLConvertible
   var url: URL {
@@ -129,7 +139,9 @@ public extension HTTPRequestConfigurable where ResultType == Data {
   /// and is implemented as `{ $0 }`, i.e. “return the input”.
   ///
   /// - Returns: A closure that returns its argument unchanged.
-  var responseDataTransformer: Transformer<Data, ResultType>? { { $0 } }
+  var responseDataTransformer: Transformer<Data, ResultType>? {
+    { $0 }
+  }
 }
 
 public extension HTTPRequestConfigurable where ResultType: Decodable {

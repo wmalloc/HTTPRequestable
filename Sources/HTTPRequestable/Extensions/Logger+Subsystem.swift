@@ -10,7 +10,9 @@ import OSLog
 
 extension OSLog {
   @inlinable
-  static var subsystem: String { "com.waqarmalik.HTTPRequestable" }
+  static var subsystem: String {
+    "com.waqarmalik.HTTPRequestable"
+  }
 
   @inlinable
   convenience init(category: String) {
@@ -20,7 +22,9 @@ extension OSLog {
 
 extension Logger {
   @inlinable
-  static var subsystem: String { OSLog.subsystem }
+  static var subsystem: String {
+    OSLog.subsystem
+  }
 
   @inlinable
   init(category: String) {
