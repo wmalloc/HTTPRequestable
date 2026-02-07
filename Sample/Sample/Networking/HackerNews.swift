@@ -26,8 +26,8 @@ final class HackerNews: HTTPTransferable {
 
   nonisolated init() {
     self.session = URLSession(configuration: .default, delegate: nil, delegateQueue: nil)
-    requestModifiers.append(HTTPHeaderModifier.defaultHeaderModifier)
-    let modifier = HTTPHeaderModifier(fields: [.accept(.json), .contentType(.json)])
+    requestModifiers.append(HTTPRequestHeadersModifier.defaultHeaderModifier)
+    let modifier = HTTPRequestHeadersModifier(fields: [.accept(.json), .contentType(.json)])
     requestModifiers.append(modifier)
   }
 }
@@ -35,15 +35,24 @@ final class HackerNews: HTTPTransferable {
 extension HackerNews {
   func topStories(limit: Int = 20) async throws -> [Item] {
     let stories = try await stories(type: "topstories")
-    var items: [Item] = []
     precondition(limit > 0 && limit <= stories.count, "Limit must be greater than zero")
-    for index in 0 ..< limit {
-      let story = stories[index]
-      do {
-        let item = try await item(id: story)
+    let allResults = try await withThrowingTaskGroup(of: (Int, Item).self, returning: [Int: Item].self) { taskGroup in
+      for storyId in stories {
+        taskGroup.addTask {
+          let item = try await self.item(id: storyId)
+          return (storyId, item)
+        }
+      }
+      var results: [Int: Item] = [:]
+      for try await result in taskGroup {
+        results[result.0] = result.1
+      }
+      return results
+    }
+    var items: [Item] = []
+    for story in stories {
+      if let item = allResults[story] {
         items.append(item)
-      } catch {
-        os_log(.error, log: .default, "Failed to fetch item with id: \(story): \(error)")
       }
     }
     return items

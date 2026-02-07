@@ -13,7 +13,7 @@ import HTTPTypes
 /// applied, the fields are appended to the request’s header list if they
 /// are not already present.  This makes it trivial to add a common set of
 /// headers (e.g., `User-Agent`, `Accept‑Encoding`) to every request.
-public final class HTTPHeaderModifier: HTTPRequestModifier, @unchecked Sendable {
+public final class HTTPRequestHeadersModifier: HTTPRequestModifier, @unchecked Sendable {
   /// The collection of header fields that will be applied.
   ///
   /// This property is immutable; all mutation occurs through the
@@ -99,9 +99,9 @@ public final class HTTPHeaderModifier: HTTPRequestModifier, @unchecked Sendable 
   }
 }
 
-public extension HTTPHeaderModifier {
+public extension HTTPRequestHeadersModifier {
   /// Default instance with standard headers
-  static var defaultHeaderModifier: HTTPHeaderModifier {
-    HTTPHeaderModifier(headerFields: .defaultHeaders)
+  static var defaultHeaderModifier: HTTPRequestHeadersModifier {
+    HTTPRequestHeadersModifier(headerFields: .defaultHeaders)
   }
 }
