@@ -9,19 +9,9 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-/* 
- # OSLogInterceptor
-
- `OSLogInterceptor` is a utility for intercepting and logging HTTP requests and responses using Apple's unified logging system (`OSLog`).
-
- This structure enables detailed and configurable logging for HTTP traffic, which can be helpful for debugging, auditing, or monitoring network activity
- in your application. It implements both `HTTPRequestModifier` and `HTTPInterceptor` protocols, allowing it to log both outgoing requests and incoming responses.
- */
-
-@frozen
-public struct OSLogInterceptor {
+public final class OSLogInterceptor {
   /// An `OSLog` instance that identifies logs coming from `OSLogInterceptor`.
-  public let logger: OSLog = .init(category: "OSLogInterceptor")
+  public let logger: OSLog = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "OSLogInterceptor")
 
   /// The log level to use (e.g., `.default`, `.info`, `.error`).
   public let logType: OSLogType
@@ -102,7 +92,7 @@ extension OSLogInterceptor: HTTPInterceptor {
   ///   - next: The next interceptor in the chain.
   ///   - delegate: An optional `URLSessionTaskDelegate`.
   /// - Returns: The intercepted `HTTPAnyResponse`.
-  public func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
+  public func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
     let response = try await next(request, delegate)
     log(request: request, data: nil)
     log(response: response.response, data: response.data, fileURL: response.fileURL, error: response.error)

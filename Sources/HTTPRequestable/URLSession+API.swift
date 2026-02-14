@@ -10,7 +10,7 @@ import HTTPTypes
 import OSLog
 
 #if DEBUG
-private let logger = Logger(.init(category: "URLSesion+API"))
+private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable", category: "URLSesion+API"))
 #else
 private let logger = Logger(.disabled)
 #endif
@@ -35,8 +35,7 @@ extension URLSession {
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
   func execute(request: HTTPRequest, next interceptor: HTTPInterceptor.Next, interceptors: any Collection<any HTTPInterceptor> = [],
-               delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse
-  {
+               delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     var next = interceptor
     for interceptor in interceptors.reversed() {
@@ -50,14 +49,14 @@ extension URLSession {
 }
 
 extension URLSession: HTTPTransportable {
-  public func data(for request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
+  public func data(for request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     let (data, response) = if let body {
       try await upload(for: request, from: body, delegate: delegate)
     } else {
       try await data(for: request, delegate: delegate)
     }
-    return HTTPAnyResponse(request: request, response: response, data: data)
+    return HTTPDataResponse(request: request, response: response, data: data)
   }
 
   /// Request data from server
@@ -65,7 +64,7 @@ extension URLSession: HTTPTransportable {
   ///   - request:  Request where to get the data from
   ///   - delegate: Delegate to handle the request
   /// - Returns: Data, and HTTPResponse
-  public func data(for request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  public func data(for request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     return try await data(for: request.httpRequest, httpBody: request.httpBody, delegate: delegate)
   }
@@ -76,11 +75,11 @@ extension URLSession: HTTPTransportable {
   ///   - fileURL: File to upload.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  public func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  public func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     let updateRequest = try request.httpRequest
     let (data, response) = try await upload(for: updateRequest, fromFile: fileURL, delegate: delegate)
-    return HTTPAnyResponse(request: updateRequest, response: response, data: data)
+    return HTTPDataResponse(request: updateRequest, response: response, data: data)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConvertible`, creates and resumes a `URLSessionUploadTask` internally.
@@ -89,11 +88,11 @@ extension URLSession: HTTPTransportable {
   ///   - bodyData: Data to upload.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  public func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  public func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     let updateRequest = try request.httpRequest
     let (data, response) = try await upload(for: updateRequest, from: bodyData, delegate: delegate)
-    return HTTPAnyResponse(request: updateRequest, response: response, data: data)
+    return HTTPDataResponse(request: updateRequest, response: response, data: data)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConfigurable`, creates and resumes a `URLSessionUploadTask` internally.
@@ -102,7 +101,7 @@ extension URLSession: HTTPTransportable {
   ///   - multipartForm: Data to upload in multipart form.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  public func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  public func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     let contentType = multipartForm.contentType
     let contentLength = multipartForm.contentLength
@@ -135,11 +134,11 @@ extension URLSession: HTTPTransportable {
   ///   - request: The `HTTPRequestConvertible` for which to download.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
-  public func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPAnyResponse {
+  public func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     let updateRequest = try request.httpRequest
     let (url, response) = try await download(for: updateRequest, delegate: delegate)
-    return HTTPAnyResponse(request: updateRequest, response: response, fileURL: url)
+    return HTTPDataResponse(request: updateRequest, response: response, fileURL: url)
   }
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.

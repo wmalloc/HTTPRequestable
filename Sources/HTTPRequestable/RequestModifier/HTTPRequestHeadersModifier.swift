@@ -1,5 +1,5 @@
 //
-//  HTTPHeaderModifier.swift
+//  HTTPRequestHeadersModifier.swift
 //
 //  Created by Waqar Malik on 1/14/26.
 //

@@ -9,7 +9,7 @@ import Foundation
 import Testing
 
 struct URLSessionConfigurationTests {
-  @Test func defaultHeaders() throws {
+  @Test func defaultHeaders() {
     let configuration = URLSessionConfiguration.default
     configuration.httpFields = .defaultHeaders
     let headers = configuration.httpAdditionalHeaders

@@ -49,13 +49,8 @@ extension HackerNews {
       }
       return results
     }
-    var items: [Item] = []
-    for story in stories {
-      if let item = allResults[story] {
-        items.append(item)
-      }
-    }
-    return items
+
+    return stories.compactMap { allResults[$0] }
   }
 
   func stories(type: String) async throws -> [Int] {

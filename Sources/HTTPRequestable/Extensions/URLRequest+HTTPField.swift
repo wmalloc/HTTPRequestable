@@ -7,7 +7,7 @@
 import Foundation
 import HTTPTypes
 
-/* 
+/*
  # URLRequest+HTTPField
 
  This extension adds convenience methods and properties to `URLRequest` for working with HTTP fields.

@@ -37,7 +37,7 @@ import Testing
     #expect(session.httpAdditionalHeaders?.count == 3)
 
     let headers = session.httpFields
-    #expect(headers.count == 3)
+    #expect(headers?.count == 3)
   }
 
   @Test("HeaderFieldsCounts")
