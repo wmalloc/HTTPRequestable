@@ -9,19 +9,9 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-/* 
- # LoggerInterceptor
-
- A logging interceptor for HTTP requests and responses.
-
- `LoggerInterceptor` logs details about HTTP requests and responses at a specified log level to the system logger.
- It can be used as both an `HTTPRequestModifier` to log outgoing requests, and as an `HTTPInterceptor` to log incoming responses.
- */
-
-@frozen
-public struct LoggerInterceptor {
+public final class LoggerInterceptor {
   /// The logger instance used for logging messages.
-  public let logger: Logger = .init(category: "LoggerInterceptor")
+  public let logger: Logger = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "LoggerInterceptor")
 
   /// The minimum severity level for log messages.
   public let logLevel: OSLogType
@@ -104,7 +94,7 @@ extension LoggerInterceptor: HTTPInterceptor {
   ///   - next: The next interceptor in the chain.
   ///   - delegate: An optional `URL` session task delegate.
   /// - Returns: The intercepted `HTTPAnyResponse`.
-  public func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse {
+  public func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
     let response = try await next(request, delegate)
     log(request: request, data: nil)
     log(response: response.response, data: response.data, fileURL: response.fileURL, error: response.error)

@@ -26,28 +26,31 @@ final class HackerNews: HTTPTransferable {
 
   nonisolated init() {
     self.session = URLSession(configuration: .default, delegate: nil, delegateQueue: nil)
-    var fields = HTTPFields.defaultHeaders
-    fields.append(HTTPField(name: .accept, contentType: .json))
-    fields.append(HTTPField(name: .contentType, contentType: .json))
-    requestModifiers.append(DefaultHeadersModifier(headerFields: fields))
+    requestModifiers.append(HTTPRequestHeadersModifier.defaultHeaderModifier)
+    let modifier = HTTPRequestHeadersModifier(fields: [.accept(.json), .contentType(.json)])
+    requestModifiers.append(modifier)
   }
 }
 
 extension HackerNews {
   func topStories(limit: Int = 20) async throws -> [Item] {
     let stories = try await stories(type: "topstories")
-    var items: [Item] = []
     precondition(limit > 0 && limit <= stories.count, "Limit must be greater than zero")
-    for index in 0 ..< limit {
-      let story = stories[index]
-      do {
-        let item = try await item(id: story)
-        items.append(item)
-      } catch {
-        os_log(.error, log: .default, "Failed to fetch item with id: \(story): \(error)")
+    let allResults = try await withThrowingTaskGroup(of: (Int, Item).self, returning: [Int: Item].self) { taskGroup in
+      for storyId in stories {
+        taskGroup.addTask {
+          let item = try await self.item(id: storyId)
+          return (storyId, item)
+        }
       }
+      var results: [Int: Item] = [:]
+      for try await result in taskGroup {
+        results[result.0] = result.1
+      }
+      return results
     }
-    return items
+
+    return stories.compactMap { allResults[$0] }
   }
 
   func stories(type: String) async throws -> [Int] {

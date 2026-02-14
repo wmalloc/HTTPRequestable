@@ -10,7 +10,7 @@ import HTTPTypesFoundation
 import OSLog
 
 #if DEBUG
-private let logger = Logger(.init(category: "HTTPRequestConfigurable"))
+private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable", category: "HTTPRequestConfigurable"))
 #else
 private let logger = Logger(.disabled)
 #endif
@@ -123,6 +123,13 @@ public extension HTTPRequestConfigurable {
       urlRequest.httpBody = httpBody
       return urlRequest
     }
+  }
+}
+
+/// Transformer when there is nothing to be returned
+public extension HTTPRequestConfigurable where ResultType == Void {
+  var responseDataTransformer: Transformer<Data, ResultType>? {
+    { _ in () }
   }
 }
 

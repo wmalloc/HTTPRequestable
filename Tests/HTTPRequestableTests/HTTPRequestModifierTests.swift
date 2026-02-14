@@ -11,7 +11,7 @@ import Testing
 
 struct Test {
   @Test func defaultHTTPHeaderModifier() async throws {
-    let defaultModifier = HTTPHeaderModifier.defaultHeaderModifier
+    let defaultModifier = HTTPRequestHeadersModifier.defaultHeaderModifier
     let environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
     let requestable = try StoryListRequest(environment, storyType: "topstories")
     var httpRequest = try requestable.httpRequest
@@ -22,7 +22,7 @@ struct Test {
   }
 
   @Test func defaultURLHeaderModifier() async throws {
-    let defaultModifier = HTTPHeaderModifier.defaultHeaderModifier
+    let defaultModifier = HTTPRequestHeadersModifier.defaultHeaderModifier
     let environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
     let requestable = try StoryListRequest(environment, storyType: "topstories")
     var urlRequest = try requestable.urlRequest

@@ -1,5 +1,5 @@
 //
-//  HTTPAnyResponse.swift
+//  HTTPDataResponse.swift
 //  HTTPRequestable
 //
 //  Created by Waqar Malik on 12/14/24.
@@ -9,7 +9,7 @@ import Foundation
 import HTTPTypes
 
 @frozen
-public struct HTTPAnyResponse: Hashable {
+public struct HTTPDataResponse: Hashable {
   /// Request that was sent to the server
   public let request: HTTPRequest
 
@@ -36,7 +36,7 @@ public struct HTTPAnyResponse: Hashable {
   }
 }
 
-public extension HTTPAnyResponse {
+public extension HTTPDataResponse {
   /// The response header fields.
   @inlinable
   var headerFields: HTTPFields {
@@ -140,7 +140,7 @@ public extension HTTPAnyResponse {
   }
 }
 
-public extension HTTPAnyResponse {
+public extension HTTPDataResponse {
   /// Transforms the underlying data with the supplied transformer.
   ///
   /// This method is intentionally *non‑async* because the transformation itself
