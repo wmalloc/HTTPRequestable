@@ -33,7 +33,7 @@ public protocol HTTPTransportable {
   ///
   /// This method is designed to be called from an asynchronous context (`async/await`)
   /// and will automatically propagate any networking errors up the call chain.
-  func data(for request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func data(for request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
   /// Fetches the data for a given HTTP request using an asynchronous task.
   ///
@@ -50,7 +50,7 @@ public protocol HTTPTransportable {
   /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
   /// - SeeAlso: `HTTPRequestConfigurable`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
-  func data(for request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func data(for request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
   /// Uploads a file to the server as part of an HTTP request asynchronously.
   ///
@@ -68,7 +68,7 @@ public protocol HTTPTransportable {
   /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
   /// - SeeAlso: `HTTPRequestConvertible`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
-  func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
   /// Uploads data to the server as part of an HTTP request asynchronously.
   ///
@@ -86,14 +86,14 @@ public protocol HTTPTransportable {
   /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
   /// - SeeAlso: `HTTPRequestConfigurable`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
-  func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
   /// Convenience method to download using an `HTTPRequestConvertible`; creates and resumes a `URLSessionDownloadTask` internally.
   /// - Parameters:
   ///   - request: The `HTTPRequestConvertible` for which to download.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
-  func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPAnyResponse
+  func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
   /// Downloads data from the server as part of an HTTP request asynchronously.
   ///

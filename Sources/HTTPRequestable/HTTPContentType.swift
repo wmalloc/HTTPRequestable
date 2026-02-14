@@ -6,14 +6,8 @@
 
 import Foundation
 
-/* 
- The `HTTPContentType` struct represents HTTP content types, such as `application/json` or `text/html`.
- It provides utilities for parsing, comparing, and encoding content types, making it easier to work with
- HTTP headers and MIME types.
- */
-
 @frozen
-public struct HTTPContentType: RawRepresentable, Hashable {
+public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
   /// The raw string value of the content type.
   public var rawValue: String // ISOLatin1String
 

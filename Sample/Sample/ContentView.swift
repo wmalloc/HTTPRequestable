@@ -17,6 +17,9 @@ struct ContentView: View {
       }
       .listStyle(.plain)
       .scrollIndicators(.hidden)
+      .navigationTitle(Text("Hacker News"))
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar(.visible, for: .navigationBar)
       .refreshable {
         Task {
           viewModel.topStories()
