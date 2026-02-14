@@ -17,7 +17,7 @@ public struct HTTPDataResponse: Hashable {
   public let response: HTTPResponse
 
   /// Data returned from the call can be nil if the url was returned
-  public var data: Data?
+  public var data: Data
 
   /// file url where the item was downloaded
   public var fileURL: URL?
@@ -28,7 +28,7 @@ public struct HTTPDataResponse: Hashable {
   ///   - response: http response from the server
   ///   - data: data if url was not the response
   ///   - fileURL: fileurl if downloading the file
-  public init(request: HTTPRequest, response: HTTPResponse, data: Data? = nil, fileURL: URL? = nil) {
+  public init(request: HTTPRequest, response: HTTPResponse, data: Data, fileURL: URL? = nil) {
     self.request = request
     self.response = response
     self.data = data
@@ -66,6 +66,12 @@ public extension HTTPDataResponse {
   @inlinable
   var isSuccessful: Bool {
     response.status.kind == .successful
+  }
+
+  /// return data from the file url if it exists
+  var fileData: Data? {
+    guard let fileURL else { return nil }
+    return try? Data(contentsOf: fileURL, options: .mappedIfSafe)
   }
 
   /// Validates the response and then returns itself.
@@ -159,10 +165,10 @@ public extension HTTPDataResponse {
       throw URLError(.cannotDecodeContentData)
     }
 
-    guard let body = data else {
+    guard !data.isEmpty else {
       throw URLError(.zeroByteResource)
     }
 
-    return try transformer(body)
+    return try transformer(data)
   }
 }

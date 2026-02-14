@@ -23,7 +23,7 @@ let package = Package(
     .executable(name: "MyApp", targets: ["MyApp"])
   ],
   dependencies: [
-    .package(url: "https://github.com/wmalloc/HTTPRequestable.git", from: "0.21.0")
+    .package(url: "https://github.com/wmalloc/HTTPRequestable.git", from: "0.42.0")
   ],
   targets: [
     .target(name: "MyApp", dependencies: 

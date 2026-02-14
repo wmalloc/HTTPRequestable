@@ -91,7 +91,7 @@ extension OSLogInterceptor: HTTPInterceptor {
   ///   - request: The `HTTPRequest` to intercept.
   ///   - next: The next interceptor in the chain.
   ///   - delegate: An optional `URLSessionTaskDelegate`.
-  /// - Returns: The intercepted `HTTPAnyResponse`.
+  /// - Returns: The intercepted `HTTPDataResponse`.
   public func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
     let response = try await next(request, delegate)
     log(request: request, data: nil)
