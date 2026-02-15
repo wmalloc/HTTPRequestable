@@ -23,7 +23,7 @@ let package = Package(
     .executable(name: "MyApp", targets: ["MyApp"])
   ],
   dependencies: [
-    .package(url: "https://github.com/wmalloc/HTTPRequestable.git", from: "0.21.0")
+    .package(url: "https://github.com/wmalloc/HTTPRequestable.git", from: "0.42.0")
   ],
   targets: [
     .target(name: "MyApp", dependencies: 
@@ -50,7 +50,8 @@ let package = Package(
 final class HackerNews: HTTPTransferable, @unchecked Sendable {
   var requestModifiers: [any HTTPRequestModifier] = []
   var interceptors: [any HTTPInterceptor] = []
-
+  let environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
+  
   let session: URLSession
 
   required init(session: URLSession = .shared) {

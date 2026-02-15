@@ -11,7 +11,7 @@ import OSLog
 
 public final class OSLogInterceptor {
   /// An `OSLog` instance that identifies logs coming from `OSLogInterceptor`.
-  public let logger: OSLog = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "OSLogInterceptor")
+  public let logger: OSLog
 
   /// The log level to use (e.g., `.default`, `.info`, `.error`).
   public let logType: OSLogType
@@ -19,8 +19,9 @@ public final class OSLogInterceptor {
   /// Initializes a new `OSLogInterceptor` with the specified log level.
   ///
   /// - Parameter logType: The log level to use. Defaults to `.default`.
-  public init(logType: OSLogType = .default) {
+  public init(logType: OSLogType = .default, logger: OSLog = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "OSLogInterceptor")) {
     self.logType = logType
+    self.logger = logger
   }
 
   /// Logs the HTTP request and optional data.
@@ -91,7 +92,7 @@ extension OSLogInterceptor: HTTPInterceptor {
   ///   - request: The `HTTPRequest` to intercept.
   ///   - next: The next interceptor in the chain.
   ///   - delegate: An optional `URLSessionTaskDelegate`.
-  /// - Returns: The intercepted `HTTPAnyResponse`.
+  /// - Returns: The intercepted `HTTPDataResponse`.
   public func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
     let response = try await next(request, delegate)
     log(request: request, data: nil)

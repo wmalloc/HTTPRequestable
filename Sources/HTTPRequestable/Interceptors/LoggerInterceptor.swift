@@ -11,7 +11,7 @@ import OSLog
 
 public final class LoggerInterceptor {
   /// The logger instance used for logging messages.
-  public let logger: Logger = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "LoggerInterceptor")
+  public let logger: Logger
 
   /// The minimum severity level for log messages.
   public let logLevel: OSLogType
@@ -19,8 +19,9 @@ public final class LoggerInterceptor {
   /// Initializes a new `LoggerInterceptor` with the specified log level.
   ///
   /// - Parameter logLevel: The minimum severity level for log messages. Defaults to `.default`.
-  public init(logLevel: OSLogType = .default) {
+  public init(logLevel: OSLogType = .default, logger: Logger = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "LoggerInterceptor")) {
     self.logLevel = logLevel
+    self.logger = logger
   }
 
   /// Logs the HTTP request and optional data.
@@ -93,7 +94,7 @@ extension LoggerInterceptor: HTTPInterceptor {
   ///   - request: The `HTTPRequest` to intercept.
   ///   - next: The next interceptor in the chain.
   ///   - delegate: An optional `URL` session task delegate.
-  /// - Returns: The intercepted `HTTPAnyResponse`.
+  /// - Returns: The intercepted `HTTPDataResponse`.
   public func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
     let response = try await next(request, delegate)
     log(request: request, data: nil)

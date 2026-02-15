@@ -28,11 +28,11 @@ public extension URLRequest {
   ///   `URLSession`.  If a modifier needs the session, it should ignore
   ///   this argument or provide its own default behaviour.
   ///
-  func apply(_ modifiers: any Collection<HTTPRequestModifier>) async throws -> Self {
-    var copy = self
+  func apply(_ modifiers: any Collection<any HTTPRequestModifier>) async throws -> Self {
+    var updatedRequest = self
     for modifier in modifiers {
-      try await modifier.modify(&copy, for: nil)
+      try await modifier.modify(&updatedRequest, for: nil)
     }
-    return copy
+    return updatedRequest
   }
 }

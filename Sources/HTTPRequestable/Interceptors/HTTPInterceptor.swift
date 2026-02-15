@@ -19,7 +19,7 @@ public protocol HTTPInterceptor: Sendable {
   /// - Parameters:
   ///   - request: The `HTTPRequest` object representing the original or modified outbound HTTP request.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
-  /// - Returns: An `HTTPAnyResponse` representing the response for the request.
+  /// - Returns: An `HTTPDataResponse` representing the response for the request.
   /// - Throws: Propagates any error thrown by the next interceptor or the underlying network operation.
   typealias Next = (_ request: HTTPRequest, _ delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
@@ -32,7 +32,7 @@ public protocol HTTPInterceptor: Sendable {
      - request: The `HTTPRequest` representing the outbound HTTP request to be sent.
      - next: A closure for invoking the next interceptor or performing the actual network operation. Call this with (potentially modified) arguments to continue the chain.
      - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
-   - Returns: An `HTTPAnyResponse` representing the network response or an interceptor-provided response.
+   - Returns: An `HTTPDataResponse` representing the network response or an interceptor-provided response.
    - Throws: Propagates any error thrown by the next interceptor or the underlying network operation, or throws an error if intercepting fails.
 
    - Note: If you wish to continue the request with modified values, call `next` using the new values. If you wish to terminate the chain early, do not call `next` and instead return or throw your own response or error.
