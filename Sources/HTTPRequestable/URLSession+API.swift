@@ -27,15 +27,15 @@ extension URLSession {
   ///   - next: The terminal closure that is called to perform the actual network operation. This closure receives the (potentially modified)
   ///   - interceptors: A collection of`HTTPInterceptor` that allows customization of the request and response behavior. If not provided, empty array.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
-  /// request and returns an `HTTPAnyResponse` asynchronously. Interceptors can call this closure to forward the request and receive the response.
+  /// request and returns an `HTTPDataResponse` asynchronously. Interceptors can call this closure to forward the request and receive the response.
   ///
-  /// - Returns: An `HTTPAnyResponse` containing the data and metadata received from the server after all interceptors have been applied.
+  /// - Returns: An `HTTPDataResponse` containing the data and metadata received from the server after all interceptors have been applied.
   ///
   /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
-  func execute(request: HTTPRequest, next interceptor: HTTPInterceptor.Next, interceptors: any Collection<any HTTPInterceptor> = [],
-               delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+  func performRequest(_ request: HTTPRequest, next interceptor: HTTPInterceptor.Next, interceptors: any Collection<any HTTPInterceptor> = [],
+                      delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     var next = interceptor
     for interceptor in interceptors.reversed() {
@@ -49,7 +49,7 @@ extension URLSession {
 }
 
 extension URLSession: HTTPTransportable {
-  public func data(for request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
+  public func performRequest(_ request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     let (data, response) = if let body {
       try await upload(for: request, from: body, delegate: delegate)
@@ -64,9 +64,9 @@ extension URLSession: HTTPTransportable {
   ///   - request:  Request where to get the data from
   ///   - delegate: Delegate to handle the request
   /// - Returns: Data, and HTTPResponse
-  public func data(for request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+  public func performRequest(_ request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
-    return try await data(for: request.httpRequest, httpBody: request.httpBody, delegate: delegate)
+    return try await performRequest(request.httpRequest, httpBody: request.httpBody, delegate: delegate)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConvertible`; creates and resumes a `URLSessionUploadTask` internally.
@@ -138,7 +138,7 @@ extension URLSession: HTTPTransportable {
     logger.trace("[IN]: \(#function)")
     let updateRequest = try request.httpRequest
     let (url, response) = try await download(for: updateRequest, delegate: delegate)
-    return HTTPDataResponse(request: updateRequest, response: response, fileURL: url)
+    return HTTPDataResponse(request: updateRequest, response: response, data: Data(), fileURL: url)
   }
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.
@@ -162,7 +162,7 @@ extension URLSession: HTTPTransportable {
    */
   @inlinable
   public func object<R: HTTPRequestConfigurable>(for request: R, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> R.ResultType {
-    try await data(for: request, delegate: delegate)
+    try await performRequest(request, delegate: delegate)
       .transformed(using: request.responseDataTransformer)
   }
 }

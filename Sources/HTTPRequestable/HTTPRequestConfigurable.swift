@@ -21,13 +21,6 @@ public typealias HTTPMethod = HTTPRequest.Method
 /// How to transform the resulting data
 public typealias Transformer<InputType, OutputType> = (InputType) throws -> OutputType
 
-/// HTTP Request
-@available(*, deprecated, renamed: "HTTPRequestConfigurable", message: "Renamed to HTTPRequestConfigurable")
-public typealias URLRequestable = HTTPRequestConfigurable
-
-@available(*, deprecated, renamed: "HTTPRequestConfigurable", message: "Renamed to HTTPRequestConfigurable")
-public typealias HTTPRequestable = HTTPRequestConfigurable
-
 /// URL/HTTP Request builder protocol
 public protocol HTTPRequestConfigurable: URLConvertible, URLRequestConvertible, HTTPRequestConvertible {
   associatedtype ResultType

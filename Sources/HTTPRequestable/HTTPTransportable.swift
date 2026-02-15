@@ -24,7 +24,7 @@ public protocol HTTPTransportable {
   ///     If `nil`, no body is added.
   ///   - delegate: An optional object conforming to `URLSessionTaskDelegate`.
   ///     It is used for task‑level callbacks such as authentication challenges or progress updates.
-  /// - Returns: A value of type `HTTPAnyResponse`, which encapsulates the status code,
+  /// - Returns: A value of type `HTTPDataResponse`, which encapsulates the status code,
   ///   headers, and raw data returned by the server. The caller can then decode
   ///   this response into a more specific model if desired.
   /// - Throws:
@@ -33,7 +33,7 @@ public protocol HTTPTransportable {
   ///
   /// This method is designed to be called from an asynchronous context (`async/await`)
   /// and will automatically propagate any networking errors up the call chain.
-  func data(for request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
+  func performRequest(_ request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
   /// Fetches the data for a given HTTP request using an asynchronous task.
   ///
@@ -43,14 +43,14 @@ public protocol HTTPTransportable {
   /// - Parameters:
   ///   - request: The `HTTPRequestConfigurable` object representing the HTTP request. This protocol defines properties necessary to create an URLRequest.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
-  /// - Returns: An `HTTPAnyResponse` object containing the data received from the server in response to the request.
+  /// - Returns: An `HTTPDataResponse` object containing the data received from the server in response to the request.
   /// - Throws: An error of type `Error` if the fetch operation fails, such as network issues or invalid requests.
   ///
   /// - Note: The `HTTPRequestConfigurable` protocol must be implemented by the request object for this method to work correctly.
-  /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
+  /// - Note: The `HTTPDataResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
-  /// - SeeAlso: `HTTPRequestConfigurable`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
-  func data(for request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
+  /// - SeeAlso: `HTTPRequestConfigurable`, `HTTPDataResponse`, `URLSessionTaskDelegate`
+  func performRequest(_ request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
   /// Uploads a file to the server as part of an HTTP request asynchronously.
   ///
@@ -61,13 +61,13 @@ public protocol HTTPTransportable {
   ///   - request: The `HTTPRequestConvertible` object representing the HTTP upload request. This protocol defines properties necessary to create an URLRequest.
   ///   - fileURL: The `URL` of the file to upload.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
-  /// - Returns: An `HTTPAnyResponse` object containing the data received from the server in response to the request.
+  /// - Returns: An `HTTPDataResponse` object containing the data received from the server in response to the request.
   /// - Throws: An error of type `Error` if the upload operation fails, such as network issues or invalid requests.
   ///
   /// - Note: The `HTTPRequestConvertible` protocol must be implemented by the request object for this method to work correctly.
-  /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
+  /// - Note: The `HTTPDataResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
-  /// - SeeAlso: `HTTPRequestConvertible`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
+  /// - SeeAlso: `HTTPRequestConvertible`, `HTTPDataResponse`, `URLSessionTaskDelegate`
   func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
   /// Uploads data to the server as part of an HTTP request asynchronously.
@@ -79,13 +79,13 @@ public protocol HTTPTransportable {
   ///   - request: The `HTTPRequestConfigurable` object representing the HTTP upload request. This protocol defines properties necessary to create an URLRequest.
   ///   - multipartForm: The data body to upload as multipartform.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
-  /// - Returns: An `HTTPAnyResponse` object containing the data received from the server in response to the request.
+  /// - Returns: An `HTTPDataResponse` object containing the data received from the server in response to the request.
   /// - Throws: An error of type `Error` if the upload operation fails, such as network issues or invalid requests.
   ///
   /// - Note: The `HTTPRequestConfigurable` protocol must be implemented by the request object for this method to work correctly.
-  /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
+  /// - Note: The `HTTPDataResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
-  /// - SeeAlso: `HTTPRequestConfigurable`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
+  /// - SeeAlso: `HTTPRequestConfigurable`, `HTTPDataResponse`, `URLSessionTaskDelegate`
   func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
   /// Convenience method to download using an `HTTPRequestConvertible`; creates and resumes a `URLSessionDownloadTask` internally.
@@ -103,13 +103,13 @@ public protocol HTTPTransportable {
   /// - Parameters:
   ///   - request: The `HTTPRequestConvertible` object representing the HTTP download request. This protocol defines properties necessary to create an URLRequest.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
-  /// - Returns: An `HTTPAnyResponse` object containing the data received from the server in response to the request.
+  /// - Returns: An `HTTPDataResponse` object containing the data received from the server in response to the request.
   /// - Throws: An error of type `Error` if the download operation fails, such as network issues or invalid requests.
   ///
   /// - Note: The `HTTPRequestConvertible` protocol must be implemented by the request object for this method to work correctly.
-  /// - Note: The `HTTPAnyResponse` type can be defined by your application to encapsulate the response data and related information.
+  /// - Note: The `HTTPDataResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
-  /// - SeeAlso: `HTTPRequestConvertible`, `HTTPAnyResponse`, `URLSessionTaskDelegate`
+  /// - SeeAlso: `HTTPRequestConvertible`, `HTTPDataResponse`, `URLSessionTaskDelegate`
   func bytes(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse)
 
   /// Sends an HTTP request and returns the parsed object of type `Request.ResultType` asynchronously.
