@@ -50,7 +50,8 @@ let package = Package(
 final class HackerNews: HTTPTransferable, @unchecked Sendable {
   var requestModifiers: [any HTTPRequestModifier] = []
   var interceptors: [any HTTPInterceptor] = []
-
+  let environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
+  
   let session: URLSession
 
   required init(session: URLSession = .shared) {
