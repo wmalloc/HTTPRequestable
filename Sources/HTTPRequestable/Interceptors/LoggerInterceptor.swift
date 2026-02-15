@@ -11,7 +11,7 @@ import OSLog
 
 public final class LoggerInterceptor {
   /// The logger instance used for logging messages.
-  public let logger: Logger = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "LoggerInterceptor")
+  public let logger: Logger
 
   /// The minimum severity level for log messages.
   public let logLevel: OSLogType
@@ -19,8 +19,9 @@ public final class LoggerInterceptor {
   /// Initializes a new `LoggerInterceptor` with the specified log level.
   ///
   /// - Parameter logLevel: The minimum severity level for log messages. Defaults to `.default`.
-  public init(logLevel: OSLogType = .default) {
+  public init(logLevel: OSLogType = .default, logger: Logger = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "LoggerInterceptor")) {
     self.logLevel = logLevel
+    self.logger = logger
   }
 
   /// Logs the HTTP request and optional data.

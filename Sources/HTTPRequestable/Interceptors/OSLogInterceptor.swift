@@ -11,7 +11,7 @@ import OSLog
 
 public final class OSLogInterceptor {
   /// An `OSLog` instance that identifies logs coming from `OSLogInterceptor`.
-  public let logger: OSLog = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "OSLogInterceptor")
+  public let logger: OSLog
 
   /// The log level to use (e.g., `.default`, `.info`, `.error`).
   public let logType: OSLogType
@@ -19,8 +19,9 @@ public final class OSLogInterceptor {
   /// Initializes a new `OSLogInterceptor` with the specified log level.
   ///
   /// - Parameter logType: The log level to use. Defaults to `.default`.
-  public init(logType: OSLogType = .default) {
+  public init(logType: OSLogType = .default, logger: OSLog = .init(subsystem: "com.waqarmalik.HTTPRequestable", category: "OSLogInterceptor")) {
     self.logType = logType
+    self.logger = logger
   }
 
   /// Logs the HTTP request and optional data.
