@@ -21,12 +21,10 @@ struct ContentView: View {
       .navigationBarTitleDisplayMode(.inline)
       .toolbar(.visible, for: .navigationBar)
       .refreshable {
-        Task {
-          viewModel.topStories()
-        }
+        viewModel.loadTopStories()
       }
       .onAppear {
-        viewModel.topStories()
+        viewModel.loadTopStories()
       }
     }
   }

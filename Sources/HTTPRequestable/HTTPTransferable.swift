@@ -98,7 +98,7 @@ extension HTTPTransferable {
   /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
-  func performRequest(_ request: HTTPRequest, next interceptor: HTTPInterceptor.Next, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+  func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.Next, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     let chain = await interceptors
     return try await session.performRequest(request, next: interceptor, interceptors: chain, delegate: delegate)
@@ -252,9 +252,9 @@ public extension HTTPTransferable {
   /// This method is typically used inside a higher‑level service or
   /// repository that hides the details of HTTP communication from its
   /// callers.
-  @inlinable
   func object<R: HTTPRequestConfigurable>(for request: R, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> R.ResultType {
-    try await performRequest(request, delegate: delegate)
+    logger.trace("[IN]: \(#function)")
+    return try await performRequest(request, delegate: delegate)
       .transformed(using: request.responseDataTransformer)
   }
 }
