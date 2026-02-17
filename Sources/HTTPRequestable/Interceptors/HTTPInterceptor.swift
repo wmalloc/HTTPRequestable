@@ -37,13 +37,13 @@ public protocol HTTPInterceptor: Sendable {
 
    - Note: If you wish to continue the request with modified values, call `next` using the new values. If you wish to terminate the chain early, do not call `next` and instead return or throw your own response or error.
    */
-  func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
+  func intercept(for request: HTTPRequest, next: @escaping Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 }
 
 /// Default implementation
 public extension HTTPInterceptor {
   @inlinable
-  func intercept(for request: HTTPRequest, next: Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
+  func intercept(for request: HTTPRequest, next: @escaping Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
     try await next(request, delegate)
   }
 }
