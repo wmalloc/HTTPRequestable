@@ -34,11 +34,11 @@ extension URLSession {
   /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
-  func performRequest(_ request: HTTPRequest, next interceptor: HTTPInterceptor.Next, interceptors: any Collection<any HTTPInterceptor> = [],
+  func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.Next, interceptors: any Collection<any HTTPInterceptor> = [],
                       delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     var next = interceptor
-    for interceptor in interceptors.reversed() {
+    for interceptor in await interceptors.reversed() {
       let _next = next
       next = {
         try await interceptor.intercept(for: $0, next: _next, delegate: $1)
@@ -160,9 +160,9 @@ extension URLSession: HTTPTransportable {
      - delegate: Delegate to handle the request, defaults to nil
    - returns: Transformed Object
    */
-  @inlinable
   public func object<R: HTTPRequestConfigurable>(for request: R, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> R.ResultType {
-    try await performRequest(request, delegate: delegate)
+    logger.trace("[IN]: \(#function)")
+    return try await performRequest(request, delegate: delegate)
       .transformed(using: request.responseDataTransformer)
   }
 }

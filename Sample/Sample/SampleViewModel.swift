@@ -13,29 +13,28 @@ import SwiftUI
 class SampleViewModel {
   @MainActor var items: [Item] = []
 
-  var task: Task<Void, Error>? {
-    didSet {
-      oldValue?.cancel()
+  func loadTopStories() {
+    Task {
+      await loadStories()
     }
   }
 
-  func topStories() {
-    task = Task {
-      do {
-        try await topStories()
-      } catch {
-        os_log("Unable to fetch top stories: %{public}@", log: .default, type: .error, error.localizedDescription)
-      }
-    }
-  }
-
-  func topStories() async throws {
-    let items = try await HackerNews.shared.topStories()
-
+  func loadStories() async {
     await MainActor.run {
-      withAnimation {
-        self.items = items
+      self.items.removeAll()
+    }
+    do {
+      let items = try await HackerNews.shared.stories(type: "topstories")
+      for item in items {
+        let items = try await HackerNews.shared.item(id: item)
+        await MainActor.run {
+          withAnimation {
+            self.items.append(items)
+          }
+        }
       }
+    } catch {
+      os_log(.error, "Unable to get stories %@", error.localizedDescription)
     }
   }
 }
