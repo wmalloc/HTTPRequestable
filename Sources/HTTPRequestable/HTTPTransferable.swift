@@ -171,8 +171,8 @@ public extension HTTPTransferable {
   func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     let contentType = multipartForm.contentType
     let contentLength = multipartForm.contentLength
-    let updatedRequest = request.append(headerField: HTTPField(name: .contentLength, value: "\(contentLength)"))
-      .append(headerField: HTTPField(name: .contentType, value: contentType.encoded))
+    let updatedRequest = request.appendHeaderField(HTTPField(name: .contentLength, value: "\(contentLength)"))
+      .appendHeaderField(HTTPField(name: .contentType, value: contentType.encoded))
 
     if contentLength <= MultipartForm.encodingMemoryThreshold {
       // if we have enough memory to store data
