@@ -91,16 +91,28 @@ public extension HTTPServerTrustEvaluating {
   }
 
   /// Default implementation for evaluating a server trust object.
+  ///
+  /// This method validates that the public keys from the server's trust object
+  /// match at least one of the provided certificate public keys.
+  ///
+  /// - Parameters:
+  ///   - trust: The server trust object to evaluate.
+  ///   - certificates: The set of certificates to use for evaluation.
+  /// - Throws: A `TrustError` if the evaluation fails:
+  ///   - `.certificateNotFound` if the trust object contains no certificates
+  ///   - `.certificatesDoNotMatch` if none of the public keys match
   func evaluate(trust: SecTrust, certificates: Set<SecCertificate>) throws(TrustError) {
     logger.trace("[IN]: \(#function)")
+    
     guard let trustCertificates = trust.certificates else {
       throw .certificateNotFound
     }
 
     let certificateKeys = Set(certificates.publicKeysData)
     let trustCertificateKeys = Set(trustCertificates.publicKeysData)
-    let isDisjoint = trustCertificateKeys.isDisjoint(with: certificateKeys)
-    if isDisjoint {
+    
+    // Validate that at least one public key matches
+    guard !trustCertificateKeys.isDisjoint(with: certificateKeys) else {
       throw .certificatesDoNotMatch
     }
   }
