@@ -18,7 +18,18 @@ private let logger = Logger(.disabled)
 /// Method
 public typealias HTTPMethod = HTTPRequest.Method
 
-/// How to transform the resulting data
+/// Synchronous transformer for converting data from one type to another.
+///
+/// This typealias defines a closure that takes an input value and returns
+/// an output value, potentially throwing an error during the transformation.
+///
+/// ## Example
+///
+/// ```swift
+/// let jsonTransformer: Transformer<Data, User> = { data in
+///     try JSONDecoder().decode(User.self, from: data)
+/// }
+/// ```
 public typealias Transformer<InputType, OutputType> = (InputType) throws -> OutputType
 
 /// URL/HTTP Request builder protocol
@@ -43,11 +54,19 @@ public protocol HTTPRequestConfigurable: URLConvertible, URLRequestConvertible, 
   /// Body data for the request, optional
   var httpBody: Data? { get }
 
-  /// Transformer to convert raw response data to ResultType
-  var responseDataTransformer: Transformer<Data, ResultType>? { get }
+  /// Synchronous transformer to convert raw response data to ResultType.
+  ///
+  /// This property provides a closure that transforms the HTTP response data
+  /// into the expected result type. For most use cases, use the default
+  /// implementations provided for common types like `Void`, `Data`, `String`,
+  /// and `Decodable`.
+  ///
+  /// - Returns: A closure that converts `Data` to `ResultType`, or `nil` if
+  ///   no transformation is needed.
+  var responseDataTransformer: Transformer<Data, ResultType> { get }
 }
 
-/// Default imeplementation
+/// Default implementation
 public extension HTTPRequestConfigurable {
   @inlinable
   var method: HTTPMethod {
@@ -121,7 +140,7 @@ public extension HTTPRequestConfigurable {
 
 /// Transformer when there is nothing to be returned
 public extension HTTPRequestConfigurable where ResultType == Void {
-  var responseDataTransformer: Transformer<Data, ResultType>? {
+  var responseDataTransformer: Transformer<Data, ResultType> {
     { _ in () }
   }
 }
@@ -139,8 +158,41 @@ public extension HTTPRequestConfigurable where ResultType == Data {
   /// and is implemented as `{ $0 }`, i.e. “return the input”.
   ///
   /// - Returns: A closure that returns its argument unchanged.
-  var responseDataTransformer: Transformer<Data, ResultType>? {
+  var responseDataTransformer: Transformer<Data, ResultType> {
     { $0 }
+  }
+}
+
+public extension HTTPRequestConfigurable where ResultType == String {
+  /// Default UTF-8 string transformer for requests whose result type is `String`.
+  ///
+  /// This extension provides a default `responseDataTransformer` that converts
+  /// the response data to a UTF-8 encoded string. This is useful for APIs that
+  /// return plain text, HTML, XML, or other text-based formats.
+  ///
+  /// ## Example
+  ///
+  /// ```swift
+  /// struct TextAPIRequest: HTTPRequestConfigurable {
+  ///     typealias ResultType = String
+  ///     var environment: HTTPEnvironment
+  ///     var path: String?
+  ///     // responseDataTransformer is automatically provided
+  /// }
+  ///
+  /// let request = TextAPIRequest(environment: env, path: "/text")
+  /// let text = try await session.data(for: request)
+  /// ```
+  ///
+  /// - Returns: A closure that converts `Data` to a UTF-8 `String`.
+  /// - Throws: `URLError(.cannotDecodeContentData)` if the data is not valid UTF-8.
+  var responseDataTransformer: Transformer<Data, ResultType> {
+    { data in
+      guard let string = String(data: data, encoding: .utf8) else {
+        throw URLError(.cannotDecodeContentData)
+      }
+      return string
+    }
   }
 }
 
@@ -153,7 +205,7 @@ public extension HTTPRequestConfigurable where ResultType: Decodable {
   /// matches the `HTTPRequestConfigurable` protocol requirement.
   ///
   /// - Returns: The static JSON‑decoder for this request type.
-  var responseDataTransformer: Transformer<Data, ResultType>? {
+  var responseDataTransformer: Transformer<Data, ResultType> {
     { data in
       try JSONDecoder().decode(ResultType.self, from: data)
     }
