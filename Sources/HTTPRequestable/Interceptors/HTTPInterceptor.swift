@@ -21,13 +21,13 @@ public protocol HTTPInterceptor: Sendable {
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
   /// - Returns: An `HTTPDataResponse` representing the response for the request.
   /// - Throws: Propagates any error thrown by the next interceptor or the underlying network operation.
-  typealias Next = (_ request: HTTPRequest, _ delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
+  typealias NextHandler = (_ request: HTTPRequest, _ delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
   /**
    Intercepts an outgoing HTTP request, allowing modification, observation, or short-circuiting of the request before it continues through the interceptor chain.
 
-   Use this method to inspect or alter the outgoing request, modify the request body, provide a custom response, or perform asynchronous work before delegating to the next interceptor. If you do not call `next`, the chain is short-circuited and your response will be returned instead.
-
+   Use this method to inspect or alter the outgoing request (including headers or body if represented within `HTTPRequest`), provide a custom response, or perform asynchronous work before delegating to the next interceptor.
+   
    - Parameters:
      - request: The `HTTPRequest` representing the outbound HTTP request to be sent.
      - next: A closure for invoking the next interceptor or performing the actual network operation. Call this with (potentially modified) arguments to continue the chain.
@@ -37,13 +37,13 @@ public protocol HTTPInterceptor: Sendable {
 
    - Note: If you wish to continue the request with modified values, call `next` using the new values. If you wish to terminate the chain early, do not call `next` and instead return or throw your own response or error.
    */
-  func intercept(for request: HTTPRequest, next: @escaping Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
+  func intercept(_ request: HTTPRequest, next: @escaping NextHandler, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 }
 
 /// Default implementation
 public extension HTTPInterceptor {
   @inlinable
-  func intercept(for request: HTTPRequest, next: @escaping Next, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
+  func intercept(_ request: HTTPRequest, next: @escaping NextHandler, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
     try await next(request, delegate)
   }
 }

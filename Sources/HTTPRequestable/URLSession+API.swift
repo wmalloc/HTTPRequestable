@@ -34,14 +34,14 @@ extension URLSession {
   /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
-  func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.Next, interceptors: any Collection<any HTTPInterceptor> = [],
+  func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.NextHandler, interceptors: any Collection<any HTTPInterceptor> = [],
                       delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     var next = interceptor
     for interceptor in interceptors.reversed() {
       let _next = next
       next = {
-        try await interceptor.intercept(for: $0, next: _next, delegate: $1)
+        try await interceptor.intercept($0, next: _next, delegate: $1)
       }
     }
     return try await next(request, delegate)

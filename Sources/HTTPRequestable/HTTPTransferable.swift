@@ -98,7 +98,7 @@ extension HTTPTransferable {
   /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
-  func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.Next, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+  func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.NextHandler, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     let chain = await interceptors
     return try await session.performRequest(request, next: interceptor, interceptors: chain, delegate: delegate)
@@ -114,7 +114,7 @@ public extension HTTPTransferable {
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
   func performRequest(_ request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
-    let next: HTTPInterceptor.Next = {
+    let next: HTTPInterceptor.NextHandler = {
       try await self.session.performRequest($0, httpBody: body, delegate: $1)
     }
     return try await performRequest(request, next: next, delegate: delegate)
@@ -139,7 +139,7 @@ public extension HTTPTransferable {
   func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
-    let next: HTTPInterceptor.Next = {
+    let next: HTTPInterceptor.NextHandler = {
       let (data, response) = try await self.session.upload(for: $0, fromFile: fileURL, delegate: $1)
       return HTTPDataResponse(request: $0, response: response, data: data)
     }
@@ -155,7 +155,7 @@ public extension HTTPTransferable {
   func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
-    let next: HTTPInterceptor.Next = {
+    let next: HTTPInterceptor.NextHandler = {
       let (data, response) = try await self.session.upload(for: $0, from: bodyData, delegate: $1)
       return HTTPDataResponse(request: $0, response: response, data: data)
     }
@@ -203,7 +203,7 @@ public extension HTTPTransferable {
   func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     logger.trace("[IN]: \(#function)")
     let updatedRequest = try await httpRequest(request)
-    let next: HTTPInterceptor.Next = {
+    let next: HTTPInterceptor.NextHandler = {
       let (url, response) = try await self.session.download(for: $0, delegate: $1)
       return HTTPDataResponse(request: $0, response: response, data: Data(), fileURL: url)
     }
