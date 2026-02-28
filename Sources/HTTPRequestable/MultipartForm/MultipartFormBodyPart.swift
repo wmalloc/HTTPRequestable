@@ -8,6 +8,15 @@ import Foundation
 import HTTPTypes
 import OSLog
 
+/// Represents a single multipart/form-data body part.
+///
+/// A body part consists of encoded headers followed by a byte stream for the body.
+/// The `headers` are expected to be encoded according to RFC 7578 with CRLF line endings
+/// and a blank line separating headers from the body (i.e., `\r\n\r\n`).
+///
+/// Note: `bodyStream` is consumed when `data(streamBufferSize:)` or `write(to:streamBufferSize:)` is called.
+/// A single instance should not be read multiple times unless the underlying stream can be rewound
+/// or recreated.
 open class MultipartFormBodyPart: AnyMultipartFormBodyPart {
   public let headers: [HTTPField]
   public let bodyStream: InputStream
@@ -21,6 +30,10 @@ open class MultipartFormBodyPart: AnyMultipartFormBodyPart {
 }
 
 public extension MultipartFormBodyPart {
+  /// Encodes headers and body into a single `Data` value.
+  ///
+  /// This method reads the entire `bodyStream` into memory using `streamBufferSize` chunks and
+  /// validates that the total number of bytes read matches `contentLength`.
   func data(streamBufferSize: Int) throws -> Data {
     var encoded = Data()
     encoded.append(encodedHeadersData)
@@ -66,6 +79,10 @@ extension MultipartFormBodyPart {
 }
 
 extension MultipartFormBodyPart {
+  /// Streams the encoded headers and body to the provided `OutputStream`.
+  ///
+  /// This method does not buffer the entire body in memory and validates the number of bytes
+  /// read from `bodyStream` against `contentLength`.
   func write(to outputStream: OutputStream, streamBufferSize: Int) throws {
     let headerData = encodedHeadersData
     try Data.write(data: headerData, to: outputStream)
@@ -79,6 +96,7 @@ extension MultipartFormBodyPart {
     defer {
       inputStream.close()
     }
+    var totalRead: UInt64 = 0
 
     while inputStream.hasBytesAvailable {
       var buffer = [UInt8](repeating: 0, count: streamBufferSize)
@@ -89,13 +107,23 @@ extension MultipartFormBodyPart {
       }
 
       if bytesRead > 0 {
+        totalRead += UInt64(bytesRead)
         if buffer.count != bytesRead {
           buffer = Array(buffer[0 ..< bytesRead])
         }
+        // If an overload exists that accepts a count, prefer it to avoid reallocation.
+        // Otherwise, fall back to passing the sliced buffer.
         try Data.write(buffer: &buffer, to: outputStream)
       } else {
         break
       }
     }
+
+    if totalRead != contentLength {
+      let message = String(localized: "multipart_error_expected_length", bundle: .module) + " \(contentLength), " +
+        String(localized: "multipart_error_encoded_length", bundle: .module) + " \(totalRead)"
+      throw MultipartFormError.inputStreamLength(message)
+    }
   }
 }
+
