@@ -9,12 +9,6 @@ import HTTPTypes
 import HTTPTypesFoundation
 import OSLog
 
-#if DEBUG
-private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable", category: "HTTPRequestConfigurable"))
-#else
-private let logger = Logger(.disabled)
-#endif
-
 /// Method
 public typealias HTTPMethod = HTTPRequest.Method
 
@@ -98,7 +92,6 @@ public extension HTTPRequestConfigurable {
   /// and the result is joined with a single leading `/`.
   var url: URL {
     get throws {
-      logger.trace("[IN]: \(#function)")
       var components = environment
       var paths = components.path.components(separatedBy: "/")
       paths.append(contentsOf: path?.components(separatedBy: "/") ?? [])
@@ -129,7 +122,6 @@ public extension HTTPRequestConfigurable {
   /// URLRequestConvertible
   var urlRequest: URLRequest {
     get throws {
-      logger.trace("[IN]: \(#function)")
       let httpRequest = try httpRequest
       guard var urlRequest = URLRequest(httpRequest: httpRequest) else {
         throw HTTPError.cannotCreateURLRequest

@@ -8,20 +8,13 @@ import Foundation
 import HTTPTypes
 import OSLog
 
-#if DEBUG
-private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable", category: "MultipartFormBodyPart"))
-#else
-private let logger = Logger(.disabled)
-#endif
-
 open class MultipartFormBodyPart: AnyMultipartFormBodyPart {
   public let headers: [HTTPField]
   public let bodyStream: InputStream
   public let contentLength: UInt64
 
   public init(headers: [HTTPField], bodyStream: InputStream, contentLength: UInt64) {
-    logger.trace("[IN]: \(#function)")
-    self.headers = headers
+     self.headers = headers
     self.bodyStream = bodyStream
     self.contentLength = contentLength
   }
@@ -29,7 +22,6 @@ open class MultipartFormBodyPart: AnyMultipartFormBodyPart {
 
 public extension MultipartFormBodyPart {
   func data(streamBufferSize: Int) throws -> Data {
-    logger.trace("[IN]: \(#function)")
     var encoded = Data()
     encoded.append(encodedHeadersData)
     let bodyStreamData = try encodedBodyStream(streamBufferSize: streamBufferSize)
@@ -40,7 +32,6 @@ public extension MultipartFormBodyPart {
 
 extension MultipartFormBodyPart {
   private func encodedBodyStream(streamBufferSize: Int) throws -> Data {
-    logger.trace("[IN]: \(#function)")
     let inputStream = bodyStream
     inputStream.open()
     defer {
@@ -76,14 +67,12 @@ extension MultipartFormBodyPart {
 
 extension MultipartFormBodyPart {
   func write(to outputStream: OutputStream, streamBufferSize: Int) throws {
-    logger.trace("[IN]: \(#function)")
     let headerData = encodedHeadersData
     try Data.write(data: headerData, to: outputStream)
     try write(bodyStreamTo: outputStream, streamBufferSize: streamBufferSize)
   }
 
   func write(bodyStreamTo outputStream: OutputStream, streamBufferSize: Int) throws {
-    logger.trace("[IN]: \(#function)")
     let inputStream = bodyStream
 
     inputStream.open()
