@@ -94,6 +94,8 @@ public extension HTTPRequestConfigurable {
   }
 
   /// URLConvertible
+  /// Note: Path segments from `environment.path` and `path` are split on `/`, empty segments are removed,
+  /// and the result is joined with a single leading `/`.
   var url: URL {
     get throws {
       logger.trace("[IN]: \(#function)")
@@ -199,12 +201,12 @@ public extension HTTPRequestConfigurable where ResultType == String {
 public extension HTTPRequestConfigurable where ResultType: Decodable {
   /// Default JSON decoder for requests whose result type is `Decodable`.
   ///
-  /// This property forwards to the static `jsonDecoder` defined on
-  /// the type.  It allows concrete request types to provide a reusable
-  /// decoder while still exposing an instance‑level transformer that
-  /// matches the `HTTPRequestConfigurable` protocol requirement.
+  /// This default uses a new `JSONDecoder()` instance with its default configuration
+  /// to decode the response data into `ResultType`. Conforming types may override
+  /// `responseDataTransformer` to supply a customized decoder or decoding behavior
+  /// (for example, different date strategies or key decoding).
   ///
-  /// - Returns: The static JSON‑decoder for this request type.
+  /// - Returns: A closure that decodes `Data` into `ResultType` using `JSONDecoder()`.
   var responseDataTransformer: Transformer<Data, ResultType> {
     { data in
       try JSONDecoder().decode(ResultType.self, from: data)
