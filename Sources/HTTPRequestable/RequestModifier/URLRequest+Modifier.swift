@@ -7,28 +7,17 @@
 import Foundation
 
 public extension URLRequest {
-  /// Applies an ordered collection of request modifiers and returns the
-  /// resulting request.
+  /// Applies an ordered collection of request modifiers and returns the resulting request.
   ///
-  /// The method creates a mutable copy of `self`, iterates over the
-  /// supplied collection, and invokes each modifier’s `modify(_:for:)`
-  /// method.  Because the modifiers operate asynchronously, this
-  /// function is marked `async` and propagates any thrown errors.
+  /// This method creates a mutable copy of `self`, iterates over the supplied collection, and
+  /// invokes each modifier’s `modify(_:for:)` method in order. Because modifiers operate asynchronously,
+  /// this function is `async` and propagates any thrown errors.
   ///
-  /// - Parameters:
-  ///   - modifiers: A collection of types conforming to
-  ///     `HTTPRequestModifier`.  The order in which they appear is the
-  ///     order of application.
+  /// - Parameter modifiers: A collection of types conforming to `HTTPRequestModifier`. Their order determines application order.
+  /// - Returns: A new `URLRequest` instance that reflects all applied modifications.
+  /// - Note: The `session` parameter is passed as `nil`. If a modifier requires session context, it should handle the absence of a session appropriately.
   ///
-  /// - Returns: A new `URLRequest` instance that has been modified by
-  ///   every element in the collection.
-  ///
-  /// - Note: The `for` argument of each modifier is passed as `nil`
-  ///   because the modifiers in this context do not require a
-  ///   `URLSession`.  If a modifier needs the session, it should ignore
-  ///   this argument or provide its own default behaviour.
-  ///
-  func apply(_ modifiers: any Collection<any HTTPRequestModifier>) async throws -> Self {
+  func apply(_ modifiers: some Sequence<any HTTPRequestModifier>) async throws -> Self {
     var updatedRequest = self
     for modifier in modifiers {
       try await modifier.modify(&updatedRequest, for: nil)
@@ -36,3 +25,4 @@ public extension URLRequest {
     return updatedRequest
   }
 }
+
