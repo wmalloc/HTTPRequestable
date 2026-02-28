@@ -103,14 +103,14 @@ public extension HTTPServerTrustEvaluating {
   ///   - `.certificatesDoNotMatch` if none of the public keys match
   func evaluate(trust: SecTrust, certificates: Set<SecCertificate>) throws(TrustError) {
     logger.trace("[IN]: \(#function)")
-    
+
     guard let trustCertificates = trust.certificates else {
       throw .certificateNotFound
     }
 
     let certificateKeys = Set(certificates.publicKeysData)
     let trustCertificateKeys = Set(trustCertificates.publicKeysData)
-    
+
     // Validate that at least one public key matches
     guard !trustCertificateKeys.isDisjoint(with: certificateKeys) else {
       throw .certificatesDoNotMatch

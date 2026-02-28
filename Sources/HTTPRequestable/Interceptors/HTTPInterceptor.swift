@@ -27,7 +27,7 @@ public protocol HTTPInterceptor: Sendable {
    Intercepts an outgoing HTTP request, allowing modification, observation, or short-circuiting of the request before it continues through the interceptor chain.
 
    Use this method to inspect or alter the outgoing request (including headers or body if represented within `HTTPRequest`), provide a custom response, or perform asynchronous work before delegating to the next interceptor.
-   
+
    - Parameters:
      - request: The `HTTPRequest` representing the outbound HTTP request to be sent.
      - next: A closure for invoking the next interceptor or performing the actual network operation. Call this with (potentially modified) arguments to continue the chain.

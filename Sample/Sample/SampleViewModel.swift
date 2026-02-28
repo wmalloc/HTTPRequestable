@@ -12,6 +12,19 @@ import SwiftUI
 @Observable
 class SampleViewModel {
   @MainActor var items: [Item] = []
+  @MainActor
+  var searchText: String = ""
+
+  @MainActor
+  var filteredItems: [Item] {
+    guard !searchText.isEmpty else {
+      return items
+    }
+
+    return items.filter { item in
+      item.title.contains(searchText)
+    }
+  }
 
   func loadTopStories() {
     Task {
