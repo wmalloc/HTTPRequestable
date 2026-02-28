@@ -10,12 +10,6 @@ import HTTPTypes
 import OSLog
 import UniformTypeIdentifiers
 
-#if DEBUG
-private let logger = Logger(.init(subsystem: "com.waqarmalik.HTTPRequestable", category: "MultipartForm"))
-#else
-private let logger = Logger(.disabled)
-#endif
-
 /// https://datatracker.ietf.org/doc/html/rfc7578
 open class MultipartForm: AnyMultipartFormBodyPart {
   public static let encodingMemoryThreshold: UInt64 = 10000000
@@ -42,19 +36,16 @@ open class MultipartForm: AnyMultipartFormBodyPart {
   }
 
   public func append(stream: InputStream, withLength length: UInt64, headers: [HTTPField]) {
-    logger.trace("[IN]: \(#function)")
     let bodyPart = MultipartFormBodyPart(headers: headers, bodyStream: stream, contentLength: length)
     bodyParts.append(bodyPart)
   }
 
   public func append(stream: InputStream, withLength length: UInt64, name: String, fileName: String, mimeType: String) {
-    logger.trace("[IN]: \(#function)")
     let headers = contentHeaders(withName: name, fileName: fileName, mimeType: mimeType)
     append(stream: stream, withLength: length, headers: headers)
   }
 
   public func append(data: Data, withName name: String, fileName: String? = nil, mimeType: String? = nil) {
-    logger.trace("[IN]: \(#function)")
     let headers = contentHeaders(withName: name, fileName: fileName, mimeType: mimeType)
     let stream = InputStream(data: data)
     let length = UInt64(data.count)
@@ -62,7 +53,6 @@ open class MultipartForm: AnyMultipartFormBodyPart {
   }
 
   public func append(fileURL: URL, withName name: String) throws {
-    logger.trace("[IN]: \(#function)")
     let fileName = fileURL.lastPathComponent
     let pathExtension = fileURL.pathExtension
 
@@ -75,7 +65,6 @@ open class MultipartForm: AnyMultipartFormBodyPart {
   }
 
   public func append(fileURL: URL, withName name: String, fileName: String, mimeType: String) throws {
-    logger.trace("[IN]: \(#function)")
     let headers = contentHeaders(withName: name, fileName: fileName, mimeType: mimeType)
 
     guard fileURL.isFileURL else {
@@ -102,7 +91,6 @@ open class MultipartForm: AnyMultipartFormBodyPart {
   }
 
   public func data(streamBufferSize: Int) throws -> Data {
-    logger.trace("[IN]: \(#function)")
     headers.append(HTTPField(name: .contentLength, value: String(contentLength)))
     var encoded = Data()
     encoded.append(encodedHeadersData)
@@ -118,7 +106,6 @@ open class MultipartForm: AnyMultipartFormBodyPart {
   }
 
   public func write(encodedDataTo fileURL: URL, streamBufferSize: Int) throws {
-    logger.trace("[IN]: \(#function)")
     if fileManager.fileExists(atPath: fileURL.path) {
       throw MultipartFormError.fileAlreadyExists(fileURL)
     }
@@ -149,7 +136,6 @@ open class MultipartForm: AnyMultipartFormBodyPart {
 
 extension MultipartForm {
   func contentHeaders(withName name: String, fileName: String? = nil, mimeType: String? = nil) -> [HTTPField] {
-    logger.trace("[IN]: \(#function)")
     var disposition = KeyedItem(item: HTTPContentType.formData.rawValue, parameters: ["name": name])
     if let fileName {
       disposition["filename"] = fileName
@@ -166,7 +152,6 @@ extension MultipartForm {
 
 extension MultipartForm {
   static func mimeType(forPathExtension pathExtension: String) -> String {
-    logger.trace("[IN]: \(#function)")
     if let id = UTType(filenameExtension: pathExtension), let contentType = id.preferredMIMEType {
       return contentType
     }

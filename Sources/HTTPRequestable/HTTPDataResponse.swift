@@ -119,18 +119,19 @@ public extension HTTPDataResponse {
   /// - Returns: Self if the content type is acceptable.
   @discardableResult
   func validateContentTypes(_ acceptableContentTypes: some Sequence<HTTPContentType>) throws -> Self {
+    // Wildcard accepts anything
     if acceptableContentTypes.contains(HTTPContentType.any) {
       return self
     }
 
-    // if the server did not set the content type then throw a bad server response
+    // Ensure the server provided a content type
     guard let contentTypes = response.contentTypes else {
       throw HTTPError.contentTypeHeaderMissing
     }
 
+    // Check if any of the response content types match the acceptable types
     let acceptable = Set(acceptableContentTypes)
-    let isDisjoint = contentTypes.isDisjoint(with: acceptable)
-    guard isDisjoint else {
+    guard !contentTypes.isDisjoint(with: acceptable) else {
       throw HTTPError.invalidContentType
     }
 
@@ -160,11 +161,7 @@ public extension HTTPDataResponse {
   ///   * ``URLError(.cannotDecodeContentData)`` – if no transformer was provided.
   ///   * ``URLError(.zeroByteResource)`` – if the response contained no data.
   ///   * Any error thrown by `transformer`.
-  func transformed<ResultType>(using transformer: Transformer<Data, ResultType>?) throws -> ResultType {
-    guard let transformer else {
-      throw URLError(.cannotDecodeContentData)
-    }
-
+  func transformed<ResultType>(using transformer: Transformer<Data, ResultType>) throws -> ResultType {
     guard !data.isEmpty else {
       throw URLError(.zeroByteResource)
     }

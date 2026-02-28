@@ -16,8 +16,8 @@ public extension HTTPRequestConfigurable {
   ///   for headers that support multiple values (e.g., `Set-Cookie`).
   /// - Returns: A new instance of `Self` with the updated `headerFields`.
   /// - Note: If the receiver currently has no `headerFields`, a new `HTTPFields` collection is created.
-  /// - SeeAlso: `set(headerField:)` for replacing the value of a header field.
-  func append(headerField field: HTTPField) -> Self {
+  /// - SeeAlso: `setHeaderField()` for replacing the value of a header field.
+  func appendHeaderField(_ field: HTTPField) -> Self {
     var fields = headerFields ?? HTTPFields()
     fields.append(field)
     var updated = self
@@ -31,8 +31,8 @@ public extension HTTPRequestConfigurable {
   ///   its value is replaced with the provided field's value; otherwise, the header is added.
   /// - Returns: A new instance of `Self` with the updated `headerFields`.
   /// - Note: If the receiver currently has no `headerFields`, a new `HTTPFields` collection is created.
-  /// - SeeAlso: `append(headerField:)` to add another instance of a header without replacing existing values.
-  func set(headerField field: HTTPField) -> Self {
+  /// - SeeAlso: `appendHeaderField()` to add another instance of a header without replacing existing values.
+  func setHeaderField(_ field: HTTPField) -> Self {
     var fields = headerFields ?? HTTPFields()
     fields[field.name] = field.value
     var updated = self
@@ -49,8 +49,8 @@ public extension HTTPRequestConfigurable {
   /// - Note: If the receiver currently has no `queryItems`, a new array is created and the item is added.
   /// - SeeAlso: Consider providing an overload to append multiple query items for batch updates.
   @inlinable
-  func append(queryItem: URLQueryItem) -> Self {
-    append(queryItems: [queryItem])
+  func appendQueryItem(_ queryItem: URLQueryItem) -> Self {
+    appendQueryItems([queryItem])
   }
 
   /// Appends a single URL query item to the request’s existing query items, preserving any existing items.
@@ -59,7 +59,7 @@ public extension HTTPRequestConfigurable {
   /// - Returns: A new instance of `Self` with the updated `queryItems` array.
   /// - Note: If the receiver currently has no `queryItems`, a new array is created and the item is added.
   /// - SeeAlso: Consider providing an overload to append multiple query items for batch updates.
-  func append(queryItems newItems: [URLQueryItem]) -> Self {
+  func appendQueryItems(_ newItems: [URLQueryItem]) -> Self {
     var queryItems = queryItems ?? []
     queryItems.append(contentsOf: newItems)
     var updated = self
