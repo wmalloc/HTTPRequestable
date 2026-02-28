@@ -52,6 +52,14 @@ public protocol HTTPTransportable {
   /// - SeeAlso: `HTTPRequestConfigurable`, `HTTPDataResponse`, `URLSessionTaskDelegate`
   func performRequest(_ request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
+  /// Convenience method to upload data using an `HTTPRequestConvertible`, creates and resumes a `URLSessionUploadTask` internally.
+  /// - Parameters:
+  ///   - request: The `HTTPRequestConvertible` for which to upload data.
+  ///   - bodyData: Data to upload.
+  ///   - delegate: Task-specific delegate. defaults to nil
+  /// - Returns: Data and response.
+  func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
+
   /// Uploads a file to the server as part of an HTTP request asynchronously.
   ///
   /// This method sends the specified `HTTPRequestConvertible` object to a server and waits for the response, including file data. The request can

@@ -11,8 +11,10 @@ struct ContentView: View {
   @Environment(SampleViewModel.self) var viewModel: SampleViewModel
 
   var body: some View {
+    @Bindable var model = viewModel
+
     NavigationStack {
-      List(viewModel.items) { item in
+      List(viewModel.filteredItems) { item in
         ItemDetailView(item: item)
       }
       .listStyle(.plain)
@@ -20,6 +22,7 @@ struct ContentView: View {
       .navigationTitle(Text("Hacker News"))
       .navigationBarTitleDisplayMode(.inline)
       .toolbar(.visible, for: .navigationBar)
+      .searchable(text: $model.searchText, placement: .automatic, prompt: Text("Filter by title"))
       .refreshable {
         viewModel.loadTopStories()
       }
