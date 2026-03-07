@@ -8,7 +8,6 @@ import Foundation
 @testable import HTTPRequestable // Replace with actual module name if different
 import Testing
 
-@Suite("HTTPContentType")
 struct HTTPContentTypeTests {
   @Test("Initializes and trims whitespace")
   func initTrimsWhitespace() {

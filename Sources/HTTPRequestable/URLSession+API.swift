@@ -147,7 +147,7 @@ extension URLSession: HTTPTransportable {
    - returns: Transformed Object
    */
   public func object<R: HTTPRequestConfigurable>(for request: R, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> R.ResultType {
-    return try await performRequest(request, delegate: delegate)
+    try await performRequest(request, delegate: delegate)
       .transformed(using: request.responseDataTransformer)
   }
 }

@@ -9,7 +9,6 @@ import Foundation
 @testable import HTTPRequestable
 import Testing
 
-@Suite("HTTPFieldValues tests")
 struct HTTPFieldValuesTests {
   @Test("KeyedItem form-data encoding")
   func keyedItemFormData() {
