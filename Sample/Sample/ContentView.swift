@@ -8,11 +8,9 @@ import SwiftUI
 import WebKit
 
 struct ContentView: View {
-  @Environment(SampleViewModel.self) var viewModel: SampleViewModel
+  @Bindable var viewModel = SampleViewModel()
 
   var body: some View {
-    @Bindable var model = viewModel
-
     NavigationStack {
       List(viewModel.filteredItems) { item in
         if let url = item.url {
@@ -33,11 +31,8 @@ struct ContentView: View {
       .navigationBarTitleDisplayMode(.inline)
       .toolbar(.visible, for: .navigationBar)
       .toolbarBackground(Color.red)
-      .searchable(text: $model.searchText, placement: .automatic, prompt: Text("Filter by title"))
+      .searchable(text: $viewModel.searchText, placement: .automatic, prompt: Text("Filter by title"))
       .refreshable {
-        viewModel.loadTopStories()
-      }
-      .onAppear {
         viewModel.loadTopStories()
       }
     }
