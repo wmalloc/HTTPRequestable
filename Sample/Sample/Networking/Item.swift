@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Item: Codable, Hashable, Sendable, Identifiable {
+struct Item: Codable, Hashable, Identifiable {
   let id: Int
   let by: String
   let descendants: Int?

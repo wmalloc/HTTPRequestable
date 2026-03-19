@@ -23,7 +23,7 @@ open class MultipartFormBodyPart: AnyMultipartFormBodyPart {
   public let contentLength: UInt64
 
   public init(headers: [HTTPField], bodyStream: InputStream, contentLength: UInt64) {
-     self.headers = headers
+    self.headers = headers
     self.bodyStream = bodyStream
     self.contentLength = contentLength
   }
@@ -126,4 +126,3 @@ extension MultipartFormBodyPart {
     }
   }
 }
-

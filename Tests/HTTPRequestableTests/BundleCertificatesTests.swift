@@ -15,7 +15,7 @@ import Foundation
 final class BundleCertificatesTests: XCTestCase {
   /// Test certificateExtensions static property
   func testCertificateExtensions() {
-    let expected: Set<String> = [".cer", ".CER", ".crt", ".CRT", ".der", ".DER"]
+    let expected: Set = [".cer", ".CER", ".crt", ".CRT", ".der", ".DER"]
     XCTAssertEqual(Bundle.certificateExtensions, expected)
   }
 
