@@ -8,7 +8,6 @@
 import HTTPTypes
 import Testing
 
-@Suite("HTTPRequestable")
 struct HTTPRequestableTests {
   @Test
   func defaultHeaders() {

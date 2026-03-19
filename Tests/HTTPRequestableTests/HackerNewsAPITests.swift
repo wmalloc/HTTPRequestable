@@ -9,7 +9,6 @@ extension HTTPURLResponse {
   }
 }
 
-@Suite("HackerNews API Tests")
 struct HackerNewsAPITests {
   private var api: HackerNews = {
     let configuration = URLSessionConfiguration.ephemeral

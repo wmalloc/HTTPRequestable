@@ -10,7 +10,6 @@ import Foundation
 import MockURLProtocol
 import Testing
 
-@Suite("MultiformDataTests")
 struct MultiformDataTests {
   @Test func testBoundary() {
     let boundary = UUID().uuidString

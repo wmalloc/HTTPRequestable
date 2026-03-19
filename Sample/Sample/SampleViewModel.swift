@@ -12,8 +12,11 @@ import SwiftUI
 @Observable
 class SampleViewModel {
   @MainActor var items: [Item] = []
-  @MainActor
-  var searchText: String = ""
+  @MainActor var searchText: String = ""
+
+  init() {
+    loadTopStories()
+  }
 
   @MainActor
   var filteredItems: [Item] {

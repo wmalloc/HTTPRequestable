@@ -10,7 +10,7 @@ import Foundation
 import HTTPTypes
 import Testing
 
-@Suite("HTTPHeadersTests") struct HTTPHeadersTests {
+struct HTTPHeadersTests {
   static var baseURLString: String {
     "https://api.github.com"
   }
