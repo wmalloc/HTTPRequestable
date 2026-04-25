@@ -33,7 +33,7 @@ public protocol HTTPTransportable {
   ///
   /// This method is designed to be called from an asynchronous context (`async/await`)
   /// and will automatically propagate any networking errors up the call chain.
-  func performRequest(_ request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
+  func performRequest(_ request: HTTPRequest, httpBody body: Data?, retryPolicy: RetryPolicy?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
   /// Fetches the data for a given HTTP request using an asynchronous task.
   ///

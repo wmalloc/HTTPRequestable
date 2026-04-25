@@ -42,13 +42,33 @@ extension URLSession {
 }
 
 extension URLSession: HTTPTransportable {
-  public func performRequest(_ request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
-    let (data, response) = if let body {
-      try await upload(for: request, from: body, delegate: delegate)
-    } else {
-      try await data(for: request, delegate: delegate)
+  public func performRequest(_ request: HTTPRequest, httpBody body: Data? = nil, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+    var attempt = 0
+    var lastError: Error?
+    
+    while true {
+      do {
+        let (data, response) = if let body {
+          try await upload(for: request, from: body, delegate: delegate)
+        } else {
+          try await data(for: request, delegate: delegate)
+        }
+        return HTTPDataResponse(request: request, response: response, data: data)
+      } catch {
+        lastError = error
+        
+        // Check if we should retry
+        guard let retryPolicy, retryPolicy.shouldRetry(error: error, attempt: attempt) else {
+          throw error
+        }
+        
+        // Calculate delay and wait before retrying
+        let delay = retryPolicy.delay(for: attempt)
+        try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+        
+        attempt += 1
+      }
     }
-    return HTTPDataResponse(request: request, response: response, data: data)
   }
 
   /// Request data from server
@@ -57,7 +77,7 @@ extension URLSession: HTTPTransportable {
   ///   - delegate: Delegate to handle the request
   /// - Returns: Data, and HTTPResponse
   public func performRequest(_ request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
-    try await performRequest(request.httpRequest, httpBody: request.httpBody, delegate: delegate)
+    try await performRequest(request.httpRequest, httpBody: request.httpBody, retryPolicy: request.retryPolicy, delegate: delegate)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConvertible`; creates and resumes a `URLSessionUploadTask` internally.

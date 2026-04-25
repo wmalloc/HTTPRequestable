@@ -105,9 +105,9 @@ public extension HTTPTransferable {
   ///   - httpBody: httpbody, defaults to nil
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
-  func performRequest(_ request: HTTPRequest, httpBody body: Data?, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+  func performRequest(_ request: HTTPRequest, httpBody body: Data?, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     let next: HTTPInterceptor.NextHandler = {
-      try await self.session.performRequest($0, httpBody: body, delegate: $1)
+      try await self.session.performRequest($0, httpBody: body, retryPolicy: retryPolicy, delegate: $1)
     }
     return try await performRequest(request, next: next, delegate: delegate)
   }
