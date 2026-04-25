@@ -12,7 +12,7 @@ import HTTPTypes
 ///
 /// The trace ID is generated per modification using the provided generator (defaults to `UUID().uuidString`)
 /// and is attached to the request as an HTTP header (defaults to `X-Trace-Id`).
-struct TraceRequestModifier: HTTPRequestModifier {
+struct TraceRequestModifier {
   /// The HTTP header field to set for the trace identifier.
   let headerField: HTTPField.Name
 
@@ -27,7 +27,14 @@ struct TraceRequestModifier: HTTPRequestModifier {
     self.headerField = headerField
     self.idGenerator = idGenerator
   }
+}
 
+extension TraceRequestModifier {
+  /// A convenience default instance that uses the `X-Trace-Id` header and UUIDs.
+  static let `default` = TraceRequestModifier()
+}
+
+extension TraceRequestModifier: HTTPRequestModifier {
   func modify(_ request: inout HTTPRequest, for session: URLSession?) async throws {
     let traceID = idGenerator()
     request.headerFields[headerField] = traceID
@@ -37,9 +44,4 @@ struct TraceRequestModifier: HTTPRequestModifier {
     let traceID = idGenerator()
     request.addValue(traceID, forHTTPField: headerField)
   }
-}
-
-extension TraceRequestModifier {
-  /// A convenience default instance that uses the `X-Trace-Id` header and UUIDs.
-  static let `default` = TraceRequestModifier()
 }

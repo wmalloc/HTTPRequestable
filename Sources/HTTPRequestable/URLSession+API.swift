@@ -28,7 +28,8 @@ extension URLSession {
   /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
-  func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.NextHandler, interceptors: any Collection<any HTTPInterceptor> = [],
+  func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.NextHandler,
+                      interceptors: some Sequence<any HTTPInterceptor> = [],
                       delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     var next = interceptor
     for interceptor in interceptors.reversed() {
@@ -42,10 +43,11 @@ extension URLSession {
 }
 
 extension URLSession: HTTPTransportable {
-  public func performRequest(_ request: HTTPRequest, httpBody body: Data? = nil, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+  public func performRequest(_ request: HTTPRequest, httpBody body: Data? = nil, retryPolicy: RetryPolicy? = nil,
+                             delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     var attempt = 0
     var lastError: Error?
-    
+
     while true {
       do {
         let (data, response) = if let body {
@@ -56,16 +58,16 @@ extension URLSession: HTTPTransportable {
         return HTTPDataResponse(request: request, response: response, data: data)
       } catch {
         lastError = error
-        
+
         // Check if we should retry
         guard let retryPolicy, retryPolicy.shouldRetry(error: error, attempt: attempt) else {
           throw error
         }
-        
+
         // Calculate delay and wait before retrying
         let delay = retryPolicy.delay(for: attempt)
-        try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-        
+        try await Task.sleep(nanoseconds: UInt64(delay * 1000000000))
+
         attempt += 1
       }
     }
