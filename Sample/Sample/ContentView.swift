@@ -15,14 +15,12 @@ struct ContentView: View {
       List(viewModel.filteredItems) { item in
         if let url = item.url {
           NavigationLink {
-            WebView(url: url)
-              .navigationTitle(item.title)
-              .toolbarBackground(Color.red)
+            ItemWebView(url: url)
           } label: {
-            ItemDetailView(item: item)
+            ListItemView(item: item)
           }
         } else {
-          ItemDetailView(item: item)
+          ListItemView(item: item)
         }
       }
       .listStyle(.plain)
