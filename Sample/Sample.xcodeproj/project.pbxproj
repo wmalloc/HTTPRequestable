@@ -21,6 +21,8 @@
 		47C302232C8D458E00C2EC97 /* SampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C302222C8D458E00C2EC97 /* SampleTests.swift */; };
 		47C3022D2C8D458E00C2EC97 /* SampleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C3022C2C8D458E00C2EC97 /* SampleUITests.swift */; };
 		47C3022F2C8D458E00C2EC97 /* SampleUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C3022E2C8D458E00C2EC97 /* SampleUITestsLaunchTests.swift */; };
+		47DAC1BF2F9D720900CF10A5 /* HTTPField.Name+Trace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47DAC1BE2F9D720900CF10A5 /* HTTPField.Name+Trace.swift */; };
+		47DAC1C12F9D722D00CF10A5 /* TraceRequestModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47DAC1C02F9D722D00CF10A5 /* TraceRequestModifier.swift */; };
 		47E2CC572E725F25009A434D /* ServerTrustEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E2CC562E725F25009A434D /* ServerTrustEvaluator.swift */; };
 /* End PBXBuildFile section */
 
@@ -59,6 +61,8 @@
 		47C302282C8D458E00C2EC97 /* SampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		47C3022C2C8D458E00C2EC97 /* SampleUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleUITests.swift; sourceTree = "<group>"; };
 		47C3022E2C8D458E00C2EC97 /* SampleUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		47DAC1BE2F9D720900CF10A5 /* HTTPField.Name+Trace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HTTPField.Name+Trace.swift"; sourceTree = "<group>"; };
+		47DAC1C02F9D722D00CF10A5 /* TraceRequestModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraceRequestModifier.swift; sourceTree = "<group>"; };
 		47E2CC562E725F25009A434D /* ServerTrustEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerTrustEvaluator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -106,6 +110,8 @@
 				473EBFB22C8D46F4004FB1B2 /* HackerNews.swift */,
 				473EBFB42C8D473B004FB1B2 /* StoryListRequest.swift */,
 				473EBFB62C8D4811004FB1B2 /* ItemRequest.swift */,
+				47DAC1BE2F9D720900CF10A5 /* HTTPField.Name+Trace.swift */,
+				47DAC1C02F9D722D00CF10A5 /* TraceRequestModifier.swift */,
 				473B4F622C8D4B390038409E /* Item.swift */,
 			);
 			path = Networking;
@@ -357,6 +363,8 @@
 				47636CC92F90921B00529A0F /* ItemWebView.swift in Sources */,
 				47636CC72F90911B00529A0F /* ListItemView.swift in Sources */,
 				473EBFB32C8D46F4004FB1B2 /* HackerNews.swift in Sources */,
+				47DAC1BF2F9D720900CF10A5 /* HTTPField.Name+Trace.swift in Sources */,
+				47DAC1C12F9D722D00CF10A5 /* TraceRequestModifier.swift in Sources */,
 				473EBFB72C8D4811004FB1B2 /* ItemRequest.swift in Sources */,
 				47C302142C8D458D00C2EC97 /* ContentView.swift in Sources */,
 				473B4F652C8D4BA50038409E /* SampleViewModel.swift in Sources */,

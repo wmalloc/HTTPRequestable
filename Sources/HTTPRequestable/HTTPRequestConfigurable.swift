@@ -58,7 +58,7 @@ public protocol HTTPRequestConfigurable: URLConvertible, URLRequestConvertible, 
   /// - Returns: A closure that converts `Data` to `ResultType`, or `nil` if
   ///   no transformation is needed.
   var responseDataTransformer: Transformer<Data, ResultType> { get }
-  
+
   /// Retry policy for handling failed requests.
   ///
   /// This property allows each request to define its own retry behavior.
@@ -107,7 +107,7 @@ public extension HTTPRequestConfigurable {
   var httpBody: Data? {
     nil
   }
-  
+
   @inlinable
   var retryPolicy: RetryPolicy? {
     nil
