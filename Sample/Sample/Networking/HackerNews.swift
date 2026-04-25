@@ -29,6 +29,8 @@ final class HackerNews: HTTPTransferable {
     requestModifiers.append(HTTPRequestHeadersModifier.defaultHeaderModifier)
     let modifier = HTTPRequestHeadersModifier(fields: [.accept(.json), .contentType(.json)])
     requestModifiers.append(modifier)
+    let traceModifier = TraceRequestModifier.default
+    requestModifiers.append(traceModifier)
   }
 }
 
