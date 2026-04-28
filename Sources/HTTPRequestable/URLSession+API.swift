@@ -46,8 +46,7 @@ extension URLSession: HTTPTransportable {
   public func performRequest(_ request: HTTPRequest, httpBody body: Data? = nil, retryPolicy: RetryPolicy? = nil,
                              delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     var attempt = 0
-    var lastError: Error?
-
+ 
     while true {
       do {
         let (data, response) = if let body {
@@ -57,8 +56,6 @@ extension URLSession: HTTPTransportable {
         }
         return HTTPDataResponse(request: request, response: response, data: data)
       } catch {
-        lastError = error
-
         // Check if we should retry
         guard let retryPolicy, retryPolicy.shouldRetry(error: error, attempt: attempt) else {
           throw error
@@ -66,7 +63,7 @@ extension URLSession: HTTPTransportable {
 
         // Calculate delay and wait before retrying
         let delay = retryPolicy.delay(for: attempt)
-        try await Task.sleep(nanoseconds: UInt64(delay * 1000000000))
+        try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
 
         attempt += 1
       }
