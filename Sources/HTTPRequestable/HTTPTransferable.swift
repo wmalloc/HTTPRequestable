@@ -59,6 +59,27 @@ public protocol HTTPTransferable: HTTPTransportable {
   ///   order they appear.  The default implementation can simply
   ///   return an empty array.
   var interceptors: [any HTTPInterceptor] { get async }
+  
+  /// Retry policy for handling failed requests.
+  ///
+  /// This property allows each request to define its own retry behavior.
+  /// By default, requests do not retry (returns `nil`). Override this property
+  /// to provide a custom retry policy with exponential backoff for handling
+  /// transient network failures.
+  ///
+  /// ## Example
+  ///
+  /// ```swift
+  /// struct UserRequest: HTTPRequestConfigurable {
+  ///     // Custom retry policy for this specific request
+  ///     var retryPolicy: RetryPolicy? {
+  ///         RetryPolicy(maxRetries: 5, initialDelay: 0.5, multiplier: 2.0)
+  ///     }
+  /// }
+  /// ```
+  ///
+  /// - Returns: A `RetryPolicy` instance, or `nil` to disable retries.
+  var retryPolicy: RetryPolicy? { get }
 }
 
 /// Default implementations of the protocol
@@ -99,6 +120,10 @@ extension HTTPTransferable {
 
 /// Default implementations of the protocol
 public extension HTTPTransferable {
+  var retryPolicy: RetryPolicy? {
+    nil
+  }
+  
   /// Send the request and get the raw data back
   /// - Parameters:
   ///   - request: The `HTTPRequest` for which to load data.
@@ -107,7 +132,7 @@ public extension HTTPTransferable {
   /// - Returns: Data and response.
   func performRequest(_ request: HTTPRequest, httpBody body: Data?, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     let next: HTTPInterceptor.NextHandler = {
-      try await self.session.performRequest($0, httpBody: body, retryPolicy: retryPolicy, delegate: $1)
+      try await self.session.performRequest($0, httpBody: body, retryPolicy: retryPolicy ?? self.retryPolicy, delegate: $1)
     }
     return try await performRequest(request, next: next, delegate: delegate)
   }

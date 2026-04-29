@@ -76,7 +76,7 @@ extension URLSession: HTTPTransportable {
   ///   - delegate: Delegate to handle the request
   /// - Returns: Data, and HTTPResponse
   public func performRequest(_ request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
-    try await performRequest(request.httpRequest, httpBody: request.httpBody, retryPolicy: request.retryPolicy, delegate: delegate)
+    try await performRequest(request.httpRequest, httpBody: request.httpBody, retryPolicy: nil, delegate: delegate)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConvertible`; creates and resumes a `URLSessionUploadTask` internally.

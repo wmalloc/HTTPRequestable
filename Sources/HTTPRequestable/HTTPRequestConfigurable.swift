@@ -58,27 +58,6 @@ public protocol HTTPRequestConfigurable: URLConvertible, URLRequestConvertible, 
   /// - Returns: A closure that converts `Data` to `ResultType`, or `nil` if
   ///   no transformation is needed.
   var responseDataTransformer: Transformer<Data, ResultType> { get }
-
-  /// Retry policy for handling failed requests.
-  ///
-  /// This property allows each request to define its own retry behavior.
-  /// By default, requests do not retry (returns `nil`). Override this property
-  /// to provide a custom retry policy with exponential backoff for handling
-  /// transient network failures.
-  ///
-  /// ## Example
-  ///
-  /// ```swift
-  /// struct UserRequest: HTTPRequestConfigurable {
-  ///     // Custom retry policy for this specific request
-  ///     var retryPolicy: RetryPolicy? {
-  ///         RetryPolicy(maxRetries: 5, initialDelay: 0.5, multiplier: 2.0)
-  ///     }
-  /// }
-  /// ```
-  ///
-  /// - Returns: A `RetryPolicy` instance, or `nil` to disable retries.
-  var retryPolicy: RetryPolicy? { get }
 }
 
 /// Default implementation
@@ -107,12 +86,7 @@ public extension HTTPRequestConfigurable {
   var httpBody: Data? {
     nil
   }
-
-  @inlinable
-  var retryPolicy: RetryPolicy? {
-    nil
-  }
-
+  
   /// URLConvertible
   /// Note: Path segments from `environment.path` and `path` are split on `/`, empty segments are removed,
   /// and the result is joined with a single leading `/`.
