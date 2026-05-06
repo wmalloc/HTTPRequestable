@@ -1,7 +1,6 @@
 //
 //  HTTPTransferable.swift
 //
-//
 //  Created by Waqar Malik on 11/17/23
 //
 
@@ -59,7 +58,7 @@ public protocol HTTPTransferable: HTTPTransportable {
   ///   order they appear.  The default implementation can simply
   ///   return an empty array.
   var interceptors: [any HTTPInterceptor] { get async }
-  
+
   /// Retry policy for handling failed requests.
   ///
   /// This property allows each request to define its own retry behavior.
@@ -67,34 +66,18 @@ public protocol HTTPTransferable: HTTPTransportable {
   /// to provide a custom retry policy with exponential backoff for handling
   /// transient network failures.
   ///
-  /// ## Example
-  ///
-  /// ```swift
-  /// struct UserRequest: HTTPRequestConfigurable {
-  ///     // Custom retry policy for this specific request
-  ///     var retryPolicy: RetryPolicy? {
-  ///         RetryPolicy(maxRetries: 5, initialDelay: 0.5, multiplier: 2.0)
-  ///     }
-  /// }
-  /// ```
-  ///
   /// - Returns: A `RetryPolicy` instance, or `nil` to disable retries.
   var retryPolicy: RetryPolicy? { get }
 }
 
+extension HTTPTransferable {
+  var retryPolicy: RetryPolicy? {
+    nil
+  }
+}
+
 /// Default implementations of the protocol
 extension HTTPTransferable {
-  /// Request to sent to server
-  /// - Parameter request: Description of the request
-  /// - Returns: request to be sent to server
-  func httpRequest(_ request: some HTTPRequestConvertible) async throws -> HTTPRequest {
-    var updatedRequest = try request.httpRequest
-    for modifier in await requestModifiers {
-      try await modifier.modify(&updatedRequest, for: session)
-    }
-    return updatedRequest
-  }
-
   /// Sends the given HTTP request through the provided interceptor chain and returns the resulting response.
   ///
   /// This method applies the registered interceptors to the provided request in reverse order, wrapping each one around the provided `interceptor` closure.
@@ -120,30 +103,29 @@ extension HTTPTransferable {
 
 /// Default implementations of the protocol
 public extension HTTPTransferable {
-  var retryPolicy: RetryPolicy? {
-    nil
-  }
-  
   /// Send the request and get the raw data back
   /// - Parameters:
   ///   - request: The `HTTPRequest` for which to load data.
   ///   - httpBody: httpbody, defaults to nil
+  ///   - retryPolicy: how to retry, defaults to nil
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
   func performRequest(_ request: HTTPRequest, httpBody body: Data?, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+    let modifiedRequest = try await request.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
       try await self.session.performRequest($0, httpBody: body, retryPolicy: retryPolicy ?? self.retryPolicy, delegate: $1)
     }
-    return try await performRequest(request, next: next, delegate: delegate)
+    return try await performRequest(modifiedRequest, next: next, delegate: delegate)
   }
 
   /// Send the request and get the raw data back
   /// - Parameters:
   ///   - request: The `HTTPRequestConfigurable` for which to load data.
+  ///   - retryPolicy: how to retry, defaults to nil
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
-  func performRequest(_ request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
-    try await performRequest(httpRequest(request), httpBody: request.httpBody, delegate: delegate)
+  func performRequest(_ request: some HTTPRequestConfigurable, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+    try await performRequest(request.httpRequest, httpBody: request.httpBody, retryPolicy: retryPolicy, delegate: delegate)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConvertible`; creates and resumes a `URLSessionUploadTask` internally.
@@ -153,7 +135,7 @@ public extension HTTPTransferable {
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
   func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
-    let updatedRequest = try await httpRequest(request)
+    let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
       let (data, response) = try await self.session.upload(for: $0, fromFile: fileURL, delegate: $1)
       return HTTPDataResponse(request: $0, response: response, data: data)
@@ -168,7 +150,7 @@ public extension HTTPTransferable {
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
   func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
-    let updatedRequest = try await httpRequest(request)
+    let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
       let (data, response) = try await self.session.upload(for: $0, from: bodyData, delegate: $1)
       return HTTPDataResponse(request: $0, response: response, data: data)
@@ -215,7 +197,7 @@ public extension HTTPTransferable {
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
   func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
-    let updatedRequest = try await httpRequest(request)
+    let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
       let (url, response) = try await self.session.download(for: $0, delegate: $1)
       return HTTPDataResponse(request: $0, response: response, data: Data(), fileURL: url)

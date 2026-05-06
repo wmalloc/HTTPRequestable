@@ -17,7 +17,7 @@ struct TraceRequestModifier {
   let headerField: HTTPField.Name
 
   /// A closure that generates a new trace identifier string for each request.
-  let idGenerator: @Sendable () -> String
+  let generator: @Sendable () -> String
 
   /// Creates a new trace request modifier.
   /// - Parameters:
@@ -25,7 +25,7 @@ struct TraceRequestModifier {
   ///   - idGenerator: A closure used to generate a trace ID per request. Default generates a UUID string.
   init(headerField: HTTPField.Name = .xTraceId, idGenerator: @escaping @Sendable () -> String = { UUID().uuidString }) {
     self.headerField = headerField
-    self.idGenerator = idGenerator
+    self.generator = idGenerator
   }
 }
 
@@ -36,12 +36,12 @@ extension TraceRequestModifier {
 
 extension TraceRequestModifier: HTTPRequestModifier {
   func modify(_ request: inout HTTPRequest, for session: URLSession?) async throws {
-    let traceID = idGenerator()
+    let traceID = generator()
     request.headerFields[headerField] = traceID
   }
 
   func modify(_ request: inout URLRequest, for session: URLSession?) async throws {
-    let traceID = idGenerator()
+    let traceID = generator()
     request.addValue(traceID, forHTTPField: headerField)
   }
 }

@@ -86,7 +86,7 @@ public extension HTTPRequestConfigurable {
   var httpBody: Data? {
     nil
   }
-  
+
   /// URLConvertible
   /// Note: Path segments from `environment.path` and `path` are split on `/`, empty segments are removed,
   /// and the result is joined with a single leading `/`.

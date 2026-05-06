@@ -50,7 +50,7 @@ public protocol HTTPTransportable {
   /// - Note: The `HTTPDataResponse` type can be defined by your application to encapsulate the response data and related information.
   ///
   /// - SeeAlso: `HTTPRequestConfigurable`, `HTTPDataResponse`, `URLSessionTaskDelegate`
-  func performRequest(_ request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
+  func performRequest(_ request: some HTTPRequestConfigurable, retryPolicy: RetryPolicy?, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse
 
   /// Convenience method to upload data using an `HTTPRequestConvertible`, creates and resumes a `URLSessionUploadTask` internally.
   /// - Parameters:

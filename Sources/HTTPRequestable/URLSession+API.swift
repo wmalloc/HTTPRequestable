@@ -46,7 +46,7 @@ extension URLSession: HTTPTransportable {
   public func performRequest(_ request: HTTPRequest, httpBody body: Data? = nil, retryPolicy: RetryPolicy? = nil,
                              delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
     var attempt = 0
- 
+
     while true {
       do {
         let (data, response) = if let body {
@@ -63,7 +63,7 @@ extension URLSession: HTTPTransportable {
 
         // Calculate delay and wait before retrying
         let delay = retryPolicy.delay(for: attempt)
-        try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+        try await Task.sleep(nanoseconds: UInt64(delay * 1000000000))
 
         attempt += 1
       }
@@ -75,8 +75,8 @@ extension URLSession: HTTPTransportable {
   ///   - request:  Request where to get the data from
   ///   - delegate: Delegate to handle the request
   /// - Returns: Data, and HTTPResponse
-  public func performRequest(_ request: some HTTPRequestConfigurable, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
-    try await performRequest(request.httpRequest, httpBody: request.httpBody, retryPolicy: nil, delegate: delegate)
+  public func performRequest(_ request: some HTTPRequestConfigurable, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+    try await performRequest(request.httpRequest, httpBody: request.httpBody, retryPolicy: retryPolicy, delegate: delegate)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConvertible`; creates and resumes a `URLSessionUploadTask` internally.
