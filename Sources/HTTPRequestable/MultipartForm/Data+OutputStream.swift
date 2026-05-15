@@ -20,10 +20,13 @@ extension Data {
   static func write(buffer: inout [UInt8], to outputStream: OutputStream) throws {
     var bytesToWrite = buffer.count
 
-    while bytesToWrite > 0, outputStream.hasSpaceAvailable {
+    while bytesToWrite > 0 {
       let bytesWritten = outputStream.write(buffer, maxLength: bytesToWrite)
       if let error = outputStream.streamError {
         throw MultipartFormError.outputStreamWriteFailed(error)
+      }
+      if bytesWritten <= 0 {
+        throw MultipartFormError.outputStreamWriteFailed(NSError(domain: NSURLErrorDomain, code: NSURLErrorUnknown))
       }
       bytesToWrite -= bytesWritten
       if bytesToWrite > 0 {

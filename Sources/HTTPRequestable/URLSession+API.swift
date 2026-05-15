@@ -21,16 +21,16 @@ extension URLSession {
   ///   - next: The terminal closure that is called to perform the actual network operation. This closure receives the (potentially modified)
   ///   - interceptors: A collection of`HTTPInterceptor` that allows customization of the request and response behavior. If not provided, empty array.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
-  /// request and returns an `HTTPDataResponse` asynchronously. Interceptors can call this closure to forward the request and receive the response.
+  /// request and returns an `HTTPResponseEnvelope` asynchronously. Interceptors can call this closure to forward the request and receive the response.
   ///
-  /// - Returns: An `HTTPDataResponse` containing the data and metadata received from the server after all interceptors have been applied.
+  /// - Returns: An `HTTPResponseEnvelope` containing the data and metadata received from the server after all interceptors have been applied.
   ///
   /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
   func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.NextHandler,
                       interceptors: some Sequence<any HTTPInterceptor> = [],
-                      delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+                      delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
     var next = interceptor
     for interceptor in interceptors.reversed() {
       let _next = next
@@ -44,7 +44,7 @@ extension URLSession {
 
 extension URLSession: HTTPTransportable {
   public func performRequest(_ request: HTTPRequest, httpBody body: Data? = nil, retryPolicy: RetryPolicy? = nil,
-                             delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+                             delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
     var attempt = 0
 
     while true {
@@ -54,7 +54,7 @@ extension URLSession: HTTPTransportable {
         } else {
           try await data(for: request, delegate: delegate)
         }
-        return HTTPDataResponse(request: request, response: response, data: data)
+        return HTTPResponseEnvelope(request: request, response: response, data: data)
       } catch {
         // Check if we should retry
         guard let retryPolicy, retryPolicy.shouldRetry(error: error, attempt: attempt) else {
@@ -75,7 +75,7 @@ extension URLSession: HTTPTransportable {
   ///   - request:  Request where to get the data from
   ///   - delegate: Delegate to handle the request
   /// - Returns: Data, and HTTPResponse
-  public func performRequest(_ request: some HTTPRequestConfigurable, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+  public func performRequest(_ request: some HTTPRequestConfigurable, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
     try await performRequest(request.httpRequest, httpBody: request.httpBody, retryPolicy: retryPolicy, delegate: delegate)
   }
 
@@ -85,10 +85,10 @@ extension URLSession: HTTPTransportable {
   ///   - fileURL: File to upload.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  public func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+  public func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
     let updateRequest = try request.httpRequest
     let (data, response) = try await upload(for: updateRequest, fromFile: fileURL, delegate: delegate)
-    return HTTPDataResponse(request: updateRequest, response: response, data: data)
+    return HTTPResponseEnvelope(request: updateRequest, response: response, data: data)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConvertible`, creates and resumes a `URLSessionUploadTask` internally.
@@ -97,10 +97,10 @@ extension URLSession: HTTPTransportable {
   ///   - bodyData: Data to upload.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  public func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+  public func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
     let updateRequest = try request.httpRequest
     let (data, response) = try await upload(for: updateRequest, from: bodyData, delegate: delegate)
-    return HTTPDataResponse(request: updateRequest, response: response, data: data)
+    return HTTPResponseEnvelope(request: updateRequest, response: response, data: data)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConfigurable`, creates and resumes a `URLSessionUploadTask` internally.
@@ -109,13 +109,11 @@ extension URLSession: HTTPTransportable {
   ///   - multipartForm: Data to upload in multipart form.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Data and response.
-  public func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+  public func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
     let contentType = multipartForm.contentType
-    let contentLength = multipartForm.contentLength
-    let updatedRequest = request.appendHeaderField(HTTPField(name: .contentLength, value: "\(contentLength)"))
-      .appendHeaderField(HTTPField(name: .contentType, value: contentType.encoded))
+    let updatedRequest = request.appendHeaderField(HTTPField(name: .contentType, value: contentType.encoded))
 
-    if contentLength <= MultipartForm.encodingMemoryThreshold {
+    if multipartForm.contentLength <= MultipartForm.encodingMemoryThreshold {
       // if we have enough memory to store data
       let data = try multipartForm.data(streamBufferSize: multipartForm.streamBufferSize)
       return try await upload(for: updatedRequest, from: data, delegate: delegate)
@@ -141,10 +139,10 @@ extension URLSession: HTTPTransportable {
   ///   - request: The `HTTPRequestConvertible` for which to download.
   ///   - delegate: Task-specific delegate.
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
-  public func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPDataResponse {
+  public func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
     let updateRequest = try request.httpRequest
     let (url, response) = try await download(for: updateRequest, delegate: delegate)
-    return HTTPDataResponse(request: updateRequest, response: response, data: Data(), fileURL: url)
+    return HTTPResponseEnvelope(request: updateRequest, response: response, fileURL: url)
   }
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.
@@ -158,7 +156,7 @@ extension URLSession: HTTPTransportable {
   }
 
   /**
-   Make a request call and return decoded data as decoded by the transformer, this requesst must return data
+   Make a request call and return decoded data as decoded by the transformer, this request must return data
 
    - Parameters:
      - request: Request where to get the data from

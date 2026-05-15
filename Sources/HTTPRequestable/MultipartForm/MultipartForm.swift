@@ -91,9 +91,7 @@ open class MultipartForm: AnyMultipartFormBodyPart {
   }
 
   public func data(streamBufferSize: Int) throws -> Data {
-    headers.append(HTTPField(name: .contentLength, value: String(contentLength)))
     var encoded = Data()
-    encoded.append(encodedHeadersData)
     encoded.append(boundary.initialBoundaryData)
     for (index, bodyPart) in bodyParts.enumerated() {
       if index > 0 {
@@ -144,7 +142,7 @@ extension MultipartForm {
     var fields: [HTTPField] = []
     fields.append(.contentDisposition(disposition.encoded))
     if let mimeType {
-      fields.append(HTTPField.contentType(mimeType + String.crlf))
+      fields.append(HTTPField.contentType(mimeType))
     }
     return fields
   }
