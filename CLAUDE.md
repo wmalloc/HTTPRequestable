@@ -58,7 +58,7 @@ HTTPRequestConfigurable (define)
 | Type | Role |
 |---|---|
 | `HTTPEnvironment` | Typealias for `URLComponents`; base URL builder |
-| `HTTPResponseEnvelope` | Wraps request + HTTPResponse + data + optional fileURL |
+| `HTTPClientResponse` | Wraps request + HTTPResponse + data + optional fileURL |
 | `HTTPError` | error cases (invalidURL, cannotCreateURLRequest, contentType, unacceptableStatusCode, etc.) |
 | `RetryPolicy` | Exponential backoff: `maxRetries`, `initialDelay`, `multiplier` — lives on `HTTPTransferable` |
 | `HTTPRequestModifier` | Pre-request middleware (mutates `HTTPRequest`/`URLRequest`) |

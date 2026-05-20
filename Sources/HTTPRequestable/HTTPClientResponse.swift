@@ -1,15 +1,16 @@
 //
-//  HTTPResponseEnvelope.swift
+//  HTTPClientResponse.swift
 //  HTTPRequestable
 //
 //  Created by Waqar Malik on 12/14/24.
 //  Renamed from HTTPDataResponse on 2026-05-14.
+//  Renamed from HTTPClientResponse on 2026-05-19.
 //
 
 import Foundation
 import HTTPTypes
 
-public struct HTTPResponseEnvelope: Sendable {
+public struct HTTPClientResponse: Sendable {
   /// Payload returned by the server.
   public enum Body: Sendable {
     /// An in-memory response body.
@@ -46,7 +47,7 @@ public struct HTTPResponseEnvelope: Sendable {
   }
 }
 
-public extension HTTPResponseEnvelope {
+public extension HTTPClientResponse {
   /// In-memory payload, when the body is `.data`. Empty otherwise.
   var data: Data {
     if case .data(let data) = body { return data }
@@ -170,7 +171,7 @@ public extension HTTPResponseEnvelope {
   }
 }
 
-public extension HTTPResponseEnvelope {
+public extension HTTPClientResponse {
   /// Transforms the response body with the supplied transformer.
   ///
   /// The bytes are taken from `.data` when the body is in memory, or read from

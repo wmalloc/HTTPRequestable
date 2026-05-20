@@ -88,14 +88,14 @@ extension HTTPTransferable {
   ///   - request: The `HTTPRequest` to send through the interceptor chain.
   ///   - next: The terminal closure that is called to perform the actual network operation. This closure receives the (potentially modified)
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
-  /// request and returns an `HTTPResponseEnvelope` asynchronously. Interceptors can call this closure to forward the request and receive the response.
+  /// request and returns an `HTTPClientResponse` asynchronously. Interceptors can call this closure to forward the request and receive the response.
   ///
-  /// - Returns: An `HTTPResponseEnvelope` containing the data and metadata received from the server after all interceptors have been applied.
+  /// - Returns: An `HTTPClientResponse` containing the data and metadata received from the server after all interceptors have been applied.
   ///
   /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
   ///
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
-  func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.NextHandler, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
+  func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.NextHandler, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let chain = await interceptors
     return try await session.performRequest(request, next: interceptor, interceptors: chain, delegate: delegate)
   }
@@ -110,7 +110,7 @@ public extension HTTPTransferable {
   ///   - retryPolicy: how to retry, defaults to nil
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
-  func performRequest(_ request: HTTPRequest, httpBody body: Data?, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
+  func performRequest(_ request: HTTPRequest, httpBody body: Data?, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let modifiedRequest = try await request.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
       try await self.session.performRequest($0, httpBody: body, retryPolicy: retryPolicy ?? self.retryPolicy, delegate: $1)
@@ -124,7 +124,7 @@ public extension HTTPTransferable {
   ///   - retryPolicy: how to retry, defaults to nil
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
-  func performRequest(_ request: some HTTPRequestConfigurable, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
+  func performRequest(_ request: some HTTPRequestConfigurable, retryPolicy: RetryPolicy? = nil, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     try await performRequest(request.httpRequest, httpBody: request.httpBody, retryPolicy: retryPolicy, delegate: delegate)
   }
 
@@ -134,11 +134,11 @@ public extension HTTPTransferable {
   ///   - fileURL: File to upload.
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
-  func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
+  func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
       let (data, response) = try await self.session.upload(for: $0, fromFile: fileURL, delegate: $1)
-      return HTTPResponseEnvelope(request: $0, response: response, data: data)
+      return HTTPClientResponse(request: $0, response: response, data: data)
     }
     return try await performRequest(updatedRequest, next: next, delegate: delegate)
   }
@@ -149,11 +149,11 @@ public extension HTTPTransferable {
   ///   - bodyData: Data to upload.
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
-  func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
+  func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
       let (data, response) = try await self.session.upload(for: $0, from: bodyData, delegate: $1)
-      return HTTPResponseEnvelope(request: $0, response: response, data: data)
+      return HTTPClientResponse(request: $0, response: response, data: data)
     }
     return try await performRequest(updatedRequest, next: next, delegate: delegate)
   }
@@ -164,7 +164,7 @@ public extension HTTPTransferable {
   ///   - multipartForm: Data to upload.
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data and response.
-  func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
+  func upload(for request: some HTTPRequestConfigurable, multipartForm: MultipartForm, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let contentType = multipartForm.contentType
     let updatedRequest = request.appendHeaderField(HTTPField(name: .contentType, value: contentType.encoded))
 
@@ -194,11 +194,11 @@ public extension HTTPTransferable {
   ///   - request: The `HTTPRequestConvertible` for which to download.
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
-  func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPResponseEnvelope {
+  func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
       let (url, response) = try await self.session.download(for: $0, delegate: $1)
-      return HTTPResponseEnvelope(request: $0, response: response, fileURL: url)
+      return HTTPClientResponse(request: $0, response: response, fileURL: url)
     }
     return try await performRequest(updatedRequest, next: next, delegate: delegate)
   }
