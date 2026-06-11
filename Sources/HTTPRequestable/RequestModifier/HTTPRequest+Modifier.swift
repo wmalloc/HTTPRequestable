@@ -27,4 +27,3 @@ public extension HTTPRequest {
     return updatedRequest
   }
 }
-

@@ -2,8 +2,8 @@
 //  BundleCertificatesTests.swift
 //
 
-@testable import HTTPRequestable
 import Foundation
+@testable import HTTPRequestable
 #if canImport(Security)
 import Security
 #endif

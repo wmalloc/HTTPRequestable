@@ -117,20 +117,19 @@ extension URLSession: HTTPTransportable {
       // if we have enough memory to store data
       let data = try multipartForm.data(streamBufferSize: multipartForm.streamBufferSize)
       return try await upload(for: updatedRequest, from: data, delegate: delegate)
-    } else {
-      // write the data to file and upload the file
-      let fileManager = multipartForm.fileManager
-      let fileURL = try fileManager.tempFile()
-      do {
-        try multipartForm.write(encodedDataTo: fileURL, streamBufferSize: multipartForm.streamBufferSize)
-        let result = try await upload(for: updatedRequest, fromFile: fileURL, delegate: delegate)
-        try? fileManager.removeItem(at: fileURL)
-        return result
-      } catch {
-        // Cleanup after attempted write if it fails.
-        try? fileManager.removeItem(at: fileURL)
-        throw error
-      }
+    }
+    // write the data to file and upload the file
+    let fileManager = multipartForm.fileManager
+    let fileURL = try fileManager.tempFile()
+    do {
+      try multipartForm.write(encodedDataTo: fileURL, streamBufferSize: multipartForm.streamBufferSize)
+      let result = try await upload(for: updatedRequest, fromFile: fileURL, delegate: delegate)
+      try? fileManager.removeItem(at: fileURL)
+      return result
+    } catch {
+      // Cleanup after attempted write if it fails.
+      try? fileManager.removeItem(at: fileURL)
+      throw error
     }
   }
 

@@ -189,8 +189,10 @@ public extension HTTPClientResponse {
     switch body {
     case .data(let data):
       payload = data
+
     case .file(let url):
       payload = try Data(contentsOf: url, options: .mappedIfSafe)
+
     case .empty:
       throw URLError(.zeroByteResource)
     }
