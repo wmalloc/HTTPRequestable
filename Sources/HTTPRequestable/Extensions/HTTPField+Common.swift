@@ -20,7 +20,7 @@ public extension HTTPField {
   /// - Parameter value: An instance of `HTTPContentType` representing the desired MIME types to accept.
   /// - Returns: An `HTTPField` instance with name `Accept` and the provided content type value as a string.
   static func accept(_ value: HTTPContentType) -> Self {
-    .init(name: .accept, value: value.rawValue)
+    .init(name: .accept, contentType: value)
   }
 
   /// Creates an `HTTPField` instance representing the `Accept-Language` header field with a raw string value.
@@ -62,7 +62,7 @@ public extension HTTPField {
   /// - Parameter value: An instance of `HTTPContentType` representing the MIME type of the content.
   /// - Returns: An `HTTPField` instance with name `Content-Type` and the provided content type value as a string.
   static func contentType(_ value: HTTPContentType) -> Self {
-    contentType(value.rawValue)
+    .init(name: .contentType, contentType: value)
   }
 
   /// Creates an `HTTPField` instance representing the `User-Agent` header field with a raw string value.

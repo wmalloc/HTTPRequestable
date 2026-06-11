@@ -26,9 +26,6 @@ final class HackerNews: HTTPTransferable {
 
   nonisolated init(session: URLSession = .shared) {
     self.session = session
-    let logger = LoggerInterceptor()
-    requestModifiers.append(logger)
-    interceptors.append(logger)
   }
 }
 
