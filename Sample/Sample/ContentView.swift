@@ -29,6 +29,20 @@ struct ContentView: View {
       .navigationBarTitleDisplayMode(.inline)
       .toolbar(.visible, for: .navigationBar)
       .toolbarBackground(Color.red)
+      .safeAreaInset(edge: .top, spacing: 0) {
+        Picker("Story Type", selection: $viewModel.storyType) {
+          ForEach(StoryType.allCases) { type in
+            Text(type.title).tag(type)
+          }
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(.bar)
+      }
+      .onChange(of: viewModel.storyType) {
+        viewModel.loadTopStories()
+      }
       .searchable(text: $viewModel.searchText, placement: .automatic, prompt: Text("Filter by title"))
       .refreshable {
         viewModel.loadTopStories()
