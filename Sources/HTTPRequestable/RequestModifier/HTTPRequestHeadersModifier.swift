@@ -56,7 +56,7 @@ public final class HTTPRequestHeadersModifier: HTTPRequestModifier, @unchecked S
   ///     the modifier.
   ///   - replaceExisting: When `true`, fields already present on the
   ///     request are overwritten.  Defaults to `false`.
-  public init(fields: any Collection<HTTPField>, replaceExisting: Bool = false) {
+  public init(fields: some Sequence<HTTPField>, replaceExisting: Bool = false) {
     self.headerFields = HTTPFields(fields)
     self.replaceExisting = replaceExisting
   }
@@ -93,6 +93,7 @@ public final class HTTPRequestHeadersModifier: HTTPRequestModifier, @unchecked S
   ///   - request: The `HTTPRequest` to modify.  It is mutated in‑place.
   ///   - session: The `URLSession` used for the request.  It is not
   ///     consulted by this modifier, but the signature matches the protocol.
+  /// - Throws: Rethrows errors from asynchronous operations if any.
   public func modify(_ request: inout HTTPRequest, for session: URLSession?) async throws {
     for field in headerFields {
       if replaceExisting || request.headerFields[field.name] == nil {
@@ -112,6 +113,7 @@ public final class HTTPRequestHeadersModifier: HTTPRequestModifier, @unchecked S
   ///   - request: The `URLRequest` to modify.  It is mutated in‑place.
   ///   - session: The `URLSession` used for the request.  This modifier
   ///     does not use it, but the signature must conform to the protocol.
+  /// - Throws: Rethrows errors from asynchronous operations if any.
   public func modify(_ request: inout URLRequest, for session: URLSession?) async throws {
     for field in headerFields {
       if replaceExisting || request.value(forHTTPField: field.name) == nil {
@@ -121,8 +123,40 @@ public final class HTTPRequestHeadersModifier: HTTPRequestModifier, @unchecked S
   }
 }
 
+extension HTTPRequestHeadersModifier: ExpressibleByArrayLiteral {
+  /// Creates a modifier from an array literal of `HTTPField` instances.
+  ///
+  /// The `replaceExisting` flag is set to `true` by default,
+  /// meaning existing headers will be overwritten.
+  ///
+  /// - Parameter elements: An array of `HTTPField` elements.
+  public convenience init(arrayLiteral elements: HTTPField...) {
+    self.init(fields: Array(elements), replaceExisting: true)
+  }
+}
+
+extension HTTPRequestHeadersModifier: ExpressibleByDictionaryLiteral {
+  /// Creates a modifier from a dictionary literal of header names and values.
+  ///
+  /// Keys are validated as header field names. Invalid keys are ignored.
+  /// The `replaceExisting` flag is set to `true` by default.
+  ///
+  /// - Parameter elements: A variadic list of `(String, String)` pairs.
+  public convenience init(dictionaryLiteral elements: (String, String)...) {
+    let fields: [HTTPField] = elements.compactMap { item in
+      guard let name = HTTPField.Name(item.0) else { return nil }
+      return .init(name: name, value: item.1)
+    }
+    self.init(fields: fields, replaceExisting: true)
+  }
+}
+
 public extension HTTPRequestHeadersModifier {
-  /// Default instance with standard headers
+  /// Default instance with standard headers.
+  ///
+  /// This instance uses `HTTPFields.defaultHeaders` as its header fields,
+  /// which typically includes common headers such as `User-Agent`,
+  /// `Accept-Encoding`, and `Accept-Language`.
   static var defaultHeaderModifier: HTTPRequestHeadersModifier {
     HTTPRequestHeadersModifier(headerFields: .defaultHeaders)
   }

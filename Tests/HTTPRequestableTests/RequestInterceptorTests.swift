@@ -20,12 +20,12 @@ struct RequestInterceptorTests {
 
   @Test func modifyHTTPRequest() async throws {
     let request = try StoryListRequest(hackerNews.environment, storyType: "topstories")
-    var httpRequst = try request.httpRequest
-    #expect(httpRequst.url?.absoluteString == "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
-    #expect(httpRequst.method == .get)
+    var httpRequest = try request.httpRequest
+    #expect(httpRequest.url?.absoluteString == "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
+    #expect(httpRequest.method == .get)
     let modifier = AddContentTypeModifier()
-    try await modifier.modify(&httpRequst, for: nil)
-    #expect(httpRequst.headerFields[.contentType] == HTTPContentType.json.rawValue)
+    try await modifier.modify(&httpRequest, for: nil)
+    #expect(httpRequest.headerFields[.contentType] == HTTPContentType.json.rawValue)
   }
 
   @Test func modifyURLRequest() async throws {
@@ -42,15 +42,14 @@ struct RequestInterceptorTests {
     var storage = [any HTTPRequestModifier]()
     #expect(storage.isEmpty)
     storage.append(OSLogInterceptor())
-    #expect(!storage.isEmpty)
     #expect(storage.count == 1)
     storage.remove(at: 0)
-    #expect(storage.isEmpty)
     #expect(storage.isEmpty)
     storage.append(OSLogInterceptor())
     storage.append(LoggerInterceptor())
     #expect(storage.count == 2)
     storage.append(AddContentTypeModifier())
+    #expect(storage.count == 3)
   }
 
   final class AddContentTypeModifier: HTTPRequestModifier {
@@ -58,8 +57,8 @@ struct RequestInterceptorTests {
       request.headerFields.append(HTTPField(name: .contentType, value: "application/json"))
     }
 
-    func modify(_ reqeust: inout URLRequest, for session: URLSession?) async throws {
-      reqeust.setValue(HTTPContentType.jsonUTF8.rawValue, forHTTPField: .contentType)
+    func modify(_ request: inout URLRequest, for session: URLSession?) async throws {
+      request.setValue(HTTPContentType.jsonUTF8.rawValue, forHTTPField: .contentType)
     }
   }
 }

@@ -94,8 +94,8 @@ extension LoggerInterceptor: HTTPInterceptor {
   ///   - request: The `HTTPRequest` to intercept.
   ///   - next: The next interceptor in the chain.
   ///   - delegate: An optional `URL` session task delegate.
-  /// - Returns: The intercepted `HTTPDataResponse`.
-  public func intercept(_ request: HTTPRequest, next: @escaping NextHandler, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPDataResponse {
+  /// - Returns: The intercepted `HTTPClientResponse`.
+  public func intercept(_ request: HTTPRequest, next: @escaping NextHandler, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPClientResponse {
     let response = try await next(request, delegate)
     log(request: request, data: nil)
     log(response: response.response, data: response.data, fileURL: response.fileURL, error: response.error)

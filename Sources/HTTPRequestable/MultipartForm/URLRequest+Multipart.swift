@@ -12,6 +12,5 @@ public extension URLRequest {
   @discardableResult
   func setMultipartFormData(_ multipartForm: MultipartForm) throws -> Self {
     try setHttpBody(multipartForm.data(streamBufferSize: multipartForm.streamBufferSize), contentType: multipartForm.contentType.encoded)
-      .setHeader(HTTPField(name: .contentLength, value: "\(multipartForm.contentLength)"))
   }
 }

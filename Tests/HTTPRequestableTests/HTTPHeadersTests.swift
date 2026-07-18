@@ -58,7 +58,7 @@ struct HTTPHeadersTests {
     var request = try URLRequest(url: #require(URL(string: "https://api.github.com")))
       .setMethod(.get)
     #expect(request.allHTTPHeaderFields != nil)
-    #expect(request.allHTTPHeaderFields?.count == 0)
+    #expect(request.allHTTPHeaderFields?.isEmpty == true)
     request = request.setUserAgent(String.url_userAgent)
     #expect(request.allHTTPHeaderFields?.count == 1)
 

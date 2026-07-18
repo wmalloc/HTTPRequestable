@@ -68,7 +68,7 @@ final class HackerNews: HTTPTransferable, @unchecked Sendable {
 }
 ```
 
-### To defineing a request
+### To define a request
 
 ```swift
 struct StoryListRequest: HTTPRequestConfigurable {

@@ -5,7 +5,7 @@
 //
 
 import Foundation
-@testable import HTTPRequestable // Replace with actual module name if different
+@testable import HTTPRequestable
 import Testing
 
 struct HTTPContentTypeTests {
