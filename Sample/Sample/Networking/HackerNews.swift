@@ -24,6 +24,8 @@ final class HackerNews: HTTPTransferable {
   private(set) var environment: HTTPEnvironment = .init(authority: "hacker-news.firebaseio.com", path: "/v0")
   let session: URLSession
 
+  let retryPolicy: RetryPolicy? = RetryPolicy()
+
   nonisolated init() {
     self.session = URLSession(configuration: .default, delegate: nil, delegateQueue: nil)
     requestModifiers.append(HTTPRequestHeadersModifier.defaultHeaderModifier)
