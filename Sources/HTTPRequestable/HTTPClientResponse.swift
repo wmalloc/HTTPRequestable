@@ -1,52 +1,77 @@
 //
-//  HTTPDataResponse.swift
+//  HTTPClientResponse.swift
 //  HTTPRequestable
 //
 //  Created by Waqar Malik on 12/14/24.
+//  Renamed from HTTPDataResponse on 2026-05-14.
+//  Renamed from HTTPClientResponse on 2026-05-19.
 //
 
 import Foundation
 import HTTPTypes
 
-@frozen
-public struct HTTPDataResponse: Hashable {
-  /// Request that was sent to the server
+public struct HTTPClientResponse: Sendable {
+  /// Payload returned by the server.
+  public enum Body: Sendable {
+    /// An in-memory response body.
+    case data(Data)
+    /// A response written to disk (e.g. by `URLSessionDownloadTask`).
+    case file(URL)
+    /// No body was returned.
+    case empty
+  }
+
+  /// Request that was sent to the server.
   public let request: HTTPRequest
 
-  /// Response from the server
+  /// Response received from the server.
   public let response: HTTPResponse
 
-  /// Data returned from the call can be nil if the url was returned
-  public var data: Data
+  /// The response payload, modelled as one of: in-memory data, an on-disk file, or empty.
+  public let body: Body
 
-  /// file url where the item was downloaded
-  public var fileURL: URL?
-
-  /// Default initalizer
-  /// - Parameters:
-  ///   - request: The request that was sent to server
-  ///   - response: http response from the server
-  ///   - data: data if url was not the response
-  ///   - fileURL: fileurl if downloading the file
-  public init(request: HTTPRequest, response: HTTPResponse, data: Data, fileURL: URL? = nil) {
+  public init(request: HTTPRequest, response: HTTPResponse, body: Body) {
     self.request = request
     self.response = response
-    self.data = data
-    self.fileURL = fileURL
+    self.body = body
+  }
+
+  /// Convenience for an in-memory response.
+  public init(request: HTTPRequest, response: HTTPResponse, data: Data) {
+    self.init(request: request, response: response, body: data.isEmpty ? .empty : .data(data))
+  }
+
+  /// Convenience for a download response.
+  public init(request: HTTPRequest, response: HTTPResponse, fileURL: URL) {
+    self.init(request: request, response: response, body: .file(fileURL))
   }
 }
 
-public extension HTTPDataResponse {
+public extension HTTPClientResponse {
+  /// In-memory payload, when the body is `.data`. Empty otherwise.
+  var data: Data {
+    if case .data(let data) = body { return data }
+    return Data()
+  }
+
+  /// On-disk payload location, when the body is `.file`.
+  var fileURL: URL? {
+    if case .file(let url) = body { return url }
+    return nil
+  }
+
   /// The response header fields.
   @inlinable
   var headerFields: HTTPFields {
     response.headerFields
   }
 
-  /// The response headers.
-  var headers: [String: String] {
+  /// The response headers as a multi-value dictionary.
+  ///
+  /// Multiple values for the same header name (e.g. `Set-Cookie`) are preserved.
+  var headers: [String: [String]] {
     response.headerFields.reduce(into: [:]) { partialResult, field in
-      partialResult[field.name.rawName] = field.value
+      partialResult[field.name.rawName, default: []].append(field.value)
     }
   }
 
@@ -68,10 +93,12 @@ public extension HTTPDataResponse {
     response.status.kind == .successful
   }
 
-  /// return data from the file url if it exists
-  var fileData: Data? {
+  /// Reads the downloaded payload from disk when the body is `.file`.
+  /// - Returns: The file contents, or `nil` when the body is not a file.
+  /// - Throws: Any error raised by `Data(contentsOf:options:)` (e.g. file missing, permissions).
+  func fileData() throws -> Data? {
     guard let fileURL else { return nil }
-    return try? Data(contentsOf: fileURL, options: .mappedIfSafe)
+    return try Data(contentsOf: fileURL, options: .mappedIfSafe)
   }
 
   /// Validates the response and then returns itself.
@@ -82,25 +109,22 @@ public extension HTTPDataResponse {
   /// otherwise the same instance (`self`) is returned so callers can chain
   /// further operations.
   ///
-  /// The `@discardableResult` attribute keeps the compiler quiet if the caller
-  /// doesn’t need the returned value (e.g., when just performing validation).
-  ///
-  /// - Throws: An error from either ``validateStatus()`` or
-  ///   ``validateContentType(_:)``.
+  /// - Throws: An error from either ``validateStatus()`` or ``validateContentTypes(_:)-(some)``.
   /// - Returns: `self`, allowing method chaining.
   @discardableResult
   func validate() throws -> Self {
     try validateStatus()
-      .validateContentTypes(acceptContentType)
+    try validateContentTypes(acceptContentType)
+    return self
   }
 
   /// Validates the result for a given status code.
   /// - Returns: Self if the status code indicates success.
+  /// - Throws: ``HTTPError/unacceptableStatusCode(_:)`` when the status is not in the successful range.
   @discardableResult
   func validateStatus() throws -> Self {
     if response.status.kind != .successful {
-      let errorCode = URLError.Code(rawValue: response.status.code)
-      throw URLError(errorCode)
+      throw HTTPError.unacceptableStatusCode(response.status)
     }
     return self
   }
@@ -138,34 +162,45 @@ public extension HTTPDataResponse {
     return self
   }
 
-  /// The set of MIME types this response accepts.
+  /// The set of MIME types this response will accept.
   ///
-  /// Returns the value stored in ``HTTPRequest/acceptContentTypes`` or an empty
-  /// set when the request (or that property) is unavailable.
+  /// Returns the value stored in ``HTTPRequest/acceptContentTypes`` or `[.any]`
+  /// (the wildcard, accepting everything) when the request does not specify one.
   var acceptContentType: Set<HTTPContentType> {
     request.acceptContentTypes ?? [HTTPContentType.any]
   }
 }
 
-public extension HTTPDataResponse {
-  /// Transforms the underlying data with the supplied transformer.
+public extension HTTPClientResponse {
+  /// Transforms the response body with the supplied transformer.
   ///
-  /// This method is intentionally *non‑async* because the transformation itself
-  /// operates purely on memory (e.g. JSON decoding).  If you need an async
-  /// variant, consider wrapping this call in a `Task` or providing an async
-  /// overload that forwards to an asynchronous transformer.
+  /// The bytes are taken from `.data` when the body is in memory, or read from
+  /// disk via ``fileData()`` when the body is `.file`. An `.empty` body throws
+  /// `URLError(.zeroByteResource)`.
   ///
   /// - Parameter transformer: The closure used to convert raw `Data` into the desired type.
   /// - Returns: The result of applying `transformer` to the response body.
   /// - Throws:
-  ///   * ``URLError(.cannotDecodeContentData)`` – if no transformer was provided.
-  ///   * ``URLError(.zeroByteResource)`` – if the response contained no data.
+  ///   * `URLError(.zeroByteResource)` when the body is empty.
+  ///   * Any error raised while reading a `.file` body from disk.
   ///   * Any error thrown by `transformer`.
   func transformed<ResultType>(using transformer: Transformer<Data, ResultType>) throws -> ResultType {
-    guard !data.isEmpty else {
+    let payload: Data
+    switch body {
+    case .data(let data):
+      payload = data
+
+    case .file(let url):
+      payload = try Data(contentsOf: url, options: .mappedIfSafe)
+
+    case .empty:
       throw URLError(.zeroByteResource)
     }
 
-    return try transformer(data)
+    guard !payload.isEmpty else {
+      throw URLError(.zeroByteResource)
+    }
+
+    return try transformer(payload)
   }
 }

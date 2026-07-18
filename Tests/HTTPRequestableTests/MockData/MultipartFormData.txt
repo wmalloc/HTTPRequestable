@@ -1,6 +1,3 @@
-Content-Type: multipart/form-data; boundary=109AF0987D004171B0A8481D6401B62D
-Content-Length: 97
-
 --109AF0987D004171B0A8481D6401B62D
 Content-Disposition: form-data; name="Profile"
 Content-Type: application/json

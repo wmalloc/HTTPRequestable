@@ -71,6 +71,16 @@
         }
       }
     },
+    "error_unacceptable_status_code" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unacceptable HTTP status code: %d"
+          }
+        }
+      }
+    },
     "multipart_error_access_denined" : {
       "localizations" : {
         "en" : {

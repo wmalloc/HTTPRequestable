@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import HTTPTypes
 
 /// An enumeration representing different HTTP-related errors that may occur.
-public enum HTTPError: LocalizedError {
+public enum HTTPError: LocalizedError, Sendable {
   /// Thrown when an invalid URL is provided.
   case invalidURL
 
@@ -29,6 +30,9 @@ public enum HTTPError: LocalizedError {
 
   /// Thrown when header value is missing
   case headerValueMissing(String)
+
+  /// Thrown when the response status is not in the successful range.
+  case unacceptableStatusCode(HTTPResponse.Status)
 
   public var errorDescription: String? {
     description
@@ -58,6 +62,9 @@ extension HTTPError: CustomStringConvertible {
 
     case .headerValueMissing(let header):
       String(format: String(localized: "error_header_value_missing", bundle: .module), header)
+
+    case .unacceptableStatusCode(let status):
+      String(format: String(localized: "error_unacceptable_status_code", bundle: .module), status.code)
     }
   }
 }
