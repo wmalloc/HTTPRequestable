@@ -99,7 +99,7 @@ extension OSLogInterceptor: HTTPInterceptor {
   public func intercept(_ request: HTTPRequest, next: @escaping NextHandler, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPClientResponse {
     let response = try await next(request, delegate)
     log(request: request, data: nil)
-    log(response: response.response, data: response.data, fileURL: response.fileURL, error: response.error)
+    log(response: response.response, data: response.responseData, fileURL: response.responseFileURL, error: response.error)
     return response
   }
 }

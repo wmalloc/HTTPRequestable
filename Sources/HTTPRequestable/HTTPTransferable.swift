@@ -141,7 +141,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
       let (data, response) = try await self.session.upload(for: $0, fromFile: fileURL, delegate: $1)
-      return HTTPClientResponse(request: $0, response: response, data: data)
+      return HTTPClientResponse(request: $0, requestBody: .file(fileURL), response: response, responseData: data)
     }
     return try await performRequest(updatedRequest, next: next, delegate: delegate)
   }
@@ -156,7 +156,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
       let (data, response) = try await self.session.upload(for: $0, from: bodyData, delegate: $1)
-      return HTTPClientResponse(request: $0, response: response, data: data)
+      return HTTPClientResponse(request: $0, requestBody: .data(bodyData), response: response, responseData: data)
     }
     return try await performRequest(updatedRequest, next: next, delegate: delegate)
   }
@@ -200,7 +200,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
       let (url, response) = try await self.session.download(for: $0, delegate: $1)
-      return HTTPClientResponse(request: $0, response: response, fileURL: url)
+      return HTTPClientResponse(request: $0, response: response, responseFileURL: url)
     }
     return try await performRequest(updatedRequest, next: next, delegate: delegate)
   }

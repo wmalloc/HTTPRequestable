@@ -12,54 +12,61 @@ public import Foundation
 import HTTPTypes
 
 public struct HTTPClientResponse: Sendable {
-  /// Payload returned by the server.
+  /// An HTTP message payload.
   public enum Body: Sendable {
-    /// An in-memory response body.
+    /// An in-memory body.
     case data(Data)
-    /// A response written to disk (e.g. by `URLSessionDownloadTask`).
+    /// A body stored on disk (e.g. a `URLSessionDownloadTask` result or an uploaded file).
     case file(URL)
-    /// No body was returned.
+    /// No body.
     case empty
   }
 
   /// Request that was sent to the server.
   public let request: HTTPRequest
 
+  /// The payload that was sent with the request, or `.empty` when the request had no body.
+  ///
+  /// For file uploads this is `.file`; note the referenced file may have been a
+  /// temporary one (e.g. large multipart forms) and might no longer exist.
+  public let requestBody: Body
+
   /// Response received from the server.
   public let response: HTTPResponse
 
   /// The response payload, modelled as one of: in-memory data, an on-disk file, or empty.
-  public let body: Body
+  public let responseBody: Body
 
-  public init(request: HTTPRequest, response: HTTPResponse, body: Body) {
+  public init(request: HTTPRequest, requestBody: Body = .empty, response: HTTPResponse, responseBody: Body) {
     self.request = request
+    self.requestBody = requestBody
     self.response = response
-    self.body = body
+    self.responseBody = responseBody
   }
 
   /// Convenience for an in-memory response.
-  public init(request: HTTPRequest, response: HTTPResponse, data: Data) {
-    self.init(request: request, response: response, body: data.isEmpty ? .empty : .data(data))
+  public init(request: HTTPRequest, requestBody: Body = .empty, response: HTTPResponse, responseData: Data) {
+    self.init(request: request, requestBody: requestBody, response: response, responseBody: responseData.isEmpty ? .empty : .data(responseData))
   }
 
   /// Convenience for a download response.
-  public init(request: HTTPRequest, response: HTTPResponse, fileURL: URL) {
-    self.init(request: request, response: response, body: .file(fileURL))
+  public init(request: HTTPRequest, requestBody: Body = .empty, response: HTTPResponse, responseFileURL: URL) {
+    self.init(request: request, requestBody: requestBody, response: response, responseBody: .file(responseFileURL))
   }
 }
 
 public extension HTTPClientResponse {
-  /// In-memory payload, when the body is `.data`. Empty otherwise.
-  var data: Data {
-    if case .data(let data) = body {
-      return data
+  /// In-memory payload, when the response body is `.data`. Empty otherwise.
+  var responseData: Data {
+    if case .data(let responseData) = responseBody {
+      return responseData
     }
     return Data()
   }
 
-  /// On-disk payload location, when the body is `.file`.
-  var fileURL: URL? {
-    if case .file(let url) = body {
+  /// On-disk payload location, when the response body is `.file`.
+  var responseFileURL: URL? {
+    if case .file(let url) = responseBody {
       return url
     }
     return nil
@@ -102,8 +109,8 @@ public extension HTTPClientResponse {
   /// - Returns: The file contents, or `nil` when the body is not a file.
   /// - Throws: Any error raised by `Data(contentsOf:options:)` (e.g. file missing, permissions).
   func fileData() throws -> Data? {
-    guard let fileURL else { return nil }
-    return try Data(contentsOf: fileURL, options: .mappedIfSafe)
+    guard let responseFileURL else { return nil }
+    return try Data(contentsOf: responseFileURL, options: .mappedIfSafe)
   }
 
   /// Validates the response and then returns itself.
@@ -191,9 +198,9 @@ public extension HTTPClientResponse {
   ///   * Any error thrown by `transformer`.
   func transformed<ResultType>(using transformer: Transformer<Data, ResultType>) throws -> ResultType {
     let payload: Data
-    switch body {
-    case .data(let data):
-      payload = data
+    switch responseBody {
+    case .data(let responseData):
+      payload = responseData
 
     case .file(let url):
       payload = try Data(contentsOf: url, options: .mappedIfSafe)
