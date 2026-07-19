@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 4/25/26.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 
 /**
  Structure that defines retry policy to be used by

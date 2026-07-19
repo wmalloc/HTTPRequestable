@@ -4,9 +4,12 @@
 //  Created by Waqar Malik on 12/24/25.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 import HTTPTypes
-import HTTPTypesFoundation
 
 public protocol HTTPTransportable {
   /// Performs a network request and returns the raw response.

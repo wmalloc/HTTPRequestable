@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 5/28/20.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 
 /// Extension providing a method for appending query items to an existing URL.
 public extension URL {

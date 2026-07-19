@@ -4,8 +4,11 @@
 //  Created by Waqar Malik on 1/14/23.
 //
 
-import Foundation
-import HTTPTypes
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 
 public extension URLRequest {
   /// Append the multipart form data to request, and header fields

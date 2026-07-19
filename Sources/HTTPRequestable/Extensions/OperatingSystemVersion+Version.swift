@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 4/28/23.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 
 public extension OperatingSystemVersion {
   var url_versionString: String {

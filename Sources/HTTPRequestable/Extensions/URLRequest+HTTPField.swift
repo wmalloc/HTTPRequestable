@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 7/12/23.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 import HTTPTypes
 
 /*

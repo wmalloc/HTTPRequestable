@@ -4,10 +4,13 @@
 //  Created by Waqar Malik on 11/17/23
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
+
 import HTTPTypes
-import HTTPTypesFoundation
-import OSLog
 
 /// A contract that enables an object to perform HTTP‑based network
 /// operations.

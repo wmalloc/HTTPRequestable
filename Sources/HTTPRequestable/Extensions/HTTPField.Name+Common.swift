@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 7/14/23.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import HTTPTypes
 
 /// Extension providing convenience properties for commonly used HTTP header fields.

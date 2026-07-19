@@ -1,11 +1,14 @@
 //
 //  RequestHandlerStorage.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 4/16/25.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 import HTTPRequestable
 
 /// A closure that produces a mock response for a given ``URLRequest``.

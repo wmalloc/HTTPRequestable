@@ -1,11 +1,14 @@
 //
 //  Bundle+LoadData.swift
 //
-//
 //  Created by Waqar Malik on 5/31/24.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 
 /// Loads binary data from a bundle resource.
 ///

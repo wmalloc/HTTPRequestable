@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 9/26/25.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 
 /// A lightweight protocol for values that can be converted to a `URLRequest`.
 ///

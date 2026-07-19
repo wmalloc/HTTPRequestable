@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 7/14/23.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 import HTTPTypes
 
 /// Extension providing a type alias for HTTP response status and computed properties for accessing headers and status.

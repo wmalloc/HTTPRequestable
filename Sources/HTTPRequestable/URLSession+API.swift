@@ -1,13 +1,16 @@
 //
 //  URLSession+API.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 1/24/25.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
+
 import HTTPTypes
-import OSLog
 
 extension URLSession {
   /// Sends the given HTTP request through the provided interceptor chain and returns the resulting response.
@@ -30,7 +33,8 @@ extension URLSession {
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
   func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.NextHandler,
                       interceptors: some Sequence<any HTTPInterceptor> = [],
-                      delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
+                      delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse
+  {
     var next = interceptor
     for interceptor in interceptors.reversed() {
       let _next = next
@@ -44,7 +48,8 @@ extension URLSession {
 
 extension URLSession: HTTPTransportable {
   public func performRequest(_ request: HTTPRequest, httpBody body: Data? = nil, retryPolicy: RetryPolicy? = nil,
-                             delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
+                             delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse
+  {
     var attempt = 0
 
     while true {

@@ -1,11 +1,14 @@
 //
 //  OSLogInterceptor.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 8/21/24.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 import HTTPTypes
 import OSLog
 

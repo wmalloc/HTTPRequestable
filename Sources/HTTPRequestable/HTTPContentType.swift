@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 4/27/23.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 
 @frozen
 public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
@@ -112,81 +116,97 @@ public extension HTTPContentType {
 
 public extension HTTPContentType {
   /// Any content type.
+  @inlinable
   static var any: Self {
     "*/*"
   }
 
   /// CSS content type.
+  @inlinable
   static var css: Self {
     "text/css"
   }
 
   /// Form Data.
+  @inlinable
   static var formData: Self {
     "form-data"
   }
 
   /// URL-encoded Form Data.
+  @inlinable
   static var formEncoded: Self {
     "application/x-www-form-urlencoded"
   }
 
   /// GIF content type.
+  @inlinable
   static var gif: Self {
     "image/gif"
   }
 
   /// HTML content type.
+  @inlinable
   static var html: Self {
     "text/html"
   }
 
   /// JPEG content type.
+  @inlinable
   static var jpeg: Self {
     "image/jpeg"
   }
 
   /// JSON content type.
+  @inlinable
   static var json: Self {
     "application/json"
   }
 
   /// JSON content type with UTF-8 encoding.
+  @inlinable
   static var jsonUTF8: Self {
     "application/json; charset=utf-8"
   }
 
   /// Multi-part form data.
+  @inlinable
   static var multipartForm: Self {
     "multipart/form-data"
   }
 
   /// Octet Stream content type.
+  @inlinable
   static var octetStream: Self {
     "application/octet-stream"
   }
 
   /// Patch JSON content type.
+  @inlinable
   static var patchjson: Self {
     "application/json-patch+json"
   }
 
   /// PNG content type.
+  @inlinable
   static var png: Self {
     "image/png"
   }
 
   /// SVG content type.
+  @inlinable
   static var svg: Self {
     "image/svg+xml"
   }
 
   /// Plain Text content type.
+  @inlinable
   static var textPlain: Self {
     "text/plain"
   }
 
   /// XML content type.
+  @inlinable
   static var xml: Self {
     "application/xml"
   }

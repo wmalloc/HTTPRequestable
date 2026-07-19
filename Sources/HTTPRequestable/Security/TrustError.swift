@@ -1,11 +1,14 @@
 //
 //  TrustError.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 9/6/25.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 
 /// An enumeration representing errors that can occur during trust evaluation.
 ///

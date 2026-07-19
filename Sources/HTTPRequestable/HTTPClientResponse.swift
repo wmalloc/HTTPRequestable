@@ -1,13 +1,14 @@
 //
 //  HTTPClientResponse.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 12/14/24.
-//  Renamed from HTTPDataResponse on 2026-05-14.
-//  Renamed from HTTPClientResponse on 2026-05-19.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 import HTTPTypes
 
 public struct HTTPClientResponse: Sendable {
@@ -50,13 +51,17 @@ public struct HTTPClientResponse: Sendable {
 public extension HTTPClientResponse {
   /// In-memory payload, when the body is `.data`. Empty otherwise.
   var data: Data {
-    if case .data(let data) = body { return data }
+    if case .data(let data) = body {
+      return data
+    }
     return Data()
   }
 
   /// On-disk payload location, when the body is `.file`.
   var fileURL: URL? {
-    if case .file(let url) = body { return url }
+    if case .file(let url) = body {
+      return url
+    }
     return nil
   }
 

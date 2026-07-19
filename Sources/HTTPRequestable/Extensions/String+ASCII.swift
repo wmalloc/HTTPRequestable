@@ -1,11 +1,14 @@
 //
 //  String+ASCII.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 8/25/24.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 
 extension String {
   /// A Boolean value indicating whether the string contains only ASCII characters.

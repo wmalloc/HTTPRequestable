@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 1/14/26.
 //
 
-import Foundation
+#if canImport(FoundationNetworking)
+public import FoundationNetworking
+#else
+public import Foundation
+#endif
 import HTTPTypes
 
 public extension HTTPRequest {
