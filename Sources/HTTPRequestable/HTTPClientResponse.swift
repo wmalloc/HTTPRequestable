@@ -108,7 +108,7 @@ public extension HTTPClientResponse {
   /// Reads the downloaded payload from disk when the body is `.file`.
   /// - Returns: The file contents, or `nil` when the body is not a file.
   /// - Throws: Any error raised by `Data(contentsOf:options:)` (e.g. file missing, permissions).
-  func fileData() throws -> Data? {
+  func responseFileData() throws -> Data? {
     guard let responseFileURL else { return nil }
     return try Data(contentsOf: responseFileURL, options: .mappedIfSafe)
   }
@@ -187,7 +187,7 @@ public extension HTTPClientResponse {
   /// Transforms the response body with the supplied transformer.
   ///
   /// The bytes are taken from `.data` when the body is in memory, or read from
-  /// disk via ``fileData()`` when the body is `.file`. An `.empty` body throws
+  /// disk via ``responseFileData()`` when the body is `.file`. An `.empty` body throws
   /// `URLError(.zeroByteResource)`.
   ///
   /// - Parameter transformer: The closure used to convert raw `Data` into the desired type.
