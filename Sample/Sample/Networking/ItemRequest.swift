@@ -1,0 +1,22 @@
+//
+//  ItemRequest.swift
+//
+//  Created by Waqar Malik on 9/7/24.
+//
+
+import Foundation
+import HTTPRequestable
+
+struct ItemRequest: HTTPRequestConfigurable {
+  typealias ResultType = Item
+
+  let environment: HTTPEnvironment
+  var headerFields: HTTPFields?
+  var queryItems: [URLQueryItem]?
+  let path: String?
+
+  init(_ environment: HTTPEnvironment, item: Int) throws {
+    self.environment = environment
+    self.path = "/item/\(item).json"
+  }
+}
