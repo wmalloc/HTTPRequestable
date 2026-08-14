@@ -5,9 +5,9 @@
 //
 
 #if canImport(FoundationNetworking)
-public import FoundationNetworking
+import FoundationNetworking
 #else
-public import Foundation
+import Foundation
 #endif
 
 /// A lightweight protocol for values that can be converted to a valid `URL`.

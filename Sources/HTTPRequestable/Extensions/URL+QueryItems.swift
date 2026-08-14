@@ -5,9 +5,9 @@
 //
 
 #if canImport(FoundationNetworking)
-public import FoundationNetworking
+import FoundationNetworking
 #else
-public import Foundation
+import Foundation
 #endif
 
 /// Extension providing a method for appending query items to an existing URL.

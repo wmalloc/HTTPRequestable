@@ -6,9 +6,9 @@
 
 #if canImport(Security)
 #if canImport(FoundationNetworking)
-public import FoundationNetworking
+import FoundationNetworking
 #else
-public import Foundation
+import Foundation
 #endif
 @preconcurrency import Security
 

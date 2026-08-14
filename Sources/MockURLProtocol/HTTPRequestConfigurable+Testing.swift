@@ -10,7 +10,6 @@ import FoundationNetworking
 import Foundation
 #endif
 import HTTPRequestable
-import HTTPTypes
 
 /// Adds a unique test‑identifier header to an ``HTTPRequestable``.
 ///
