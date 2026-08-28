@@ -4,6 +4,7 @@
 //  Created by Waqar Malik on 9/7/24.
 //
 
+import HackerNewsKit
 import SwiftUI
 
 struct ListItemView: View {

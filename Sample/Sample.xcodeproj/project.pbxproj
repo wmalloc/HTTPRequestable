@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		473EBFAE2C8D466C004FB1B2 /* HTTPRequestable in Frameworks */ = {isa = PBXBuildFile; productRef = 473EBFAD2C8D466C004FB1B2 /* HTTPRequestable */; };
+		47A51B22304130E3004ED3CD /* HackerNewsKit in Frameworks */ = {isa = PBXBuildFile; productRef = 47A51B21304130E3004ED3CD /* HackerNewsKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				473EBFAE2C8D466C004FB1B2 /* HTTPRequestable in Frameworks */,
+				47A51B22304130E3004ED3CD /* HackerNewsKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -122,6 +124,7 @@
 				472F205D2D0DF633008EBB36 /* PBXTargetDependency */,
 				472F205F2D0DF633008EBB36 /* PBXTargetDependency */,
 				472F20612D0DF633008EBB36 /* PBXTargetDependency */,
+				47A51B23304130E3004ED3CD /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				476A0B8C302FE2240053EE24 /* Sample */,
@@ -204,6 +207,7 @@
 			mainGroup = 47C302052C8D458D00C2EC97;
 			packageReferences = (
 				47385CDA2CD590B30015E6B5 /* XCLocalSwiftPackageReference "../../HTTPRequestable" */,
+				47A51B20304130E3004ED3CD /* XCLocalSwiftPackageReference "Modules/HackerNewsKit" */,
 			);
 			productRefGroup = 47C3020F2C8D458D00C2EC97 /* Products */;
 			projectDirPath = "";
@@ -317,6 +321,10 @@
 		472F20612D0DF633008EBB36 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			productRef = 472F20602D0DF633008EBB36 /* MultipartForm */;
+		};
+		47A51B23304130E3004ED3CD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 47A51B21304130E3004ED3CD /* HackerNewsKit */;
 		};
 		47C302202C8D458E00C2EC97 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -632,6 +640,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../HTTPRequestable;
 		};
+		47A51B20304130E3004ED3CD /* XCLocalSwiftPackageReference "Modules/HackerNewsKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Modules/HackerNewsKit;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -653,6 +665,11 @@
 		473EBFAD2C8D466C004FB1B2 /* HTTPRequestable */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = HTTPRequestable;
+		};
+		47A51B21304130E3004ED3CD /* HackerNewsKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 47A51B20304130E3004ED3CD /* XCLocalSwiftPackageReference "Modules/HackerNewsKit" */;
+			productName = HackerNewsKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

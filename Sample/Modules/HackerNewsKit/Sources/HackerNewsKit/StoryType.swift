@@ -6,18 +6,18 @@
 
 import Foundation
 
-enum StoryType: String, CaseIterable, Identifiable {
+public enum StoryType: String, CaseIterable, Identifiable, Sendable {
   case top = "topstories"
   case new = "newstories"
   case best = "beststories"
   case show = "showstories"
   case job = "jobstories"
 
-  var id: String {
+  public var id: String {
     rawValue
   }
 
-  var title: String {
+  public var title: String {
     switch self {
     case .top: "Top"
     case .new: "New"
