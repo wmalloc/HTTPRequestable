@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 1/27/23
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 
 extension Data {
   func write(to outputStream: OutputStream) throws {

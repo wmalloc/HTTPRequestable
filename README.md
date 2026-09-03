@@ -56,9 +56,6 @@ final class HackerNews: HTTPTransferable, @unchecked Sendable {
 
   required init(session: URLSession = .shared) {
     self.session = session
-    let logger = LoggerInterceptor()
-    requestModifiers.append(logger)
-    interceptors.append(logger)
   }
 
  func storyList(type: String) async throws -> StoryList.ResultType {

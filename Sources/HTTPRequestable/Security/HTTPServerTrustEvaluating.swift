@@ -1,13 +1,16 @@
 //
 //  HTTPServerTrustEvaluating.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 8/29/25.
 //
 
-#if canImport(Security)
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
-import OSLog
+#endif
+
+#if canImport(Security)
 @preconcurrency import Security
 
 /*

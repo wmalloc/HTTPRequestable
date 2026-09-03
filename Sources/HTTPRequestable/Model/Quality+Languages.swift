@@ -1,11 +1,14 @@
 //
 //  Quality+Languages.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 10/25/24.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 
 public extension Quality {
   init(values: [String]) {

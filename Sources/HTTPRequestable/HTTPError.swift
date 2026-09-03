@@ -5,7 +5,12 @@
 //  Created by Waqar Malik on 1/24/25.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
+
 import HTTPTypes
 
 /// An enumeration representing different HTTP-related errors that may occur.

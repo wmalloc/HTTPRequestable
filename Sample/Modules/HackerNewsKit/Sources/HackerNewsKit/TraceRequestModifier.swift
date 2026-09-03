@@ -6,7 +6,6 @@
 
 import Foundation
 import HTTPRequestable
-import HTTPTypes
 
 /// A request modifier that injects a unique trace identifier into every outgoing request.
 ///

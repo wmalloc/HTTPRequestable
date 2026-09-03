@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 1/17/23
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 
 /// Errors thrown by multipart form
 public enum MultipartFormError: LocalizedError, Sendable {

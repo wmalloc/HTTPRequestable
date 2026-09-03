@@ -4,9 +4,12 @@
 //  Created by Waqar Malik on 1/24/23
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import HTTPTypes
-import OSLog
 
 /// Represents a single multipart/form-data body part.
 ///

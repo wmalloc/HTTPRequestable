@@ -1,11 +1,14 @@
 //
 //  HTTPField.Name+Testing.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 4/21/25.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import HTTPTypes
 
 public extension HTTPField.Name {

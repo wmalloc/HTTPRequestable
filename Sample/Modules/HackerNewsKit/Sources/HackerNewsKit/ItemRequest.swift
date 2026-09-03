@@ -6,7 +6,6 @@
 
 import Foundation
 import HTTPRequestable
-import HTTPTypes
 
 struct ItemRequest: HTTPRequestConfigurable {
   typealias ResultType = Item

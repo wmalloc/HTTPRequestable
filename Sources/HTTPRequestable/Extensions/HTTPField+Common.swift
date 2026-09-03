@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 4/28/23.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import HTTPTypes
 
 /// Extension providing static methods for creating HTTP fields (headers) with specific values.

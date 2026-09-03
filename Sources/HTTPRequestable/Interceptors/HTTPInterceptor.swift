@@ -1,11 +1,14 @@
 //
 //  HTTPInterceptor.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 8/23/24.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import HTTPTypes
 
 /// Interceptor is a middleware component that can intercept, modify, or observe network requests and responses.

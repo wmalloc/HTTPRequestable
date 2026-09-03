@@ -57,7 +57,8 @@ public struct APIRequest<ResultType>: HTTPRequestConfigurable {
   ///   - responseDataTransformer: Closure that converts response `Data` into `ResultType`.
   public init(_ environment: HTTPEnvironment, method: HTTPMethod = .get, path: String? = nil,
               queryItems: [URLQueryItem]? = nil, headerFields: HTTPFields? = nil, httpBody: Data? = nil,
-              responseDataTransformer: @escaping Transformer<Data, ResultType>) {
+              responseDataTransformer: @escaping Transformer<Data, ResultType>)
+  {
     self.environment = environment
     self.method = method
     self.path = path
@@ -79,10 +80,11 @@ public extension APIRequest where ResultType == Data {
   ///   - headerFields: Headers applied to the resulting request.
   ///   - httpBody: Body data attached to the resulting `URLRequest`.
   init(_ environment: HTTPEnvironment, method: HTTPMethod = .get, path: String? = nil,
-       queryItems: [URLQueryItem]? = nil, headerFields: HTTPFields? = nil, httpBody: Data? = nil) {
+       queryItems: [URLQueryItem]? = nil, headerFields: HTTPFields? = nil, httpBody: Data? = nil)
+  {
     self.init(environment, method: method, path: path,
-      queryItems: queryItems, headerFields: headerFields, httpBody: httpBody,
-      responseDataTransformer: { $0 } )
+              queryItems: queryItems, headerFields: headerFields, httpBody: httpBody,
+              responseDataTransformer: { $0 })
   }
 }
 
@@ -97,9 +99,10 @@ public extension APIRequest where ResultType: Decodable {
   ///   - headerFields: Headers applied to the resulting request.
   ///   - httpBody: Body data attached to the resulting `URLRequest`.
   init(_ environment: HTTPEnvironment, method: HTTPMethod = .get, path: String? = nil,
-       queryItems: [URLQueryItem]? = nil, headerFields: HTTPFields? = nil, httpBody: Data? = nil) {
+       queryItems: [URLQueryItem]? = nil, headerFields: HTTPFields? = nil, httpBody: Data? = nil)
+  {
     self.init(environment, method: method, path: path,
-      queryItems: queryItems, headerFields: headerFields, httpBody: httpBody,
-      responseDataTransformer: { try JSONDecoder().decode(ResultType.self, from: $0) })
+              queryItems: queryItems, headerFields: headerFields, httpBody: httpBody,
+              responseDataTransformer: { try JSONDecoder().decode(ResultType.self, from: $0) })
   }
 }

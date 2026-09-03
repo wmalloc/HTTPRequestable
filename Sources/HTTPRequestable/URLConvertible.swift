@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 9/26/25.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 
 /// A lightweight protocol for values that can be converted to a valid `URL`.
 ///

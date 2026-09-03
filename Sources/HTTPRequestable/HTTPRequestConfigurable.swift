@@ -4,10 +4,14 @@
 //  Created by Waqar Malik on 10/17/23.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
+
 import HTTPTypes
 import HTTPTypesFoundation
-import OSLog
 
 /// Method
 public typealias HTTPMethod = HTTPRequest.Method

@@ -1,11 +1,14 @@
 //
 //  HTTPField+Default.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 10/25/24.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import HTTPTypes
 
 /// Convenience initializer for creating a header field that represents

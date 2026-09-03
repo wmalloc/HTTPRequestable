@@ -1,13 +1,16 @@
 //
 //  URLSession+API.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 1/24/25.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
+
 import HTTPTypes
-import OSLog
 
 extension URLSession {
   /// Sends the given HTTP request through the provided interceptor chain and returns the resulting response.
@@ -30,7 +33,8 @@ extension URLSession {
   /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
   func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.NextHandler,
                       interceptors: some Sequence<any HTTPInterceptor> = [],
-                      delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
+                      delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse
+  {
     var next = interceptor
     for interceptor in interceptors.reversed() {
       let _next = next
@@ -44,7 +48,8 @@ extension URLSession {
 
 extension URLSession: HTTPTransportable {
   public func performRequest(_ request: HTTPRequest, httpBody body: Data? = nil, retryPolicy: RetryPolicy? = nil,
-                             delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
+                             delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse
+  {
     var attempt = 0
 
     while true {
@@ -54,7 +59,7 @@ extension URLSession: HTTPTransportable {
         } else {
           try await data(for: request, delegate: delegate)
         }
-        return HTTPClientResponse(request: request, response: response, data: data)
+        return HTTPClientResponse(request: request, requestBody: body.map(HTTPClientResponse.Body.data) ?? .empty, response: response, responseData: data)
       } catch {
         // Check if we should retry
         guard let retryPolicy, retryPolicy.shouldRetry(error: error, attempt: attempt) else {
@@ -88,7 +93,7 @@ extension URLSession: HTTPTransportable {
   public func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updateRequest = try request.httpRequest
     let (data, response) = try await upload(for: updateRequest, fromFile: fileURL, delegate: delegate)
-    return HTTPClientResponse(request: updateRequest, response: response, data: data)
+    return HTTPClientResponse(request: updateRequest, requestBody: .file(fileURL), response: response, responseData: data)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConvertible`, creates and resumes a `URLSessionUploadTask` internally.
@@ -100,7 +105,7 @@ extension URLSession: HTTPTransportable {
   public func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updateRequest = try request.httpRequest
     let (data, response) = try await upload(for: updateRequest, from: bodyData, delegate: delegate)
-    return HTTPClientResponse(request: updateRequest, response: response, data: data)
+    return HTTPClientResponse(request: updateRequest, requestBody: .data(bodyData), response: response, responseData: data)
   }
 
   /// Convenience method to upload data using an `HTTPRequestConfigurable`, creates and resumes a `URLSessionUploadTask` internally.
@@ -141,7 +146,7 @@ extension URLSession: HTTPTransportable {
   public func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updateRequest = try request.httpRequest
     let (url, response) = try await download(for: updateRequest, delegate: delegate)
-    return HTTPClientResponse(request: updateRequest, response: response, fileURL: url)
+    return HTTPClientResponse(request: updateRequest, response: response, responseFileURL: url)
   }
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.

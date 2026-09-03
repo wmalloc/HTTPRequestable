@@ -4,9 +4,12 @@
 //  Created by Waqar Malik on 5/31/24.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import HTTPRequestable
-import HTTPTypes
 
 public class MockURLProtocol: URLProtocol, @unchecked Sendable {
   private static let requestHandlerStorage = RequestHandlerStorage()

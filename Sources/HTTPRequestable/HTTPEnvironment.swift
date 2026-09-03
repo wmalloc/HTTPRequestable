@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 4/28/23.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 
 /// A type alias for :class:`URLComponents` that represents a full HTTP URL.
 ///
