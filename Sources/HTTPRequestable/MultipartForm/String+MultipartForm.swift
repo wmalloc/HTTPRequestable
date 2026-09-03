@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 10/15/25.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 
 extension String {
   static var crlf: Self {

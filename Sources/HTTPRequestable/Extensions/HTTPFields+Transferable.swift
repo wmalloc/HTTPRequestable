@@ -1,11 +1,14 @@
 //
 //  HTTPFields+Transferable.swift
 //
-//
 //  Created by Waqar Malik on 5/18/24.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import HTTPTypes
 
 /// Extension providing convenience initializers and computed properties for HTTP fields (headers).

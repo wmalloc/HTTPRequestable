@@ -1,11 +1,14 @@
 //
 //  TestIdentifiable.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 8/30/25.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import HTTPTypes
 
 /// A protocol that exposes a *test* identifier for debugging or logging purposes.
@@ -22,6 +25,7 @@ public protocol TestIdentifiable {
 
 extension String: TestIdentifiable {
   /// Returns the string itself as the test identifier.
+  @inlinable
   public var testIdentifier: String? {
     self
   }
@@ -29,6 +33,7 @@ extension String: TestIdentifiable {
 
 extension URL: TestIdentifiable {
   /// Returns the absolute URL string as the test identifier.
+  @inlinable
   public var testIdentifier: String? {
     absoluteString
   }

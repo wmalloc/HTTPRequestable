@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 2/5/26.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 
 public extension URLRequest {
   /// Applies an ordered collection of request modifiers and returns the resulting request.

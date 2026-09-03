@@ -6,7 +6,6 @@
 
 import Foundation
 import HTTPRequestable
-import HTTPTypes
 
 struct StoryListRequest: HTTPRequestConfigurable {
   typealias ResultType = [Int]

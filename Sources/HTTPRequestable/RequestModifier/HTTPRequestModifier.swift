@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 9/24/24.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import HTTPTypes
 
 public protocol HTTPRequestModifier: Sendable {

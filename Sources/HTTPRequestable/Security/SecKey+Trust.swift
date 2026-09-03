@@ -1,12 +1,16 @@
 //
 //  SecKey+Trust.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 9/6/25.
 //
 
-#if canImport(Security)
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
+
+#if canImport(Security)
 @preconcurrency import Security
 
 public extension SecKey {

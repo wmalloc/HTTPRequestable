@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 12/24/25.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 
 extension FileManager {
   func tempFile() throws -> URL {

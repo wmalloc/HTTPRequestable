@@ -1,12 +1,15 @@
 //
 //  Bundle+Certificates.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 8/29/25.
 //
 
 #if canImport(Security)
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 @preconcurrency import Security
 
 public extension Bundle {

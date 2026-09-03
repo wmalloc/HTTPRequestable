@@ -1,12 +1,16 @@
 //
 //  SecCertificate+Trust.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 9/6/25.
 //
 
-#if canImport(Security)
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
+
+#if canImport(Security)
 @preconcurrency import Security
 
 /// `SecCertificate` is an opaque Core Foundation type that represents an X.509 certificate.

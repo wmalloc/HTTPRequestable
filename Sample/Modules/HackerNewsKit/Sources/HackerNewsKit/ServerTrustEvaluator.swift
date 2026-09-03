@@ -1,6 +1,5 @@
 //
 //  ServerTrustEvaluator.swift
-//  HTTPRequestable
 //
 //  Created by Waqar Malik on 9/10/25.
 //

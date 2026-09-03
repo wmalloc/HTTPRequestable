@@ -4,7 +4,11 @@
 //  Created by Waqar Malik on 5/24/24.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import HTTPTypes
 
 /// A type-erased representation of a single body part in a multipart/form-data payload.
