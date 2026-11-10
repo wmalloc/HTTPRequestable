@@ -13,7 +13,8 @@ A lightweight WebService API for [Apple](https://www.apple.com) devices, written
 Add the following dependency clause to your Package.swift:
 
 ```swift
-// swift-tools-version:5.11
+// swift-tools-version: 6.3
+
 import PackageDescription
 
 let package = Package(
@@ -23,7 +24,7 @@ let package = Package(
     .executable(name: "MyApp", targets: ["MyApp"])
   ],
   dependencies: [
-    .package(url: "https://github.com/wmalloc/HTTPRequestable.git", from: "0.42.0")
+    .package(url: "https://github.com/wmalloc/HTTPRequestable.git", from: "1.0.0")
   ],
   targets: [
     .target(name: "MyApp", dependencies: 
@@ -42,8 +43,57 @@ let package = Package(
 |`URLRequestConvertible` | To create your URLRequest|
 |`URLConvertible` | To create your URL|
 
-## Usage
 
+## HTTPRequestConfigurable
+
+```swift
+public protocol HTTPRequestConfigurable {
+  associatedtype ResultType
+  var environment: HTTPEnvironment { get }
+  var method: HTTPMethod { get }
+  var path: String { get }
+  var queryItems: [URLQueryItem] { get mutating set }
+  var headerFields: HTTPFields { get mutating set }
+  var httpBody: Data? { get }
+  var responseDataTransformer: Transformer<Data, ResultType> { get }
+}
+```
+
+## URLConvertible
+```swift
+public protocol URLConvertible {
+  var url: URL { get throws }
+}
+```
+
+## URLRequestConvertible
+```swift
+public protocol URLRequestConvertible {
+  var urlRequest: URLRequest { get throws }
+}
+```
+
+## HTTPRequestConvertible
+```swift
+public protocol HTTPRequestConvertible {
+  var httpRequest: HTTPRequest { get throws }
+}
+```
+
+## @Endpoint
+```swift
+@Endpoint(.get, path: "/api/v1/story", headerFields: [.accept: "application/json"], queryItems: ["print": "pretty"])
+```
+expands to
+```swift
+struct Request: HTTPRequestConfigurable {
+  let method: HTTPMethod = .get
+  let path: String = "/api/v1/story"
+  var queryItems: [URLQueryItem] = [URLQueryItem(name: "print", value: "pretty")]
+  var headerFields: HTTPFields = [[.accept: "application/json"]
+}
+```
+## Usage
 ### Creating an API Manager
 
 ```swift
@@ -68,17 +118,12 @@ final class HackerNews: HTTPTransferable, @unchecked Sendable {
 ### To define a request
 
 ```swift
+@Endpoint(headerFields: [.accept: HTTPContentType.json.rawValue], queryItems: ["print": "pretty"])
 struct StoryListRequest: HTTPRequestConfigurable {
   typealias ResultType = [Int]
   
   let environment: HTTPEnvironment
-  let headerFields: HTTPFields? = .init([.accept(.json)])
-  let queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
-  let path: String?
-  
-  var responseDataTransformer: Transformer<Data, ResultType>? {
-    Self.jsonDecoder
-  }
+  let path: String
   
   init(_ environment: HTTPEnvironment, storyType: String) throws {
     precondition(!storyType.isEmpty, "Story type cannot be empty")
