@@ -4,10 +4,10 @@
 
 import Foundation
 @testable import HTTPRequestable
+import Testing
 #if canImport(Security)
 import Security
 #endif
-import Testing
 
 @Suite("Bundle Certificates Tests")
 struct BundleCertificatesTests {

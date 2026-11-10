@@ -13,23 +13,23 @@ import Foundation
 extension String {
   static var url_osName: String {
     #if targetEnvironment(simulator)
-    return "iOS(Simulator)"
+    "iOS(Simulator)"
     #elseif os(iOS)
     #if targetEnvironment(macCatalyst)
-    return "macOS(Catalyst)"
+    "macOS(Catalyst)"
     #else
-    return "iOS"
+    "iOS"
     #endif
     #elseif os(watchOS)
-    return "watchOS"
+    "watchOS"
     #elseif os(tvOS)
-    return "tvOS"
+    "tvOS"
     #elseif os(macOS)
-    return "macOS"
+    "macOS"
     #elseif os(visionOS)
-    return "visionOS"
+    "visionOS"
     #else
-    return "Unknown"
+    "Unknown"
     #endif
   }
 }
