@@ -7,13 +7,12 @@
 import Foundation
 import HTTPRequestable
 
+@Endpoint(headerFields: [.accept: HTTPContentType.json.rawValue], queryItems: ["print": "pretty"])
 struct StoryListRequest: HTTPRequestConfigurable {
   typealias ResultType = [Int]
 
   let environment: HTTPEnvironment
-  var headerFields: HTTPFields? = .init([.accept(.json)])
-  var queryItems: [URLQueryItem]? = [URLQueryItem(name: "print", value: "pretty")]
-  let path: String?
+  let path: String
 
   init(_ environment: HTTPEnvironment, storyType: String) throws {
     precondition(!storyType.isEmpty, "Story type cannot be empty")

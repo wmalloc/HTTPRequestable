@@ -35,9 +35,7 @@ public extension HTTPRequestConfigurable {
   /// - Returns: A copy of the request with the new header set.
   func byAddingTestIdentifierHeader() -> Self {
     var request = self
-    var existing = request.headerFields ?? [:]
-    existing[.xTestIdentifier] = UUID().uuidString
-    request.headerFields = existing
+    request.headerFields[.xTestIdentifier] = UUID().uuidString
     return request
   }
 
@@ -47,6 +45,6 @@ public extension HTTPRequestConfigurable {
   /// identify a request at runtime.  If the header has not been set,
   /// `nil` is returned.
   var testIdentifier: String? {
-    headerFields?[.xTestIdentifier]
+    headerFields[.xTestIdentifier]
   }
 }

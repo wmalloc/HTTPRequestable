@@ -22,7 +22,7 @@ public extension HTTPRequestConfigurable {
   /// - Note: If the receiver currently has no `headerFields`, a new `HTTPFields` collection is created.
   /// - SeeAlso: `setHeaderField()` for replacing the value of a header field.
   func appendHeaderField(_ field: HTTPField) -> Self {
-    var fields = headerFields ?? HTTPFields()
+    var fields = headerFields
     fields.append(field)
     var updated = self
     updated.headerFields = fields
@@ -37,7 +37,7 @@ public extension HTTPRequestConfigurable {
   /// - Note: If the receiver currently has no `headerFields`, a new `HTTPFields` collection is created.
   /// - SeeAlso: `appendHeaderField()` to add another instance of a header without replacing existing values.
   func setHeaderField(_ field: HTTPField) -> Self {
-    var fields = headerFields ?? HTTPFields()
+    var fields = headerFields
     fields[field.name] = field.value
     var updated = self
     updated.headerFields = fields
@@ -64,7 +64,7 @@ public extension HTTPRequestConfigurable {
   /// - Note: If the receiver currently has no `queryItems`, a new array is created and the item is added.
   /// - SeeAlso: Consider providing an overload to append multiple query items for batch updates.
   func appendQueryItems(_ newItems: [URLQueryItem]) -> Self {
-    var queryItems = queryItems ?? []
+    var queryItems = queryItems
     queryItems.append(contentsOf: newItems)
     var updated = self
     updated.queryItems = queryItems

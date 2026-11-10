@@ -40,14 +40,14 @@ public protocol HTTPRequestConfigurable: URLConvertible, URLRequestConvertible, 
   /// Method for the request, default is GET
   var method: HTTPMethod { get }
 
-  /// Path to append to the base URL, optional
-  var path: String? { get }
+  /// Path to append to the base URL
+  var path: String { get }
 
   /// Additional query items to include in the URL
-  var queryItems: [URLQueryItem]? { get mutating set }
+  var queryItems: [URLQueryItem] { get mutating set }
 
   /// Additional headers to include in the request
-  var headerFields: HTTPFields? { get mutating set }
+  var headerFields: HTTPFields { get mutating set }
 
   /// Body data for the request, optional
   var httpBody: Data? { get }
@@ -72,18 +72,18 @@ public extension HTTPRequestConfigurable {
   }
 
   @inlinable
-  var path: String? {
-    nil
+  var path: String {
+    ""
   }
 
   @inlinable
-  var queryItems: [URLQueryItem]? {
-    nil
+  var queryItems: [URLQueryItem] {
+    []
   }
 
   @inlinable
-  var headerFields: HTTPFields? {
-    nil
+  var headerFields: HTTPFields {
+    [:]
   }
 
   @inlinable
@@ -98,16 +98,14 @@ public extension HTTPRequestConfigurable {
     get throws {
       var components = environment
       var paths = components.path.components(separatedBy: "/")
-      paths.append(contentsOf: path?.components(separatedBy: "/") ?? [])
+      paths.append(contentsOf: path.components(separatedBy: "/"))
       paths = paths.filter { !$0.isEmpty }
       if !paths.isEmpty {
         paths.insert("", at: 0)
       }
       components.path = paths.joined(separator: "/")
       var items: [URLQueryItem] = environment.queryItems ?? []
-      if let queryItems {
-        items.append(contentsOf: queryItems)
-      }
+      items.append(contentsOf: queryItems)
       components.queryItems = items.isEmpty ? nil : Array(items)
       guard let url = components.url else {
         throw HTTPError.invalidURL
@@ -119,7 +117,7 @@ public extension HTTPRequestConfigurable {
   /// HTTPRequestConvertible
   var httpRequest: HTTPRequest {
     get throws {
-      try HTTPRequest(method: method, url: url, headerFields: headerFields ?? HTTPFields())
+      try HTTPRequest(method: method, url: url, headerFields: headerFields)
     }
   }
 

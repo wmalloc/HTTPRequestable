@@ -24,8 +24,7 @@ let package = Package(
     .target(name: "HTTPRequestable", dependencies: ["HTTPRequestableMacros",
                                                     .product(name: "HTTPTypes", package: "swift-http-types"),
                                                     .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
-            resources: [.process("Resources")],
-            swiftSettings: []),
+            resources: [.process("Resources")]),
     .target(name: "MockURLProtocol", dependencies: ["HTTPRequestable",
                                                     .product(name: "HTTPTypes", package: "swift-http-types"),
                                                     .product(name: "HTTPTypesFoundation", package: "swift-http-types")]),
@@ -33,6 +32,10 @@ let package = Package(
                 dependencies: ["HTTPRequestable", "MockURLProtocol",
                                .product(name: "HTTPTypes", package: "swift-http-types"),
                                .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
-                resources: [.copy("MockData")])
+                resources: [.copy("MockData")]),
+    .testTarget(name: "HTTPRequestableMacrosTests", dependencies: ["HTTPRequestableMacros",
+                                                                   .product(name: "SwiftSyntax", package: "swift-syntax"),
+                                                                   .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                                                                   .product(name: "SwiftCompilerPlugin", package: "swift-syntax")])
   ]
 )

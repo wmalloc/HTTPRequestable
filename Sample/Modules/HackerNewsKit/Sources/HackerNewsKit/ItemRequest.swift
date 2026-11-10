@@ -7,13 +7,12 @@
 import Foundation
 import HTTPRequestable
 
+@Endpoint(headerFields: [.accept: HTTPContentType.json.rawValue], queryItems: [:])
 struct ItemRequest: HTTPRequestConfigurable {
   typealias ResultType = Item
 
   let environment: HTTPEnvironment
-  var headerFields: HTTPFields?
-  var queryItems: [URLQueryItem]?
-  let path: String?
+  let path: String
 
   init(_ environment: HTTPEnvironment, item: Int) throws {
     self.environment = environment
