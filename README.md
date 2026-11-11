@@ -19,7 +19,7 @@ import PackageDescription
 
 let package = Package(
   name: "MyPackage",
-  platforms: [.iOS(.v16), .tvOS(.v16), .macOS(.v12), .watchOS(.v9), .macCatalyst(.v16), .visionOS(.v1)],
+  platforms: [.iOS(.v18), .tvOS(.v18), .macOS(.v15), .watchOS(.v11), .macCatalyst(.v18), .visionOS(.v2)],
   products: [
     .executable(name: "MyApp", targets: ["MyApp"])
   ],

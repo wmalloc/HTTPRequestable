@@ -8,10 +8,11 @@
 import FoundationNetworking
 #else
 import Foundation
+import HTTPTypesFoundation
 #endif
 
 import HTTPTypes
-import HTTPTypesFoundation
+
 
 /// A lightweight protocol for types that can produce a fully formed `HTTPRequest`.
 ///

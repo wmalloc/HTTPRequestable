@@ -37,13 +37,13 @@ import HTTPTypesFoundation
 /// )
 /// ```
 public struct APIRequest<ResultType>: HTTPRequestConfigurable {
-  public var environment: HTTPEnvironment
-  public var method: HTTPMethod
-  public var path: String
+  public let environment: HTTPEnvironment
+  public let method: HTTPMethod
+  public let path: String
   public var queryItems: [URLQueryItem]
   public var headerFields: HTTPFields
-  public var httpBody: Data?
-  public var responseDataTransformer: Transformer<Data, ResultType>
+  public let httpBody: Data?
+  public let responseDataTransformer: Transformer<Data, ResultType>
 
   /// Creates a generic request with a caller-supplied response transformer.
   ///
@@ -57,8 +57,7 @@ public struct APIRequest<ResultType>: HTTPRequestConfigurable {
   ///   - responseDataTransformer: Closure that converts response `Data` into `ResultType`.
   public init(_ environment: HTTPEnvironment, method: HTTPMethod = .get, path: String = "",
               queryItems: [URLQueryItem] = [], headerFields: HTTPFields = [:], httpBody: Data? = nil,
-              responseDataTransformer: @escaping Transformer<Data, ResultType>)
-  {
+              responseDataTransformer: @escaping Transformer<Data, ResultType>) {
     self.environment = environment
     self.method = method
     self.path = path
@@ -80,8 +79,7 @@ public extension APIRequest where ResultType == Data {
   ///   - headerFields: Headers applied to the resulting request.
   ///   - httpBody: Body data attached to the resulting `URLRequest`.
   init(_ environment: HTTPEnvironment, method: HTTPMethod = .get, path: String = "",
-       queryItems: [URLQueryItem] = [], headerFields: HTTPFields = [:], httpBody: Data? = nil)
-  {
+       queryItems: [URLQueryItem] = [], headerFields: HTTPFields = [:], httpBody: Data? = nil) {
     self.init(environment, method: method, path: path,
               queryItems: queryItems, headerFields: headerFields, httpBody: httpBody,
               responseDataTransformer: { $0 })
@@ -99,8 +97,7 @@ public extension APIRequest where ResultType: Decodable {
   ///   - headerFields: Headers applied to the resulting request.
   ///   - httpBody: Body data attached to the resulting `URLRequest`.
   init(_ environment: HTTPEnvironment, method: HTTPMethod = .get, path: String = "",
-       queryItems: [URLQueryItem] = [], headerFields: HTTPFields = [:], httpBody: Data? = nil)
-  {
+       queryItems: [URLQueryItem] = [], headerFields: HTTPFields = [:], httpBody: Data? = nil) {
     self.init(environment, method: method, path: path,
               queryItems: queryItems, headerFields: headerFields, httpBody: httpBody,
               responseDataTransformer: { try JSONDecoder().decode(ResultType.self, from: $0) })

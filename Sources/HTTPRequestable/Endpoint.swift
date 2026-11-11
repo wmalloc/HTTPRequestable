@@ -25,8 +25,8 @@ import HTTPTypes
 /// ```swift
 /// @Endpoint(.post, path: "/api/v1/items", headerFields: [.accept: "application/json"])
 /// struct CreateItemRequest: HTTPRequestConfigurable {
-///     typealias ResponseType = Item
-///     let environment: HTTPEnvironment
+///   typealias ResponseType = Item
+///   let environment: HTTPEnvironment
 /// }
 /// ```
 ///
