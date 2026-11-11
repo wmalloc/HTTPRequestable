@@ -1,3 +1,4 @@
+//
 //  Endpoint.swift
 //
 //  Created by Waqar Malik on 11/6/26.
@@ -8,14 +9,16 @@ import HTTPTypes
 
 /// Declares an `HTTPRequestConfigurable` endpoint's method, path, headers and query items.
 ///
-/// Always adds stored `headerFields`, initialized from `headerFields`. Adds the other members only
-/// when their argument is passed, so a hand-written `method`, `path` or `queryItems` (e.g. one built
-/// from the request's inputs) can be combined with the macro:
+/// Always adds stored `headerFields`, initialized from `headerFields`, and stored
+/// `var queryItems: [URLQueryItem]`, initialized from `queryItems` in source order, keeping duplicate
+/// names. Assign `queryItems` in `init` when they are built from the request's inputs; a type that
+/// declares its own settable `queryItems` keeps it, as long as `queryItems` is not passed.
+///
+/// Adds the other members only when their argument is passed, so a hand-written `method` or `path`
+/// can be combined with the macro:
 ///
 /// - `method` -> `var method: HTTPMethod { <method> }`; omitted, the protocol default `.get` applies.
 /// - `path`: -> `var path: String { <path> }`; must be a constant.
-/// - `queryItems`: -> stored `var queryItems: [URLQueryItem]` in source order, keeping duplicate
-///   names. Pass `[:]` for settable storage that starts empty.
 ///
 /// Members are `public` when the type is `public` or `open`.
 ///
@@ -33,7 +36,5 @@ import HTTPTypes
 ///   - headerFields: The initial header fields.
 ///   - queryItems: The initial query item names and values.
 @attached(member, names: named(headerFields), named(method), named(path), named(queryItems))
-public macro Endpoint(_ method: HTTPMethod = .get,
-                      path: String = "",
-                      headerFields: HTTPFields = [:],
+public macro Endpoint(_ method: HTTPRequest.Method = .get, path: String = "", headerFields: HTTPFields = [:],
                       queryItems: KeyValuePairs<String, String?> = [:]) = #externalMacro(module: "HTTPRequestableMacros", type: "EndpointMacro")

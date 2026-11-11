@@ -36,7 +36,7 @@ public struct EndpointMacro: MemberMacro {
       try declaration.validateStorage(for: "path", macroName: "@Endpoint")
       members.append(EndpointMember.path(path, access: access))
     }
-    if let queryItems {
+    if queryItems != nil || !declaration.declaresVariable(named: "queryItems") {
       try declaration.validateStorage(for: "queryItems", macroName: "@Endpoint")
       members.append(EndpointMember.queryItems(queryItems, access: access))
     }

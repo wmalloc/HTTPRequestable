@@ -7,7 +7,7 @@
 import Foundation
 import HTTPRequestable
 
-@Endpoint(headerFields: [.accept: HTTPContentType.json.rawValue], queryItems: [:])
+@Endpoint(headerFields: [.accept: HTTPContentType.json.rawValue])
 struct ItemRequest: HTTPRequestConfigurable {
   typealias ResultType = Item
 

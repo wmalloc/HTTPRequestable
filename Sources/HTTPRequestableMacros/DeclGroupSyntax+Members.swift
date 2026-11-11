@@ -25,9 +25,14 @@ extension DeclGroupSyntax {
     guard self.is(StructDeclSyntax.self) || self.is(ClassDeclSyntax.self) else {
       throw MacroExpansionErrorMessage("\(macroName) can only be applied to a struct or class")
     }
-    if memberBlock.members.contains(where: { $0.declaresVariable(named: name) }) {
+    if declaresVariable(named: name) {
       throw MacroExpansionErrorMessage("\(macroName) cannot be used on a type that already declares '\(name)'")
     }
+  }
+
+  /// Whether the decleration has a variable member binding `name`.
+  func declaresVariable(named name: String) -> Bool {
+    memberBlock.members.contains { $0.declaresVariable(named: name) }
   }
 }
 

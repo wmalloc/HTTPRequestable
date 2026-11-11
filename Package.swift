@@ -34,8 +34,6 @@ let package = Package(
                                .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
                 resources: [.copy("MockData")]),
     .testTarget(name: "HTTPRequestableMacrosTests", dependencies: ["HTTPRequestableMacros",
-                                                                   .product(name: "SwiftSyntax", package: "swift-syntax"),
-                                                                   .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                                                                   .product(name: "SwiftCompilerPlugin", package: "swift-syntax")])
+                                                                   .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")])
   ]
 )

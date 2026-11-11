@@ -77,16 +77,6 @@ public extension HTTPRequestConfigurable {
   }
 
   @inlinable
-  var queryItems: [URLQueryItem] {
-    []
-  }
-
-  @inlinable
-  var headerFields: HTTPFields {
-    [:]
-  }
-
-  @inlinable
   var httpBody: Data? {
     nil
   }
