@@ -13,7 +13,7 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-http-types.git", from: "1.8.0"),
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "603.0.0")
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "604.0.0")
   ],
   targets: [
     .macro(name: "HTTPRequestableMacros", dependencies: [.product(name: "SwiftSyntax", package: "swift-syntax"),
