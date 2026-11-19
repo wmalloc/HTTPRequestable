@@ -102,16 +102,13 @@ extension HTTPContentType: Decodable {
   /// - Parameter decoder: The decoder to read data from.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
-    self.rawValue = try container.decode(String.self)
-    self.mimeType = Self.mimeType(for: rawValue) ?? ""
+    let rawString = try container.decode(String.self)
+    self.init(rawValue: rawString)
   }
 }
 
 public extension HTTPContentType {
-  /// Allows comparison of raw string values.
-  static func == (lhs: HTTPContentType, rhs: StringLiteralType) -> Bool {
-    lhs.mimeType == HTTPContentType.mimeType(for: rhs)
-  }
+  // Allows comparison of raw string values.
 }
 
 public extension HTTPContentType {

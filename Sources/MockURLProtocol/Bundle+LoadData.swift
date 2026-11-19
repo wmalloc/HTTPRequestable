@@ -18,7 +18,7 @@ import Foundation
 /// specify one) and returns its contents as ``Data``.
 ///
 /// ```swift
-/// let json = try Bundle.main.data(forResource: "sample", withExtension: "json")
+/// let json = try Bundle.main.mockData(forResource: "sample", withExtension: "json")
 /// // json now contains the raw bytes of MockData/sample.json
 /// ```
 ///
@@ -49,7 +49,7 @@ public extension Bundle {
   /// - Returns: The raw data of the requested file.
   /// - Throws: ``URLError`` if the file cannot be found, or any error from
   ///   ``Data(contentsOf:options:)``.
-  func data(forResource resource: String, withExtension ext: String, subdirectory: String = "MockData") throws -> Data {
+  func mockData(forResource resource: String, withExtension ext: String, subdirectory: String = "MockData") throws -> Data {
     guard let url = url(forResource: resource, withExtension: ext, subdirectory: subdirectory) else {
       throw URLError(.fileDoesNotExist)
     }

@@ -28,7 +28,7 @@ struct HackerNewsAPITests {
     let request = try StoryListRequest(api.environment, storyType: "topstories").byAddingTestIdentifierHeader()
     let url = try request.url
     try await MockURLProtocol.setRequestHandler({ _ in
-      let data = try Bundle.module.data(forResource: "topstories", withExtension: "json")
+      let data = try Bundle.module.mockData(forResource: "topstories", withExtension: "json")
       return (data, HTTPURLResponse.ok(url: url))
     }, forRequest: request)
     let topStories = try await api.object(for: request)
@@ -46,7 +46,7 @@ struct HackerNewsAPITests {
     let request = try StoryListRequest(api.environment, storyType: "newstories").byAddingTestIdentifierHeader()
     let url = try request.url
     try await MockURLProtocol.setRequestHandler({ _ in
-      let data = try Bundle.module.data(forResource: "newstories", withExtension: "json")
+      let data = try Bundle.module.mockData(forResource: "newstories", withExtension: "json")
       return (data, HTTPURLResponse.ok(url: url))
     }, forRequest: request)
     let newStories = try await api.object(for: request, delegate: nil)
@@ -64,7 +64,7 @@ struct HackerNewsAPITests {
     let request = try StoryListRequest(api.environment, storyType: "beststories").byAddingTestIdentifierHeader()
     let url = try request.url
     try await MockURLProtocol.setRequestHandler({ _ in
-      let data = try Bundle.module.data(forResource: "beststories", withExtension: "json")
+      let data = try Bundle.module.mockData(forResource: "beststories", withExtension: "json")
       return (data, HTTPURLResponse.ok(url: url))
     }, forRequest: request)
     let bestStories = try await api.object(for: request, delegate: nil)

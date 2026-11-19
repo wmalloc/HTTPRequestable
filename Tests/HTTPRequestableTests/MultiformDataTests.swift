@@ -42,7 +42,7 @@ struct MultiformDataTests {
     form.append(data: imageData, withName: "\"Image\"", mimeType: "application/jpeg;base64")
 
     let encoded = try form.data(streamBufferSize: form.streamBufferSize)
-    let fixture = try Bundle.module.data(forResource: "MultipartFormData", withExtension: "txt")
+    let fixture = try Bundle.module.mockData(forResource: "MultipartFormData", withExtension: "txt")
     #expect(encoded == fixture)
   }
 
