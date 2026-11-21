@@ -38,10 +38,14 @@ public protocol HTTPServerTrustEvaluating {
 
   /// Accepts a server trust challenge without validation.
   ///
+  /// - Warning: This disables TLS validation for the connection and exposes it to man-in-the-middle
+  ///   attacks. Do not use it outside of local debugging.
+  ///
   /// - Parameters:
   ///   - challenge: The server trust challenge to accept.
   ///   - certificates: The set of certificates to use for evaluation.
   /// - Returns: A tuple containing the disposition and credential for the challenge.
+  @available(*, deprecated, message: "Accepts any server trust without validation, which allows man-in-the-middle attacks. Use evaluate(challenge:certificates:) instead.")
   func accept(challenge: URLAuthenticationChallenge, certificates: Set<SecCertificate>) -> (URLSession.AuthChallengeDisposition, URLCredential?)
 
   /// Evaluates a server trust object using the specified certificates.
@@ -74,6 +78,7 @@ public extension HTTPServerTrustEvaluating {
   }
 
   /// Default implementation for accepting a server trust challenge without validation.
+  @available(*, deprecated, message: "Accepts any server trust without validation, which allows man-in-the-middle attacks. Use evaluate(challenge:certificates:) instead.")
   func accept(challenge: URLAuthenticationChallenge, certificates: Set<SecCertificate>) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
     guard let trust = challenge.protectionSpace.serverTrust else {
       return (.cancelAuthenticationChallenge, nil)
@@ -96,6 +101,14 @@ public extension HTTPServerTrustEvaluating {
   ///   - `.certificateNotFound` if the trust object contains no certificates
   ///   - `.certificatesDoNotMatch` if none of the public keys match
   func evaluate(trust: SecTrust, certificates: Set<SecCertificate>) throws(TrustError) {
+    // Validate the chain with the system first (expiry, hostname, trusted root). Pinning alone is not
+    // enough: public keys are public, so an attacker can include a pinned certificate in the chain
+    // they present. After evaluation the chain is the one the system built and validated.
+    var evaluationError: CFError?
+    guard SecTrustEvaluateWithError(trust, &evaluationError) else {
+      throw .evaluationFailed
+    }
+
     guard let trustCertificates = trust.certificates else {
       throw .certificateNotFound
     }

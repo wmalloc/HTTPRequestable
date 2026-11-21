@@ -55,20 +55,21 @@ extension URLSession: HTTPTransportable {
     while true {
       do {
         let (data, response) = if let body {
-          try await upload(for: request, from: body, delegate: delegate)
+          try await upload(for: request, from: body, delegate: delegate ?? HTTPRedirectPolicy.default)
         } else {
-          try await data(for: request, delegate: delegate)
+          try await data(for: request, delegate: delegate ?? HTTPRedirectPolicy.default)
         }
         return HTTPClientResponse(request: request, requestBody: body.map(HTTPClientResponse.Body.data) ?? .empty, response: response, responseData: data)
       } catch {
         // Check if we should retry
-        guard let retryPolicy, retryPolicy.shouldRetry(error: error, attempt: attempt) else {
+        guard let retryPolicy, retryPolicy.allowsRetry(for: request.method),
+              retryPolicy.shouldRetry(error: error, attempt: attempt) else {
           throw error
         }
 
         // Calculate delay and wait before retrying
         let delay = retryPolicy.delay(for: attempt)
-        try await Task.sleep(nanoseconds: UInt64(delay * 1000000000))
+        try await Task.sleep(for: .seconds(delay))
 
         attempt += 1
       }
@@ -92,7 +93,7 @@ extension URLSession: HTTPTransportable {
   /// - Returns: Data and response.
   public func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updateRequest = try request.httpRequest
-    let (data, response) = try await upload(for: updateRequest, fromFile: fileURL, delegate: delegate)
+    let (data, response) = try await upload(for: updateRequest, fromFile: fileURL, delegate: delegate ?? HTTPRedirectPolicy.default)
     return HTTPClientResponse(request: updateRequest, requestBody: .file(fileURL), response: response, responseData: data)
   }
 
@@ -104,7 +105,7 @@ extension URLSession: HTTPTransportable {
   /// - Returns: Data and response.
   public func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updateRequest = try request.httpRequest
-    let (data, response) = try await upload(for: updateRequest, from: bodyData, delegate: delegate)
+    let (data, response) = try await upload(for: updateRequest, from: bodyData, delegate: delegate ?? HTTPRedirectPolicy.default)
     return HTTPClientResponse(request: updateRequest, requestBody: .data(bodyData), response: response, responseData: data)
   }
 
@@ -145,7 +146,7 @@ extension URLSession: HTTPTransportable {
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
   public func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updateRequest = try request.httpRequest
-    let (url, response) = try await download(for: updateRequest, delegate: delegate)
+    let (url, response) = try await download(for: updateRequest, delegate: delegate ?? HTTPRedirectPolicy.default)
     return HTTPClientResponse(request: updateRequest, response: response, responseFileURL: url)
   }
 
@@ -156,7 +157,7 @@ extension URLSession: HTTPTransportable {
   /// - Returns: Data stream and response.
   public func bytes(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
     let updateRequest = try request.httpRequest
-    return try await bytes(for: updateRequest, delegate: delegate)
+    return try await bytes(for: updateRequest, delegate: delegate ?? HTTPRedirectPolicy.default)
   }
 
   /**

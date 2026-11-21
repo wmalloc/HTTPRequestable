@@ -31,7 +31,16 @@ public extension HTTPEnvironment {
   init(authority: String, scheme: String = "https", path: String = "") {
     self.init()
     self.scheme = scheme
-    self.host = authority
+    // Parse `host[:port]` so a port is not folded into the host. Anything that would add user info,
+    // a path or a query (for example "good.com@evil.com" or "evil.com/x") is not an authority and is
+    // assigned to `host` as is, where URLComponents rejects or percent-encodes it.
+    if let parsed = URLComponents(string: "//" + authority), parsed.user == nil, parsed.password == nil,
+       parsed.path.isEmpty, parsed.query == nil, parsed.fragment == nil, let host = parsed.host {
+      self.host = host
+      self.port = parsed.port
+    } else {
+      self.host = authority
+    }
     self.path = path
   }
 
@@ -54,6 +63,7 @@ public extension HTTPEnvironment {
   /// The original environment is left untouched; this method performs
   /// a copy‑modify pattern that is common in value types.
   ///
+  /// - Note: Use `https`. Nothing prevents `http`, which sends requests unencrypted.
   /// - Parameter scheme: The new URL scheme (e.g. `"http"` or `"https"`).
   /// - Returns: A copy of the current environment with the scheme updated.
   @discardableResult
@@ -182,6 +192,9 @@ public extension HTTPEnvironment {
 
   /// Sets the user component and returns a new instance.
   ///
+  /// - Warning: Credentials in a URL can leak through logs, proxies and the `Referer` header. Prefer
+  ///   an `Authorization` header.
+  ///
   /// - Parameter user: The new user string or `nil` to clear it.
   /// - Returns: A copy of the current environment with the user updated.
   @discardableResult
@@ -192,6 +205,9 @@ public extension HTTPEnvironment {
   }
 
   /// Sets the password component and returns a new instance.
+  ///
+  /// - Warning: Credentials in a URL can leak through logs, proxies and the `Referer` header. Prefer
+  ///   an `Authorization` header.
   ///
   /// - Parameter password: The new password string or `nil` to clear it.
   /// - Returns: A copy of the current environment with the password updated.

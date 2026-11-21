@@ -14,6 +14,10 @@ import HTTPTypes
 public protocol HTTPRequestModifier: Sendable {
   /// The hosts this modifier is restricted to.
   ///
+  /// - Important: Set this for any modifier that adds credentials (for example an `Authorization` header
+  ///   or an API key). With the default `nil`, the modifier is applied to requests for every host, so
+  ///   the credentials are sent to whichever host a request targets.
+  ///
   /// When `nil` (the default), the modifier applies to requests for any host. When non-nil, the modifier
   /// is only applied to requests whose host is in the set; host comparison is case-insensitive and ignores the port.
   var allowedHosts: Set<String>? { get }

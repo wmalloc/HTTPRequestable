@@ -134,9 +134,9 @@ open class MultipartForm: AnyMultipartFormBodyPart {
 
 extension MultipartForm {
   func contentHeaders(withName name: String, fileName: String? = nil, mimeType: String? = nil) -> [HTTPField] {
-    var disposition = KeyedItem(item: HTTPContentType.formData.rawValue, parameters: ["name": name])
+    var disposition = KeyedItem(item: HTTPContentType.formData.rawValue, parameters: ["name": Self.quotedParameter(name)])
     if let fileName {
-      disposition["filename"] = fileName
+      disposition["filename"] = Self.quotedParameter(fileName)
     }
 
     var fields: [HTTPField] = []
@@ -145,6 +145,25 @@ extension MultipartForm {
       fields.append(HTTPField.contentType(mimeType))
     }
     return fields
+  }
+}
+
+extension MultipartForm {
+  /// Returns `value` as a quoted `Content-Disposition` parameter value that cannot end the value early
+  /// or inject other parameters or headers.
+  ///
+  /// `"`, CR and LF are percent-encoded (RFC 7578 section 4.2). A value that the caller already wrapped
+  /// in double quotes is unwrapped first, so it is not quoted twice.
+  static func quotedParameter(_ value: String) -> String {
+    var inner = Substring(value)
+    if inner.count >= 2, inner.hasPrefix("\""), inner.hasSuffix("\"") {
+      inner = inner.dropFirst().dropLast()
+    }
+    let escaped = inner
+      .replacingOccurrences(of: "\r", with: "%0D")
+      .replacingOccurrences(of: "\n", with: "%0A")
+      .replacingOccurrences(of: "\"", with: "%22")
+    return "\"\(escaped)\""
   }
 }
 
