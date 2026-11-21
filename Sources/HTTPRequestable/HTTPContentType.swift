@@ -13,17 +13,19 @@ import Foundation
 @frozen
 public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
   /// The raw string value of the content type.
-  public var rawValue: String // ISOLatin1String
+  public let rawValue: String
 
-  /// The MIME type extracted from the raw value.
-  public var mimeType: String
+  /// The MIME type extracted from the raw value, without parameters such as `charset`.
+  /// Empty when the raw value has no media type.
+  public var mimeType: String {
+    Self.mimeType(for: rawValue)
+  }
 
   /// Initializes a new `HTTPContentType` with the given raw value.
   ///
   /// - Parameter rawValue: The raw string value of the content type.
   public init(rawValue: String) {
     self.rawValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
-    self.mimeType = Self.mimeType(for: self.rawValue) ?? ""
   }
 
   /// Splits a string and creates content types from the MIME type only.
@@ -33,12 +35,15 @@ public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
   public static func contentTypes(for value: String) -> [Self] {
     guard !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
     return value.split(separator: ",")
-      .compactMap { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-      .map(Self.init(rawValue:))
+      .map { Self(rawValue: String($0)) }
+      .filter { !$0.rawValue.isEmpty }
   }
 
-  static func mimeType(for value: String) -> String? {
-    value.split(separator: ";", maxSplits: 1).first.map(String.init)?.trimmingCharacters(in: .whitespacesAndNewlines)
+  /// The part of `value` before the first `;`, trimmed. Unlike `split`, this keeps an empty
+  /// media type empty instead of returning the parameters.
+  static func mimeType(for value: String) -> String {
+    let mimeType = value.prefix { $0 != ";" }
+    return mimeType.trimmingCharacters(in: .whitespacesAndNewlines)
   }
 }
 
@@ -102,15 +107,8 @@ extension HTTPContentType: Decodable {
   /// - Parameter decoder: The decoder to read data from.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
-    self.rawValue = try container.decode(String.self)
-    self.mimeType = Self.mimeType(for: rawValue) ?? ""
-  }
-}
-
-public extension HTTPContentType {
-  /// Allows comparison of raw string values.
-  static func == (lhs: HTTPContentType, rhs: StringLiteralType) -> Bool {
-    lhs.mimeType == HTTPContentType.mimeType(for: rhs)
+    let rawString = try container.decode(String.self)
+    self.init(rawValue: rawString)
   }
 }
 
@@ -127,7 +125,8 @@ public extension HTTPContentType {
     "text/css"
   }
 
-  /// Form Data.
+  /// The `form-data` disposition type used in a multipart part's `Content-Disposition` header.
+  /// This is not a media type; use ``multipartForm`` for a `Content-Type` header.
   @inlinable
   static var formData: Self {
     "form-data"
