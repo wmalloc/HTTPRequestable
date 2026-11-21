@@ -212,7 +212,7 @@ public extension HTTPTransferable {
   /// - Returns: Data stream and response.
   @inlinable
   func bytes(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
-    try await session.bytes(for: request, delegate: delegate ?? HTTPRedirectPolicy.default)
+    try await session.bytes(for: request, delegate: delegate)
   }
 
   /// Creates an object from the data returned by a request.

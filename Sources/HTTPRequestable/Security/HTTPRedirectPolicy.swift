@@ -17,9 +17,9 @@ import HTTPTypes
 /// location. This policy blocks downgrades from `https` to another scheme and removes credential
 /// headers when a redirect leaves the origin (scheme, host and port) of the request.
 ///
-/// It is used automatically when no `delegate` is passed to a request. A delegate you pass replaces it,
-/// so forward `urlSession(_:task:willPerformHTTPRedirection:newRequest:completionHandler:)` to a
-/// policy of your own to keep the protection.
+/// It is applied automatically through ``HTTPSecurityDelegate``, which also wraps any delegate you pass
+/// to a request. Pass an `HTTPRedirectPolicy` as the delegate to use a policy of your own. On platforms
+/// without the Objective-C runtime a delegate cannot be wrapped, so one you pass replaces this policy.
 public final class HTTPRedirectPolicy: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
   /// The policy used when a request has no delegate: blocks downgrades and strips sensitive headers
   /// on cross-origin redirects.
