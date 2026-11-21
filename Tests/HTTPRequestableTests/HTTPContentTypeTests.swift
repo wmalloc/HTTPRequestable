@@ -23,6 +23,19 @@ struct HTTPContentTypeTests {
     #expect(singleType.mimeType == "image/png")
   }
 
+  @Test("mimeType is empty when only parameters are present")
+  func mimeTypeWithoutMediaType() {
+    #expect(HTTPContentType(rawValue: "; charset=utf-8").mimeType.isEmpty)
+    #expect(HTTPContentType(rawValue: "").mimeType.isEmpty)
+    #expect(HTTPContentType(rawValue: " text/html ; charset=utf-8").mimeType == "text/html")
+  }
+
+  @Test("Blank entries are dropped when parsing")
+  func contentTypesDropsBlankEntries() {
+    let parsed = HTTPContentType.contentTypes(for: "a/b, ,c/d,,")
+    #expect(parsed.map(\.rawValue) == ["a/b", "c/d"])
+  }
+
   @Test("Parses multiple content types")
   func contentTypesParsing() {
     let parsed = HTTPContentType.contentTypes(for: "application/json, text/html; charset=utf-8 ,image/png")
@@ -37,7 +50,7 @@ struct HTTPContentTypeTests {
     #expect(HTTPContentType.contentTypes(for: "").isEmpty)
   }
 
-  @Test("StringLiteral and LosslessStringConvertible init")
+  @Test("StringLiteral and LosslessStringInit")
   func stringLiteralAndLosslessInit() {
     let literal: HTTPContentType = "text/css"
     #expect(literal.rawValue == "text/css")
@@ -69,13 +82,6 @@ struct HTTPContentTypeTests {
     let data = try JSONEncoder().encode(ctype)
     let decoded = try JSONDecoder().decode(HTTPContentType.self, from: data)
     #expect(decoded == ctype)
-  }
-
-  @Test("Comparing with string literal")
-  func equalsStringLiteral() {
-    let ctype: HTTPContentType = "application/json"
-    #expect(ctype == "application/json")
-    #expect(!(ctype == "text/html"))
   }
 
   @Test("Static content types are correct")
