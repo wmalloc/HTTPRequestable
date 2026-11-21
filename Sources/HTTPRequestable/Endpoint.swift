@@ -18,9 +18,9 @@ import HTTPTypes
 /// can be combined with the macro:
 ///
 /// - `method` -> `var method: HTTPMethod { <method> }`; omitted, the protocol default `.get` applies.
-/// - `path`: -> `var path: String { <path> }`; must be a constant.
+/// - `path` -> `var path: String { <path> }`; must be a constant.
 ///
-/// Members are `public` when the type is `public` or `open`.
+/// Members are `public` when the type is `public` or `open`, and `package` when the type is `package`.
 ///
 /// ```swift
 /// @Endpoint(.post, path: "/api/v1/items", headerFields: [.accept: "application/json"])

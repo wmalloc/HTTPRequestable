@@ -11,7 +11,7 @@ import SwiftSyntaxMacros
 /// Always adds stored `headerFields`, initialized from `headerFields:` when given. Adds `method`
 /// (first unlabeled argument), `path` (`path:`) and stored `queryItems` (`queryItems:`) only when
 /// those arguments are passed, so hand-written members can be combined with the macro. Members are
-/// `public` when the type is `public` or `open`.
+/// `public` when the type is `public` or `open`, and `package` when the type is `package`.
 public struct EndpointMacro: MemberMacro {
   public static func expansion(of node: AttributeSyntax,
                                providingMembersOf declaration: some DeclGroupSyntax,

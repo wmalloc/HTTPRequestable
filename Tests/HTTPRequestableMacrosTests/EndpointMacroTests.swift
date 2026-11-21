@@ -292,5 +292,53 @@ struct EndpointMacroTests {
       failureHandler: recordMacroFailure
     )
   }
+
+  @Test func ignoresStaticMembersWithSameName() {
+    assertMacroExpansion(
+      """
+      @Endpoint(path: "/items")
+      struct ItemsRequest {
+        static let path = "/other"
+      }
+      """,
+      expandedSource: """
+      struct ItemsRequest {
+        static let path = "/other"
+
+        var headerFields = HTTPFields()
+
+        var path: String {
+          "/items"
+        }
+
+        var queryItems: [URLQueryItem] = []
+      }
+      """,
+      macroSpecs: macros,
+      indentationWidth: .spaces(2),
+      failureHandler: recordMacroFailure
+    )
+  }
+
+  @Test func packageTypeGetsPackageMembers() {
+    assertMacroExpansion(
+      """
+      @Endpoint
+      package struct ItemsRequest {
+      }
+      """,
+      expandedSource: """
+      package struct ItemsRequest {
+
+        package var headerFields = HTTPFields()
+
+        package var queryItems: [URLQueryItem] = []
+      }
+      """,
+      macroSpecs: macros,
+      indentationWidth: .spaces(2),
+      failureHandler: recordMacroFailure
+    )
+  }
 }
 #endif

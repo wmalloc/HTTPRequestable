@@ -34,6 +34,9 @@ public final class HTTPRequestHeadersModifier: HTTPRequestModifier, @unchecked S
   /// exists for that name, preserving any caller‑supplied value.
   public let replaceExisting: Bool
 
+  /// The hosts this modifier is restricted to, or `nil` to apply to any host.
+  public let allowedHosts: Set<String>?
+
   /// Creates a modifier from an `HTTPFields` collection.
   ///
   /// The default set is defined by `HTTPFields.defaultHeaders` and
@@ -44,9 +47,12 @@ public final class HTTPRequestHeadersModifier: HTTPRequestModifier, @unchecked S
   ///   - headerFields: The headers to apply.
   ///   - replaceExisting: When `true`, fields already present on the
   ///     request are overwritten.  Defaults to `false`.
-  public init(headerFields: HTTPFields, replaceExisting: Bool = false) {
+  ///   - allowedHosts: Hosts the modifier is restricted to.  Defaults to
+  ///     `nil`, which applies the modifier to every host.
+  public init(headerFields: HTTPFields, replaceExisting: Bool = false, allowedHosts: Set<String>? = nil) {
     self.headerFields = headerFields
     self.replaceExisting = replaceExisting
+    self.allowedHosts = allowedHosts
   }
 
   /// Creates a modifier from an arbitrary collection of `HTTPField`s.
@@ -60,9 +66,12 @@ public final class HTTPRequestHeadersModifier: HTTPRequestModifier, @unchecked S
   ///     the modifier.
   ///   - replaceExisting: When `true`, fields already present on the
   ///     request are overwritten.  Defaults to `false`.
-  public init(fields: some Sequence<HTTPField>, replaceExisting: Bool = false) {
+  ///   - allowedHosts: Hosts the modifier is restricted to.  Defaults to
+  ///     `nil`, which applies the modifier to every host.
+  public init(fields: some Sequence<HTTPField>, replaceExisting: Bool = false, allowedHosts: Set<String>? = nil) {
     self.headerFields = HTTPFields(fields)
     self.replaceExisting = replaceExisting
+    self.allowedHosts = allowedHosts
   }
 
   /// Creates a modifier from a dictionary of header names and values.
@@ -76,7 +85,9 @@ public final class HTTPRequestHeadersModifier: HTTPRequestModifier, @unchecked S
   ///   - headers: A dictionary mapping header names to string values.
   ///   - replaceExisting: When `true`, fields already present on the
   ///     request are overwritten.  Defaults to `false`.
-  public init(headers: [String: String], replaceExisting: Bool = false) {
+  ///   - allowedHosts: Hosts the modifier is restricted to.  Defaults to
+  ///     `nil`, which applies the modifier to every host.
+  public init(headers: [String: String], replaceExisting: Bool = false, allowedHosts: Set<String>? = nil) {
     var fields = HTTPFields()
     for (key, value) in headers {
       guard let fieldName = HTTPField.Name(key) else { continue }
@@ -84,6 +95,7 @@ public final class HTTPRequestHeadersModifier: HTTPRequestModifier, @unchecked S
     }
     self.headerFields = fields
     self.replaceExisting = replaceExisting
+    self.allowedHosts = allowedHosts
   }
 
   /// Applies the stored headers to a mutable `HTTPRequest` instance.

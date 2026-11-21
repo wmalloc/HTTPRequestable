@@ -24,7 +24,7 @@ public extension URLRequest {
   /// - Throws: Any error thrown by one of the modifiers during modification.
   func modify(_ modifiers: some Sequence<any HTTPRequestModifier>, for session: URLSession?) async throws -> Self {
     var updatedRequest = self
-    for modifier in modifiers {
+    for modifier in modifiers where modifier.isAllowed(url: url) {
       try await modifier.modify(&updatedRequest, for: session)
     }
     return updatedRequest
