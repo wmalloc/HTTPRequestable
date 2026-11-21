@@ -23,6 +23,19 @@ struct HTTPContentTypeTests {
     #expect(singleType.mimeType == "image/png")
   }
 
+  @Test("mimeType is empty when only parameters are present")
+  func mimeTypeWithoutMediaType() {
+    #expect(HTTPContentType(rawValue: "; charset=utf-8").mimeType.isEmpty)
+    #expect(HTTPContentType(rawValue: "").mimeType.isEmpty)
+    #expect(HTTPContentType(rawValue: " text/html ; charset=utf-8").mimeType == "text/html")
+  }
+
+  @Test("Blank entries are dropped when parsing")
+  func contentTypesDropsBlankEntries() {
+    let parsed = HTTPContentType.contentTypes(for: "a/b, ,c/d,,")
+    #expect(parsed.map(\.rawValue) == ["a/b", "c/d"])
+  }
+
   @Test("Parses multiple content types")
   func contentTypesParsing() {
     let parsed = HTTPContentType.contentTypes(for: "application/json, text/html; charset=utf-8 ,image/png")
