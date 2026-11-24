@@ -97,6 +97,23 @@ private final class PlainDelegate: NSObject, URLSessionTaskDelegate, @unchecked 
   // @unchecked: NSObject is not Sendable; this subclass has no state.
 }
 
+/// Races the rest of the chain against a timeout. Calling `next` from a child task needs a `@Sendable` handler.
+private struct TimeoutInterceptor: HTTPInterceptor {
+  let timeout: Duration
+
+  func intercept(_ request: HTTPRequest, next: @escaping NextHandler, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPClientResponse {
+    try await withThrowingTaskGroup(of: HTTPClientResponse.self) { group in
+      group.addTask { try await next(request, nil) }
+      group.addTask {
+        try await Task.sleep(for: timeout)
+        throw URLError(.timedOut)
+      }
+      defer { group.cancelAll() }
+      return try await group.next()!
+    }
+  }
+}
+
 private struct Client: HTTPTransferable {
   let session: URLSession
   var requestModifiers: [any HTTPRequestModifier] = [AuthModifier()]
@@ -291,6 +308,16 @@ struct InterceptorSecurityTests {
     #expect(authorization(sentTo: "origin.test") == ["Bearer secret"])
   }
   #endif
+
+  // MARK: Concurrency
+
+  @Test("An interceptor can call next from a child task")
+  func nextFromChildTask() async throws {
+    let client = Client(session: session, interceptors: [TimeoutInterceptor(timeout: .seconds(5))])
+    let response = try await client.performRequest(request("https://origin.test/start"), httpBody: nil)
+    #expect(response.response.status == .ok)
+    #expect(authorization(sentTo: "origin.test") == ["Bearer secret"])
+  }
 
   // MARK: Order
 

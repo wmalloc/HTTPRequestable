@@ -34,16 +34,19 @@ import HTTPTypes
 public protocol HTTPInterceptor: Sendable {
   /// A closure type representing the next step in the interceptor chain.
   ///
-  /// This typealias is used to forward the current HTTP request, optional body data, and an optional delegate
-  /// to the next interceptor or the actual network execution. It allows interceptors to perform pre-processing,
+  /// This typealias is used to forward the current HTTP request and an optional delegate to the next
+  /// interceptor or the actual network execution. It allows interceptors to perform pre-processing,
   /// post-processing, or short-circuit the request handling.
+  ///
+  /// The handler is `@Sendable`, so an interceptor can call it from a child task, for example to race the
+  /// request against a timeout in a task group. A closure you create of this type must be `@Sendable` too.
   ///
   /// - Parameters:
   ///   - request: The `HTTPRequest` object representing the original or modified outbound HTTP request.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
   /// - Returns: An `HTTPClientResponse` representing the response for the request.
   /// - Throws: Propagates any error thrown by the next interceptor or the underlying network operation.
-  typealias NextHandler = (_ request: HTTPRequest, _ delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPClientResponse
+  typealias NextHandler = @Sendable (_ request: HTTPRequest, _ delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPClientResponse
 
   /**
    Intercepts an outgoing HTTP request, allowing modification, observation, or short-circuiting of the request before it continues through the interceptor chain.

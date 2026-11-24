@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - **HTTPInterceptor**: When an interceptor moves a request to another origin, sensitive header values the request carried into the chain (for example an `Authorization` header added by a request modifier) are removed; values the interceptor sets itself are kept. Moving an `https` request to another scheme throws `URLError(.appTransportSecurityRequiresSecureConnection)`. Both follow the redirect policy of the caller's delegate, and a delegate substituted by an interceptor cannot relax them.
 - **HTTPTransferable**: `bytes(for:)` now applies `requestModifiers`, like every other request method. Interceptors still do not run for streamed requests, and this is now documented.
+- **Breaking — HTTPInterceptor.NextHandler** is now `@Sendable`, so interceptors can call `next` from child tasks (for example to race a request against a timeout). Existing `HTTPInterceptor` conformances compile and behave unchanged, including ones that spell out the closure type without `@Sendable`. Code that creates a `NextHandler` closure, for example to call `URLSession.performRequest(_:next:interceptors:delegate:)` or an interceptor directly, must make it `@Sendable`, so it can no longer capture non-`Sendable` values.
 
 ## [0.80.0]
 
