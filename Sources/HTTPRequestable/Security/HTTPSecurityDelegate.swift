@@ -160,6 +160,51 @@ extension URLSession {
   static func maxResponseSize(of delegate: any URLSessionTaskDelegate) -> Int? {
     (delegate as? HTTPSecurityDelegate)?.maxResponseSize
   }
+
+  /// The delegate to give a task after an interceptor chain forwards `forwarded`, given the `caller`'s
+  /// delegate that entered the chain.
+  ///
+  /// The caller's redirect policy, pins and response size limit always apply, so an interceptor cannot
+  /// relax them by substituting or wrapping the delegate:
+  /// - `nil`, or the caller's own delegate, gives the caller's secured delegate unchanged.
+  /// - Any other delegate is wrapped in an `HTTPSecurityDelegate` with the caller's settings. Callbacks
+  ///   those settings do not consume reach `forwarded`, so its own redirect policy and pins still run
+  ///   and can only add restrictions. The smaller of the two response size limits applies.
+  static func chainedTaskDelegate(_ forwarded: (any URLSessionTaskDelegate)?,
+                                  caller: (any URLSessionTaskDelegate)?) -> any URLSessionTaskDelegate {
+    let secured = secureTaskDelegate(caller)
+    guard let forwarded, forwarded !== caller, forwarded !== secured else {
+      return secured
+    }
+    let redirectPolicy: HTTPRedirectPolicy?
+    let pinning: HTTPPublicKeyPinning?
+    let callerLimit: Int?
+    switch secured {
+    case let security as HTTPSecurityDelegate:
+      (redirectPolicy, pinning, callerLimit) = (security.redirectPolicy, security.pinning, security.maxResponseSize)
+    case let policy as HTTPRedirectPolicy:
+      (redirectPolicy, pinning, callerLimit) = (policy, nil, nil)
+    default:
+      (redirectPolicy, pinning, callerLimit) = (.default, nil, nil)
+    }
+    let limits = [callerLimit, maxResponseSize(of: forwarded)].compactMap { $0 }
+    return HTTPSecurityDelegate(redirectPolicy: redirectPolicy, pinning: pinning, maxResponseSize: limits.min(), delegate: forwarded)
+  }
+
+  /// The redirect policy configured on `delegate`, or ``HTTPRedirectPolicy/default`` when it has none.
+  ///
+  /// An `HTTPSecurityDelegate` with no redirect policy still gets the default one here: turning off
+  /// redirect filtering does not let interceptors move credentials to another origin.
+  static func redirectPolicy(of delegate: (any URLSessionTaskDelegate)?) -> HTTPRedirectPolicy {
+    switch delegate {
+    case let policy as HTTPRedirectPolicy:
+      policy
+    case let security as HTTPSecurityDelegate:
+      security.redirectPolicy ?? .default
+    default:
+      .default
+    }
+  }
 }
 
 #else
@@ -173,6 +218,19 @@ extension URLSession {
 
   static func maxResponseSize(of delegate: any URLSessionTaskDelegate) -> Int? {
     nil
+  }
+
+  /// The delegate to give a task after an interceptor chain forwards `forwarded`. Without the
+  /// Objective-C runtime a delegate cannot be wrapped, so a delegate an interceptor passes replaces the
+  /// caller's, as one a caller passes replaces the default redirect policy.
+  static func chainedTaskDelegate(_ forwarded: (any URLSessionTaskDelegate)?,
+                                  caller: (any URLSessionTaskDelegate)?) -> any URLSessionTaskDelegate {
+    secureTaskDelegate(forwarded ?? caller)
+  }
+
+  /// The redirect policy passed as `delegate`, or ``HTTPRedirectPolicy/default`` otherwise.
+  static func redirectPolicy(of delegate: (any URLSessionTaskDelegate)?) -> HTTPRedirectPolicy {
+    (delegate as? HTTPRedirectPolicy) ?? .default
   }
 }
 

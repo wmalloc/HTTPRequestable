@@ -83,6 +83,40 @@ public final class HTTPRedirectPolicy: NSObject, URLSessionTaskDelegate, @unchec
       && lhs.host?.lowercased() == rhs.host?.lowercased()
       && lhs.port == rhs.port
   }
+
+  /// The request to send after interceptors forward `request`, given the request that entered the chain.
+  ///
+  /// Interceptors run after request modifiers, so `original` may already carry credentials meant for its
+  /// origin. When `request` has a different origin (scheme and authority), sensitive header values it
+  /// carried over from `original` are removed; values an interceptor set itself are kept. A move from
+  /// `https` to another scheme is refused when ``blocksDowngrade`` is `true`.
+  ///
+  /// - Parameters:
+  ///   - request: The request the interceptors forwarded.
+  ///   - original: The request that entered the interceptor chain.
+  /// - Returns: `request`, without the sensitive header values carried over from `original` when the
+  ///   origin changed.
+  /// - Throws: `URLError(.appTransportSecurityRequiresSecureConnection)` for a blocked downgrade.
+  func forwardedRequest(_ request: HTTPRequest, original: HTTPRequest) throws -> HTTPRequest {
+    if blocksDowngrade, original.scheme?.lowercased() == "https", request.scheme?.lowercased() != "https" {
+      throw URLError(.appTransportSecurityRequiresSecureConnection)
+    }
+    if original.scheme?.lowercased() == request.scheme?.lowercased(),
+       original.authority?.lowercased() == request.authority?.lowercased() {
+      return request
+    }
+
+    var carried: [HTTPField.Name: Set<String>] = [:]
+    for field in original.headerFields where sensitiveHeaders.contains(field.name) {
+      carried[field.name, default: []].insert(field.value)
+    }
+    guard !carried.isEmpty else {
+      return request
+    }
+    var forwarded = request
+    forwarded.headerFields = HTTPFields(request.headerFields.filter { carried[$0.name]?.contains($0.value) != true })
+    return forwarded
+  }
 }
 
 private extension URLRequest {

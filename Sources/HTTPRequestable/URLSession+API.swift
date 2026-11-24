@@ -15,27 +15,35 @@ import HTTPTypes
 extension URLSession {
   /// Sends the given HTTP request through the provided interceptor chain and returns the resulting response.
   ///
-  /// This method applies the registered interceptors to the provided request in reverse order, wrapping each one around the provided `interceptor` closure.
-  /// The resulting chain is then executed asynchronously, allowing each interceptor to observe and modify the request or response as needed before ultimately
-  /// forwarding the response back to the caller.
+  /// Wraps `send` in `interceptors` and runs the chain. The first interceptor is the outermost: it sees
+  /// the request first and the response last.
+  ///
+  /// Before `send` runs, the request the interceptors forward is checked against the one that entered the
+  /// chain, using the redirect policy of `delegate` (see ``HTTPRedirectPolicy/forwardedRequest(_:original:)``),
+  /// and the delegate they forward is combined with `delegate`'s redirect policy, pins and response size
+  /// limit (see `chainedTaskDelegate(_:caller:)`). Both come from the caller's delegate, not one an
+  /// interceptor substitutes, so an interceptor cannot relax them.
   ///
   /// - Parameters:
   ///   - request: The `HTTPRequest` to send through the interceptor chain.
-  ///   - next: The terminal closure that is called to perform the actual network operation. This closure receives the (potentially modified)
-  ///   - interceptors: A collection of`HTTPInterceptor` that allows customization of the request and response behavior. If not provided, empty array.
+  ///   - send: The terminal closure that performs the network operation with the (potentially modified) request.
+  ///   - interceptors: The interceptors to run, outermost first. Defaults to none.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
-  /// request and returns an `HTTPClientResponse` asynchronously. Interceptors can call this closure to forward the request and receive the response.
   ///
   /// - Returns: An `HTTPClientResponse` containing the data and metadata received from the server after all interceptors have been applied.
   ///
-  /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
-  ///
-  /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
-  func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.NextHandler,
+  /// - Throws: Any error thrown by an interceptor or during the final network operation, or
+  ///   `URLError(.appTransportSecurityRequiresSecureConnection)` when an interceptor moves an `https`
+  ///   request to another scheme. Errors propagate up through the interceptor chain.
+  func performRequest(_ request: HTTPRequest, next send: @escaping HTTPInterceptor.NextHandler,
                       interceptors: some Sequence<any HTTPInterceptor> = [],
                       delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse
   {
-    var next = interceptor
+    let policy = Self.redirectPolicy(of: delegate)
+    var next: HTTPInterceptor.NextHandler = { forwarded, forwardedDelegate in
+      try await send(policy.forwardedRequest(forwarded, original: request),
+                     Self.chainedTaskDelegate(forwardedDelegate, caller: delegate))
+    }
     for interceptor in interceptors.reversed() {
       let _next = next
       next = {

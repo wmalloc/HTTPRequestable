@@ -149,9 +149,13 @@ If you wish to modify the requests before they are sent to the server, you can c
 For instance, you could create an authorization modifier that would add the `Authorization` header to the request.
 
 ### HTTPInterceptor
-If you wish to intercept the requests before they are finished, you can create an object that conforms to the `HTTPInterceptor` interface and add it to the `interceptors`. They are called in the reverse order.
+If you wish to intercept the requests before they are finished, you can create an object that conforms to the `HTTPInterceptor` interface and add it to the `interceptors`. Interceptors run after the request modifiers, in the order they are listed: the first interceptor sees the request first and the response last.
 
-Logging interceptors are provided if you would like to log you responses.
+If an interceptor sends the request to a different origin, credential headers the request already carried (such as `Authorization`) are removed, and moving an `https` request to `http` fails.
+
+Interceptors do not run for `bytes(for:)`, which streams the response; request modifiers do.
+
+No logging interceptor is included. If you write one, keep credentials out of your logs: `HTTPClientResponse.request` is the request as it was sent, so redact the fields in `HTTPRedirectPolicy.defaultSensitiveHeaders` (and any others your API uses), and avoid logging request or response bodies.
 
 ## License
 

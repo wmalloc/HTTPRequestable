@@ -12,6 +12,25 @@ import Foundation
 import HTTPTypes
 
 /// Interceptor is a middleware component that can intercept, modify, or observe network requests and responses.
+///
+/// Interceptors run after request modifiers, in the order they are listed. The first interceptor is the
+/// outermost: it sees the request first and the response last.
+///
+/// The request an interceptor chain forwards is checked before it is sent:
+/// - If its origin (scheme and authority) differs from the request that entered the chain, sensitive
+///   header values carried over from that request, such as an `Authorization` header a modifier added,
+///   are removed. Values an interceptor sets itself after changing the origin are kept.
+/// - A move from `https` to another scheme fails with `URLError(.appTransportSecurityRequiresSecureConnection)`.
+///
+/// Both rules follow the ``HTTPRedirectPolicy`` of the delegate passed to the request, or
+/// ``HTTPRedirectPolicy/default``.
+///
+/// An interceptor may pass a different delegate to `next`, for example to collect metrics. On platforms
+/// with the Objective-C runtime, the caller's
+/// redirect policy, public key pins and response size limit still apply to the task; the interceptor's
+/// delegate receives the remaining callbacks and can add restrictions but not remove them.
+///
+/// - Important: Interceptors do not run for `bytes(for:delegate:)`, which streams the response.
 public protocol HTTPInterceptor: Sendable {
   /// A closure type representing the next step in the interceptor chain.
   ///

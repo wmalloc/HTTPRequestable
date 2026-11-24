@@ -48,18 +48,23 @@ public protocol HTTPTransferable: HTTPTransportable {
 
   // MARK: Response Interceptors
 
-  /// An array of objects that can inspect or transform a received
-  /// response.
+  /// An array of objects that wrap each request: they can change the
+  /// request before it is sent, observe or transform the response, or
+  /// answer the request themselves.
   ///
   /// Each element must conform to `HTTPInterceptor`.  The array is
   /// produced asynchronously for the same reasons as
-  /// `requestModifiers`.  Interceptors are invoked after a request
-  /// completes, allowing error handling, logging, or response
-  /// transformation.
+  /// `requestModifiers`.  Interceptors run after `requestModifiers`.
   ///
-  /// - Returns: A list of interceptors that will be applied in the
-  ///   order they appear.  The default implementation can simply
-  ///   return an empty array.
+  /// The first interceptor is the outermost: it sees the request first
+  /// and the response last.
+  ///
+  /// When an interceptor moves the request to another origin, sensitive
+  /// header values the request already carried are removed, and a move
+  /// from `https` to another scheme fails. See ``HTTPInterceptor``.
+  ///
+  /// - Returns: A list of interceptors in the order they run.  The
+  ///   default implementation can simply return an empty array.
   var interceptors: [any HTTPInterceptor] { get async }
 
   /// Retry policy for handling failed requests.
@@ -83,21 +88,17 @@ extension HTTPTransferable {
 extension HTTPTransferable {
   /// Sends the given HTTP request through the provided interceptor chain and returns the resulting response.
   ///
-  /// This method applies the registered interceptors to the provided request in reverse order, wrapping each one around the provided `interceptor` closure.
-  /// The resulting chain is then executed asynchronously, allowing each interceptor to observe and modify the request or response as needed before ultimately
-  /// forwarding the response back to the caller.
+  /// Wraps `interceptor` in the registered interceptors and runs the chain. The first interceptor is the
+  /// outermost: it sees the request first and the response last.
   ///
   /// - Parameters:
   ///   - request: The `HTTPRequest` to send through the interceptor chain.
-  ///   - next: The terminal closure that is called to perform the actual network operation. This closure receives the (potentially modified)
+  ///   - next: The terminal closure that performs the network operation with the (potentially modified) request.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
-  /// request and returns an `HTTPClientResponse` asynchronously. Interceptors can call this closure to forward the request and receive the response.
   ///
   /// - Returns: An `HTTPClientResponse` containing the data and metadata received from the server after all interceptors have been applied.
   ///
   /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
-  ///
-  /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
   func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.NextHandler, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let chain = await interceptors
     return try await session.performRequest(request, next: interceptor, interceptors: chain, delegate: delegate)
@@ -140,7 +141,7 @@ public extension HTTPTransferable {
   func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
-      let (data, response) = try await self.session.upload(for: $0, fromFile: fileURL, delegate: $1)
+      let (data, response) = try await self.session.upload(for: $0, fromFile: fileURL, delegate: URLSession.secureTaskDelegate($1))
       return HTTPClientResponse(request: $0, requestBody: .file(fileURL), response: response, responseData: data)
     }
     return try await performRequest(updatedRequest, next: next, delegate: delegate)
@@ -155,7 +156,7 @@ public extension HTTPTransferable {
   func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
-      let (data, response) = try await self.session.upload(for: $0, from: bodyData, delegate: $1)
+      let (data, response) = try await self.session.upload(for: $0, from: bodyData, delegate: URLSession.secureTaskDelegate($1))
       return HTTPClientResponse(request: $0, requestBody: .data(bodyData), response: response, responseData: data)
     }
     return try await performRequest(updatedRequest, next: next, delegate: delegate)
@@ -199,20 +200,28 @@ public extension HTTPTransferable {
   func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     let next: HTTPInterceptor.NextHandler = {
-      let (url, response) = try await self.session.download(for: $0, delegate: $1)
+      let (url, response) = try await self.session.download(for: $0, delegate: URLSession.secureTaskDelegate($1))
       return HTTPClientResponse(request: $0, response: response, responseFileURL: url)
     }
     return try await performRequest(updatedRequest, next: next, delegate: delegate)
   }
 
   /// Returns a byte stream that conforms to AsyncSequence protocol.
+  ///
+  /// `requestModifiers` are applied, and the delegate is secured as for every other request.
+  ///
+  /// - Important: `interceptors` do not run for streamed requests, because an interceptor returns a
+  ///   buffered `HTTPClientResponse` and cannot hand back a stream. Do not rely on an interceptor to
+  ///   enforce a policy, such as a host allowlist or request signing, for requests made with this method.
+  ///
   /// - Parameters:
   ///   - request: The `HTTPRequestConvertible` for which to load data.
   ///   - delegate: Task-specific delegate. defaults to nil
   /// - Returns: Data stream and response.
-  @inlinable
+  /// - Throws: Any error thrown while building or modifying the request, or by the underlying task.
   func bytes(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
-    try await session.bytes(for: request, delegate: delegate)
+    let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
+    return try await session.bytes(for: updatedRequest, delegate: URLSession.secureTaskDelegate(delegate))
   }
 
   /// Creates an object from the data returned by a request.
