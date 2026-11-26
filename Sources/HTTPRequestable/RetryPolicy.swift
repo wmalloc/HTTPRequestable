@@ -26,7 +26,6 @@ import HTTPTypes
 /// ```swift
 /// let policy = RetryPolicy(maxRetries: 3, initialDelay: 0.5, maxDelay: 10)
 /// ```
-@frozen
 public struct RetryPolicy: Sendable {
   /// The number of retries after the first attempt, so a request is sent at most `maxRetries + 1` times.
   /// `0` means no retries.

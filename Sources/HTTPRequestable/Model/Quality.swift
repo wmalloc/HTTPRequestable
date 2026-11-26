@@ -35,7 +35,6 @@ import Foundation
 /// ```
 ///
 /// - SeeAlso: `Quality.Item`, `Quality.Parameter`
-@frozen
 public struct Quality: Hashable, Sendable {
   public var items: [Item]
 
@@ -61,7 +60,6 @@ public struct Quality: Hashable, Sendable {
   /// ```
   ///
   /// - SeeAlso: `Quality`, `Quality.Parameter`
-  @frozen
   public struct Item: Codable, Hashable, Sendable {
     public let item: String
     public let parameters: Parameter
@@ -113,7 +111,6 @@ public struct Quality: Hashable, Sendable {
   /// ```
   ///
   /// - SeeAlso: `Quality.Item`
-  @frozen
   public struct Parameter: Codable, Hashable, Sendable {
     // swiftlint:disable identifier_name
     public let q: Float?

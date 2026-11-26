@@ -38,5 +38,8 @@ struct HTTPFieldNameMacroUsageTests {
     #expect(HTTPField.Name.xMockIdentifier.rawName == "X-Mock-Identifier")
     #expect(String.xMockIdentifier == "X-Mock-Identifier")
     #expect(try HTTPRedirectPolicy.defaultSensitiveHeaders.contains(#require(HTTPField.Name("x-api-key"))))
+    #expect(HTTPRedirectPolicy.defaultSensitiveHeaders.contains(.xAPIKey))
+    #expect(HTTPField.Name.xAPIKey.rawName == "X-API-Key")
+    #expect(HTTPField.Name.userAuthorization.rawName == "User-Authorization")
   }
 }

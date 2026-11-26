@@ -16,8 +16,6 @@ import Foundation
 /// with any item conforming to `Codable`, `Equatable`, and `Sendable`. The structure also supports collection-like
 /// access to its parameters and custom string descriptions.
 ///
-/// - Note: The structure is frozen, which means future versions will not add stored properties, ensuring binary compatibility.
-///
 /// - Parameters:
 ///   - ItemType: The type of the item to associate parameters with. Must conform to `Codable`, `Equatable`, and `Sendable`.
 ///
@@ -33,7 +31,6 @@ import Foundation
 ///
 /// # Thread Safety
 /// `KeyedItem` is `Sendable` as long as its `ItemType` is `Sendable`, making it safe for use in concurrent contexts.
-@frozen
 public struct KeyedItem<ItemType: Codable & Equatable & Sendable>: Equatable, Sendable {
   public let item: ItemType
   /// The parameters. Change them with ``setParameter(_:forKey:)``, which validates them.

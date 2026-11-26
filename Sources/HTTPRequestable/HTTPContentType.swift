@@ -25,7 +25,6 @@ import UniformTypeIdentifiers
 /// type?.parameters["charset"]  // "UTF-8"
 /// HTTPContentType(rawValue: "not a type")  // nil
 /// ```
-@frozen
 public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
   /// The content type as written, without leading or trailing whitespace.
   public let rawValue: String
