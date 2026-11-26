@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 public extension URLSessionConfiguration {
   /// The HTTP header fields of the session configuration as an `HTTPFields` instance.

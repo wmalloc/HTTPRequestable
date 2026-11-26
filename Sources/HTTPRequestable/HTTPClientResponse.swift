@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 public struct HTTPClientResponse: Sendable {
   /// An HTTP message payload.
@@ -200,16 +200,15 @@ public extension HTTPClientResponse {
   ///   * Any error raised while reading a `.file` body from disk.
   ///   * Any error thrown by `transformer`.
   func transformed<ResultType>(using transformer: Transformer<Data, ResultType>) throws -> ResultType {
-    let payload: Data
-    switch responseBody {
+    let payload: Data = switch responseBody {
     case .data(let responseData):
-      payload = responseData
+      responseData
 
     case .file(let url):
-      payload = try Data(contentsOf: url, options: .mappedIfSafe)
+      try Data(contentsOf: url, options: .mappedIfSafe)
 
     case .empty:
-      payload = Data()
+      Data()
     }
 
     return try transformer(payload)

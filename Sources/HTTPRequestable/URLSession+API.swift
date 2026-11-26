@@ -5,11 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-
-import HTTPTypes
 
 extension URLSession {
   /// Sends the given HTTP request through the provided interceptor chain and returns the resulting response.
@@ -66,13 +65,7 @@ extension URLSession: HTTPTransportable {
     while true {
       let clientResponse: HTTPClientResponse
       do {
-        let (data, response) = if let maxResponseSize {
-          try await limitedData(for: request, httpBody: body, maxResponseSize: maxResponseSize, delegate: taskDelegate)
-        } else if let body {
-          try await upload(for: request, from: body, delegate: taskDelegate)
-        } else {
-          try await data(for: request, delegate: taskDelegate)
-        }
+        let (data, response) = try await load(request, httpBody: body, maxResponseSize: maxResponseSize, delegate: taskDelegate)
         clientResponse = HTTPClientResponse(request: request, requestBody: body.map(HTTPClientResponse.Body.data) ?? .empty,
                                             response: response, responseData: data)
       } catch {
@@ -94,6 +87,26 @@ extension URLSession: HTTPTransportable {
     }
   }
 
+  /// Sends `request` once and loads the whole response body.
+  ///
+  /// With a `maxResponseSize`, the body is streamed and the request fails as soon as it is exceeded. The
+  /// limit is only available on Apple platforms, where ``HTTPSecurityDelegate`` provides it.
+  private func load(_ request: HTTPRequest, httpBody body: Data?, maxResponseSize: Int?,
+                    delegate: any URLSessionTaskDelegate) async throws -> (Data, HTTPResponse)
+  {
+    #if canImport(Darwin)
+    if let maxResponseSize {
+      return try await limitedData(for: request, httpBody: body, maxResponseSize: maxResponseSize, delegate: delegate)
+    }
+    #endif
+    if let body {
+      return try await upload(for: request, from: body, delegate: delegate)
+    }
+    return try await data(for: request, delegate: delegate)
+  }
+
+  // `URLSession.AsyncBytes`, which streaming the body needs, exists only on Apple platforms.
+  #if canImport(Darwin)
   /// Loads the response body into memory, failing as soon as it exceeds `maxResponseSize` bytes instead
   /// of buffering all of it.
   ///
@@ -128,6 +141,7 @@ extension URLSession: HTTPTransportable {
     }
     return (data, response)
   }
+  #endif
 
   /// Request data from server
   /// - Parameters:
@@ -203,6 +217,8 @@ extension URLSession: HTTPTransportable {
     return HTTPClientResponse(request: updateRequest, response: response, responseFileURL: url)
   }
 
+  // `URLSession.AsyncBytes` exists only on Apple platforms.
+  #if canImport(Darwin)
   /// Returns a byte stream that conforms to AsyncSequence protocol.
   /// - Parameters:
   ///   - request: The `HTTPRequestConvertible` for which to load data.
@@ -212,6 +228,7 @@ extension URLSession: HTTPTransportable {
     let updateRequest = try request.httpRequest
     return try await bytes(for: updateRequest, delegate: Self.secureTaskDelegate(delegate))
   }
+  #endif
 
   /// Sends `request`, checks the response with the request's `validateResponse(_:)`, and decodes the
   /// body with its `responseDataTransformer`.

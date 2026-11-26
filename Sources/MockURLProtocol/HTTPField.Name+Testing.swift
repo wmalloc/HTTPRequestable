@@ -5,11 +5,11 @@
 //
 
 import Foundation
+import HTTPRequestable
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPRequestable
-import HTTPTypes
 
 public extension HTTPField.Name {
   /// The `X-Mock-Identifier` header field, which ``MockURLProtocol`` uses to find the handler for a request.

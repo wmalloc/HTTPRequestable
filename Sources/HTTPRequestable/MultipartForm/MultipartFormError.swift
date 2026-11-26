@@ -26,37 +26,94 @@ public enum MultipartFormError: LocalizedError, Sendable {
   public var errorDescription: String? {
     switch self {
     case .badURL(let url):
-      String(localized: "multipart_error_invalid_url", bundle: .module) + " " + url.absoluteString
+      MultipartFormError.Message.badURL + " " + url.absoluteString
 
     case .invalidFilename(let url):
-      String(localized: "multipart_error_invalid_filename", bundle: .module) + " " + url.absoluteString
+      MultipartFormError.Message.invalidFilename + " " + url.absoluteString
 
     case .fileNotFound(let url, let error):
-      String(localized: "multipart_error_file_notfound", bundle: .module) + " " + url.absoluteString + " " + (error?.localizedDescription ?? "")
+      MultipartFormError.Message.fileNotFound + " " + url.absoluteString + " " + (error?.localizedDescription ?? "")
 
     case .fileAlreadyExists(let url):
-      String(localized: "multipart_error_file_already_exists", bundle: .module) + " " + url.absoluteString
+      MultipartFormError.Message.fileAlreadyExists + " " + url.absoluteString
 
     case .accessDenied(let url):
-      String(localized: "multipart_error_access_denined", bundle: .module) + " " + url.absoluteString
+      MultipartFormError.Message.accessDenied + " " + url.absoluteString
 
     case .fileIsDirectory(let url):
-      String(localized: "multipart_error_file_is_directory", bundle: .module) + " " + url.absoluteString
+      MultipartFormError.Message.fileIsDirectory + " " + url.absoluteString
 
     case .fileSizeNotAvailable(let url):
-      String(localized: "multipart_error_file_size_not_available", bundle: .module) + " " + url.absoluteString
+      MultipartFormError.Message.fileSizeNotAvailable + " " + url.absoluteString
 
     case .streamCreation(let url):
-      String(localized: "multipart_error_stream_creation", bundle: .module) + " " + url.absoluteString
+      MultipartFormError.Message.streamCreation + " " + url.absoluteString
 
     case .outputStreamWriteFailed(let error):
-      String(localized: "multipart_error_output_stream_write_failed", bundle: .module) + " " + error.localizedDescription
+      MultipartFormError.Message.outputStreamWriteFailed + " " + error.localizedDescription
 
     case .inputStreamReadFailed(let error):
-      String(localized: "multipart_error_input_stream_read_failed", bundle: .module) + " " + error.localizedDescription
+      MultipartFormError.Message.inputStreamReadFailed + " " + error.localizedDescription
 
     case .inputStreamLength(let message):
-      String(localized: "multipart_error_input_stream_length", bundle: .module) + " " + message
+      MultipartFormError.Message.inputStreamLength + " " + message
+    }
+  }
+}
+
+extension MultipartFormError {
+  /// The text that begins each error's ``errorDescription``.
+  enum Message {
+    static var badURL: String {
+      "Bad URL"
+    }
+
+    static var invalidFilename: String {
+      "Invalid filename"
+    }
+
+    static var fileNotFound: String {
+      "File not found"
+    }
+
+    static var fileAlreadyExists: String {
+      "File already exists"
+    }
+
+    static var accessDenied: String {
+      "Access Denied"
+    }
+
+    static var fileIsDirectory: String {
+      "File is directory"
+    }
+
+    static var fileSizeNotAvailable: String {
+      "File size not available"
+    }
+
+    static var streamCreation: String {
+      "Stream creation"
+    }
+
+    static var outputStreamWriteFailed: String {
+      "Output stream write failed"
+    }
+
+    static var inputStreamReadFailed: String {
+      "Input stream read failed"
+    }
+
+    static var inputStreamLength: String {
+      "Input stream length"
+    }
+
+    static var expectedLength: String {
+      "Expected body content length"
+    }
+
+    static var encodedLength: String {
+      "encodedLength"
     }
   }
 }

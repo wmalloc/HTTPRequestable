@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 /// A task delegate that decides whether, and how, a redirect is followed.
 ///

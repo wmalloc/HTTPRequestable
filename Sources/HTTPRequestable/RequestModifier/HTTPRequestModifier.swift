@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 public protocol HTTPRequestModifier: Sendable {
   /// The hosts this modifier is restricted to.

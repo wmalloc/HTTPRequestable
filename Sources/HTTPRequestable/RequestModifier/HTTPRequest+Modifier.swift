@@ -5,11 +5,11 @@
 //
 
 import Foundation
+import HTTPTypes
+import HTTPTypesFoundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypesFoundation
-import HTTPTypes
 
 public extension HTTPRequest {
   /// Applies an ordered collection of request modifiers and returns the resulting request.

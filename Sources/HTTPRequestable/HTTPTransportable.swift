@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 public protocol HTTPTransportable {
   /// Performs a network request and returns the raw response.
@@ -105,6 +105,8 @@ public protocol HTTPTransportable {
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
   func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPClientResponse
 
+  // `URLSession.AsyncBytes` exists only on Apple platforms.
+  #if canImport(Darwin)
   /// Downloads data from the server as part of an HTTP request asynchronously.
   ///
   /// This method sends the specified `HTTPRequestConvertible` object to a server and waits for the response, including file data. The request can optionally include a delegate
@@ -121,6 +123,7 @@ public protocol HTTPTransportable {
   ///
   /// - SeeAlso: `HTTPRequestConvertible`, `HTTPClientResponse`, `URLSessionTaskDelegate`
   func bytes(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse)
+  #endif
 
   /// Sends an HTTP request and returns the parsed object of type `Request.ResultType` asynchronously.
   ///

@@ -5,13 +5,13 @@
 //
 
 import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 @testable import HTTPRequestable
 import HTTPTypes
 import MockURLProtocol
 import Testing
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// A seeded generator (SplitMix64), so jittered delays can be checked repeatably.
 private struct SeededGenerator: RandomNumberGenerator {

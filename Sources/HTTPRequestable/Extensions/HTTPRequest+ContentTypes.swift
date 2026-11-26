@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 public extension HTTPRequest {
   /// The media ranges the request's `Accept` header lists, without their parameters.

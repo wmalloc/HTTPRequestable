@@ -5,7 +5,6 @@ import PackageDescription
 
 let package = Package(
   name: "HTTPRequestable",
-  defaultLocalization: "en",
   platforms: [.iOS(.v18), .tvOS(.v18), .macOS(.v15), .watchOS(.v11), .macCatalyst(.v18), .visionOS(.v2)],
   products: [
     .library(name: "HTTPRequestable", targets: ["HTTPRequestable"]),
@@ -23,8 +22,7 @@ let package = Package(
                                                          .product(name: "HTTPTypesFoundation", package: "swift-http-types")]),
     .target(name: "HTTPRequestable", dependencies: ["HTTPRequestableMacros",
                                                     .product(name: "HTTPTypes", package: "swift-http-types"),
-                                                    .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
-            resources: [.process("Resources")]),
+                                                    .product(name: "HTTPTypesFoundation", package: "swift-http-types")]),
     .target(name: "MockURLProtocol", dependencies: ["HTTPRequestable",
                                                     .product(name: "HTTPTypes", package: "swift-http-types"),
                                                     .product(name: "HTTPTypesFoundation", package: "swift-http-types")]),

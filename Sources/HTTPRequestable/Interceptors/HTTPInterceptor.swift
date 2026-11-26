@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 /// Interceptor is a middleware component that can intercept, modify, or observe network requests and responses.
 ///

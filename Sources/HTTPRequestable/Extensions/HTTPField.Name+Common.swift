@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 /// Extension providing convenience properties for commonly used HTTP header fields.
 public extension HTTPField.Name {

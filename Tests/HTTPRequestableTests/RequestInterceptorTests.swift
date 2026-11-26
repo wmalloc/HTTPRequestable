@@ -5,13 +5,13 @@
 //
 
 import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 @testable import HTTPRequestable
 import HTTPTypes
 import MockURLProtocol
 import Testing
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 struct RequestInterceptorTests {
   let hackerNews: HackerNews = {
@@ -21,7 +21,8 @@ struct RequestInterceptorTests {
     return HackerNews(session: session)
   }()
 
-  @Test func modifyHTTPRequest() async throws {
+  @Test("A request modifier sets Content-Type on an HTTPRequest")
+  func modifyHTTPRequest() async throws {
     let request = try StoryListRequest(hackerNews.environment, storyType: "topstories")
     var httpRequest = try request.httpRequest
     #expect(httpRequest.url?.absoluteString == "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
@@ -31,7 +32,8 @@ struct RequestInterceptorTests {
     #expect(httpRequest.headerFields[.contentType] == HTTPContentType.json.rawValue)
   }
 
-  @Test func modifyURLRequest() async throws {
+  @Test("A request modifier sets Content-Type on a URLRequest")
+  func modifyURLRequest() async throws {
     let request = try StoryListRequest(hackerNews.environment, storyType: "topstories")
     let modifier = AddContentTypeModifier()
     var urlRequest = try request.urlRequest
@@ -41,7 +43,8 @@ struct RequestInterceptorTests {
     #expect(urlRequest.value(forHTTPHeaderField: HTTPField.Name.contentType.rawName) == HTTPContentType.jsonUTF8.rawValue)
   }
 
-  @Test func storageTests() {
+  @Test("Request modifiers can be stored in an array of any HTTPRequestModifier")
+  func storageTests() {
     var storage = [any HTTPRequestModifier]()
     #expect(storage.isEmpty)
     storage.append(AddContentTypeModifier())

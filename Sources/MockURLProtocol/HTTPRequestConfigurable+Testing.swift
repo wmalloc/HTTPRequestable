@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPRequestable
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPRequestable
 
 public extension HTTPRequestConfigurable {
   /// A copy of the request with an `X-Mock-Identifier` header set to a random UUID.

@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 /*
  # URLRequest+Builder
@@ -181,10 +181,8 @@ public extension URLRequest {
   }
 }
 
-/*
- Adds missing documentation for the `URLRequest` extension methods.
- */
-
+// `URLRequest.Attribution` exists only on Apple platforms.
+#if canImport(Darwin)
 @available(iOS 15, tvOS 15, macOS 12, watchOS 8, macCatalyst 15, *)
 public extension URLRequest {
   /// Sets the attribution of the `URLRequest`.
@@ -197,6 +195,7 @@ public extension URLRequest {
     return request
   }
 }
+#endif
 
 public extension URLRequest {
   /// Sets the `Content-Type` header of the `URLRequest` using an `HTTPContentType`.

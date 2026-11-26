@@ -194,7 +194,7 @@ extension URLSession {
     default:
       (redirectPolicy, pinning, callerLimit) = (.default, nil, nil)
     }
-    let limits = [callerLimit, maxResponseSize(of: forwarded)].compactMap { $0 }
+    let limits = [callerLimit, maxResponseSize(of: forwarded)].compactMap(\.self)
     return HTTPSecurityDelegate(redirectPolicy: redirectPolicy, pinning: pinning, maxResponseSize: limits.min(), delegate: forwarded)
   }
 

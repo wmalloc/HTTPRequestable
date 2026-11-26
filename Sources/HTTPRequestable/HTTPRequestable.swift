@@ -5,9 +5,8 @@
 //
 
 import Foundation
+@_exported import HTTPTypes
+@_exported import HTTPTypesFoundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-@_exported import HTTPTypesFoundation
-
-@_exported import HTTPTypes

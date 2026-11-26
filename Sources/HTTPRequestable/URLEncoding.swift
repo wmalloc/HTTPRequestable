@@ -60,7 +60,7 @@ enum URLEncoding {
 
   /// `queries` joined with `&`, leaving out empty ones, or `nil` when none remain.
   static func joinedQuery(_ queries: String?...) -> String? {
-    let parts = queries.compactMap { $0 }.filter { !$0.isEmpty }
+    let parts = queries.compactMap(\.self).filter { !$0.isEmpty }
     return parts.isEmpty ? nil : parts.joined(separator: "&")
   }
 

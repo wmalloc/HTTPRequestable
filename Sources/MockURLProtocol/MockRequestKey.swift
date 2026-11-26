@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 /// A value that supplies the identifier ``MockURLProtocol`` uses to find the handler for a request.
 ///

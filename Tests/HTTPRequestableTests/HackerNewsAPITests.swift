@@ -1,10 +1,10 @@
 import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 @testable import HTTPRequestable
 import MockURLProtocol
 import Testing
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 extension HTTPURLResponse {
   static func ok(url: URL) -> HTTPURLResponse {

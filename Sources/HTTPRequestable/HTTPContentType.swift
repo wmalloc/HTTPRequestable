@@ -399,6 +399,6 @@ public extension HTTPContentType {
     "css": .css, "csv": .csv, "gif": .gif, "heic": .heic, "htm": .html, "html": .html, "jpeg": .jpeg,
     "jpg": .jpeg, "js": .javascript, "json": .json, "m4a": .m4a, "mov": .quickTime, "mp3": .mp3,
     "mp4": .mp4, "pdf": .pdf, "png": .png, "svg": .svg, "txt": .textPlain, "webp": .webp, "xml": .xml,
-    "zip": .zip,
+    "zip": .zip
   ]
 }

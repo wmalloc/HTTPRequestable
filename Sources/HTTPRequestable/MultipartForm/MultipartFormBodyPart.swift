@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 /// Represents a single multipart/form-data body part.
 ///
@@ -134,7 +134,8 @@ extension MultipartFormBodyPart {
 
 extension MultipartFormBodyPart {
   static func lengthMessage(expected: UInt64, actual: UInt64) -> String {
-    String(localized: "multipart_error_expected_length", bundle: .module) + " \(expected), " +
-      String(localized: "multipart_error_encoded_length", bundle: .module) + " \(actual)"
+    let expectedLabel = MultipartFormError.Message.expectedLength
+    let actualLabel = MultipartFormError.Message.encodedLength
+    return "\(expectedLabel) \(expected), \(actualLabel) \(actual)"
   }
 }

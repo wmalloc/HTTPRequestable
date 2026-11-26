@@ -5,12 +5,11 @@
 //
 
 import Foundation
+import HTTPTypes
+import HTTPTypesFoundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypesFoundation
-
-import HTTPTypes
 
 /// A lightweight protocol for types that can produce a fully formed `HTTPRequest`.
 ///

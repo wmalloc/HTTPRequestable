@@ -5,12 +5,11 @@
 //
 
 import Foundation
+import HTTPTypes
+import HTTPTypesFoundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-
-import HTTPTypes
-import HTTPTypesFoundation
 
 /// Method
 public typealias HTTPMethod = HTTPRequest.Method

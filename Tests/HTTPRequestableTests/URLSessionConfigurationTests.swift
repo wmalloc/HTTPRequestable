@@ -5,14 +5,15 @@
 //
 
 import Foundation
+@testable import HTTPRequestable
+import Testing
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-@testable import HTTPRequestable
-import Testing
 
 struct URLSessionConfigurationTests {
-  @Test func defaultHeaders() {
+  @Test("Default headers set Accept-Encoding, Accept-Language and User-Agent on a configuration")
+  func defaultHeaders() {
     let configuration = URLSessionConfiguration.default
     configuration.httpFields = .defaultHeaders
     let headers = configuration.httpAdditionalHeaders

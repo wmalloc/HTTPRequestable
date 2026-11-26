@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 /// Extension providing static methods for creating HTTP fields (headers) with specific values.
 public extension HTTPField {

@@ -5,12 +5,12 @@
 //
 
 import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 @testable import HTTPRequestable
 import HTTPTypes
 import Testing
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 struct URLRequestBuilderTests {
   private let request = URLRequest(url: #URL("https://api.example.com/items"))
@@ -83,7 +83,7 @@ struct URLRequestBuilderTests {
 
   @Test("setMultipartFormData sets the body with its Content-Type and Content-Length")
   func multipart() throws {
-    // A form reads each part's stream once, so an identical second form gives the expected body.
+    /// A form reads each part's stream once, so an identical second form gives the expected body.
     func makeForm() -> MultipartForm {
       let form = MultipartForm(boundary: "BOUNDARY")
       form.append(data: Data("value".utf8), withName: "field")

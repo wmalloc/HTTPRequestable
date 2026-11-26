@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPRequestable
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPRequestable
 
 /// A closure that produces a mock response for a given `URLRequest`.
 ///

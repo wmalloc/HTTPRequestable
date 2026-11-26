@@ -6,11 +6,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-
-import HTTPTypes
 
 /// An enumeration representing different HTTP-related errors that may occur.
 public enum HTTPError: LocalizedError, Sendable {
@@ -47,28 +46,65 @@ extension HTTPError: CustomStringConvertible {
   public var description: String {
     switch self {
     case .invalidURL:
-      String(localized: "error_invalid_url", bundle: .module)
+      Message.invalidURL
 
     case .cannotCreateURLRequest:
-      String(localized: "error_cant_create_url_request", bundle: .module)
+      Message.cannotCreateURLRequest
 
     case .cannotConvertToHTTPResponse:
-      String(localized: "error_cant_convert_to_http_response", bundle: .module)
+      Message.cannotConvertToHTTPResponse
 
     case .cannotConvertToHTTPURLResponse:
-      String(localized: "error_cant_convert_to_http_url_response", bundle: .module)
+      Message.cannotConvertToHTTPURLResponse
 
     case .contentTypeHeaderMissing:
-      String(localized: "error_content_type_header_missing", bundle: .module)
+      Message.contentTypeHeaderMissing
 
     case .invalidContentType:
-      String(localized: "error_invalid_content_type", bundle: .module)
+      Message.invalidContentType
 
     case .headerValueMissing(let header):
-      String(format: String(localized: "error_header_value_missing", bundle: .module), header)
+      "\(Message.headerValueMissing): \(header)"
 
     case .unacceptableStatusCode(let status):
-      String(format: String(localized: "error_unacceptable_status_code", bundle: .module), status.code)
+      "\(Message.unacceptableStatusCode) \(status.code)"
+    }
+  }
+}
+
+extension HTTPError {
+  /// The text of each error's ``description``.
+  enum Message {
+    static var invalidURL: String {
+      "Cannot create URL."
+    }
+
+    static var cannotCreateURLRequest: String {
+      "Cannot create URLRequest."
+    }
+
+    static var cannotConvertToHTTPResponse: String {
+      "Cannot convert URLResponse to HTTPResponse."
+    }
+
+    static var cannotConvertToHTTPURLResponse: String {
+      "Cannot convert URLResponse to HTTPURLResponse."
+    }
+
+    static var contentTypeHeaderMissing: String {
+      "ContentType header is missing."
+    }
+
+    static var invalidContentType: String {
+      "ContentType header value is invalid"
+    }
+
+    static var headerValueMissing: String {
+      "Header missing value"
+    }
+
+    static var unacceptableStatusCode: String {
+      "Unacceptable HTTP status code:"
     }
   }
 }

@@ -9,7 +9,7 @@ import HTTPTypes
 import Testing
 
 struct HTTPRequestableTests {
-  @Test
+  @Test("The default User-Agent names HTTPRequestable")
   func defaultHeaders() {
     let userAgent = HTTPField.defaultUserAgent
     #expect(userAgent.name == HTTPField.Name.userAgent)

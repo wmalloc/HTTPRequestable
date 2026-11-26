@@ -5,11 +5,11 @@
 //
 
 import Foundation
+import HTTPTypes
+import HTTPTypesFoundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
-import HTTPTypesFoundation
 
 public extension HTTPRequestConfigurable {
   /// Appends an HTTP header field to the request's header collection, preserving any existing headers.

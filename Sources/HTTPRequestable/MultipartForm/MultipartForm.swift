@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 /// https://datatracker.ietf.org/doc/html/rfc7578
 open class MultipartForm: AnyMultipartFormBodyPart {
@@ -84,7 +84,12 @@ open class MultipartForm: AnyMultipartFormBodyPart {
       throw MultipartFormError.badURL(fileURL)
     }
 
+    #if canImport(Darwin)
     let isReachable = try fileURL.checkPromisedItemIsReachable()
+    #else
+    // checkPromisedItemIsReachable, which also covers files not yet downloaded from iCloud, is Apple only.
+    let isReachable = try fileURL.checkResourceIsReachable()
+    #endif
     if isReachable == false {
       throw MultipartFormError.accessDenied(fileURL)
     }

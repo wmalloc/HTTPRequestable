@@ -5,10 +5,10 @@
 //
 
 import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import HTTPTypes
 
 /// Extension providing convenience initializers and computed properties for HTTP fields (headers).
 public extension HTTPFields {

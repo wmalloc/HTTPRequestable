@@ -5,13 +5,13 @@
 //
 
 import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 @testable import HTTPRequestable
 import HTTPTypes
 import MockURLProtocol
 import Testing
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 private struct Item: Codable, Equatable {
   let id: Int
@@ -76,7 +76,8 @@ private struct CustomValidationRequest: HTTPRequestConfigurable {
 /// Expects `body` to throw `HTTPError.unacceptableStatusCode(status)`. `HTTPError` is not `Equatable`,
 /// so the case is matched with a pattern.
 private func expectUnacceptableStatus(_ status: HTTPResponse.Status, sourceLocation: SourceLocation = #_sourceLocation,
-                                      _ body: () async throws -> Void) async {
+                                      _ body: () async throws -> Void) async
+{
   let error = await #expect(throws: HTTPError.self, sourceLocation: sourceLocation) {
     try await body()
   }
@@ -187,8 +188,8 @@ struct ResponseValidationTests {
 
   @Test("A response without a body is passed to the transformer as empty data")
   func noBody() throws {
-    let response = HTTPClientResponse(request: HTTPRequest(method: .delete, url: URL(string: "https://api.example.com/x")!),
-                                      response: HTTPResponse(status: .noContent), responseBody: .empty)
+    let response = try HTTPClientResponse(request: HTTPRequest(method: .delete, url: #require(URL(string: "https://api.example.com/x"))),
+                                          response: HTTPResponse(status: .noContent), responseBody: .empty)
     try response.transformed(using: { (data: Data) in #expect(data.isEmpty) })
     #expect(try response.transformed(using: { $0 }).isEmpty)
   }
@@ -207,7 +208,7 @@ private final class ValidationClient: HTTPTransferable, Sendable {
 
 struct MultipartMIMETypeTests {
   @Test("Common file name extensions have MIME types", arguments: [
-    ("png", "image/png"), ("PNG", "image/png"), ("jpg", "image/jpeg"), ("json", "application/json"), ("txt", "text/plain"),
+    ("png", "image/png"), ("PNG", "image/png"), ("jpg", "image/jpeg"), ("json", "application/json"), ("txt", "text/plain")
   ])
   func knownExtensions(pathExtension: String, expected: String) {
     #expect(MultipartForm.mimeType(forPathExtension: pathExtension) == expected)
@@ -217,13 +218,12 @@ struct MultipartMIMETypeTests {
   func unknownExtension() {
     #expect(MultipartForm.mimeType(forPathExtension: "not-a-real-extension") == "application/octet-stream")
   }
-
 }
 
 struct ContentTypePathExtensionTests {
   @Test("Common file name extensions map to content types, ignoring case", arguments: [
     ("png", HTTPContentType.png), ("PNG", .png), ("jpg", .jpeg), ("JPEG", .jpeg), ("json", .json), ("txt", .textPlain),
-    ("pdf", .pdf), ("csv", .csv), ("html", .html), ("svg", .svg), ("zip", .zip), ("mp4", .mp4), ("mov", .quickTime),
+    ("pdf", .pdf), ("csv", .csv), ("html", .html), ("svg", .svg), ("zip", .zip), ("mp4", .mp4), ("mov", .quickTime)
   ])
   func known(pathExtension: String, expected: HTTPContentType) {
     #expect(HTTPContentType(pathExtension: pathExtension)?.mimeType == expected.mimeType)

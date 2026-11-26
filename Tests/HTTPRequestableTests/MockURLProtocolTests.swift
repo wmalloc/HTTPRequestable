@@ -5,12 +5,12 @@
 //
 
 import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 import HTTPRequestable
 import MockURLProtocol
 import Testing
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 struct MockURLProtocolTests {
   private let session: URLSession = {
