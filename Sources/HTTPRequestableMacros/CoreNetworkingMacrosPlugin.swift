@@ -11,6 +11,7 @@ import SwiftSyntaxMacros
 @main
 struct CoreNetworkingMacrosPlugin: CompilerPlugin {
   let providingMacros: [any Macro.Type] = [
-    EndpointMacro.self
+    EndpointMacro.self,
+    URLMacro.self
   ]
 }

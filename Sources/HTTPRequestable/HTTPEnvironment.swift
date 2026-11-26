@@ -102,14 +102,15 @@ public extension HTTPEnvironment {
   /// Replaces the query items with a new array and returns a new instance.
   ///
   /// If *queryItems* is empty, the `queryItems` property will be set to `nil`
-  /// (i.e. no query component in the URL).
+  /// (i.e. no query component in the URL). Names and values are percent-encoded, including `+`,
+  /// which `URLComponents.queryItems` leaves as is and servers decode as a space.
   ///
   /// - Parameter queryItems: An array of :class:`URLQueryItem`.
   /// - Returns: A copy of the current environment with the query items updated.
   @discardableResult
   func setQueryItems(_ queryItems: [URLQueryItem]) -> Self {
     var components = self
-    components.queryItems = queryItems.isEmpty ? nil : queryItems
+    components.percentEncodedQuery = queryItems.isEmpty ? nil : URLEncoding.query(queryItems)
     return components
   }
 
@@ -140,15 +141,16 @@ public extension HTTPEnvironment {
 
   /// Appends new query items to the existing ones.
   ///
-  /// Existing items are preserved; if no items exist, the new ones become the sole query.
+  /// Existing items are preserved exactly as they are percent-encoded; if no items exist, the new ones
+  /// become the sole query. New names and values are percent-encoded as in ``setQueryItems(_:)-([URLQueryItem])``.
   ///
   /// - Parameter newQueryItems: An array of :class:`URLQueryItem` to append.
   /// - Returns: A copy of the current environment with the query items appended.
   @discardableResult
   func appendQueryItems(_ newQueryItems: [URLQueryItem]) -> Self {
-    var existing = queryItems ?? []
-    existing.append(contentsOf: newQueryItems)
-    return setQueryItems(existing)
+    var components = self
+    components.percentEncodedQuery = URLEncoding.joinedQuery(percentEncodedQuery, URLEncoding.query(newQueryItems))
+    return components
   }
 
   /// Convenience wrapper that accepts a dictionary of `String:String` pairs.
@@ -192,11 +194,14 @@ public extension HTTPEnvironment {
 
   /// Sets the user component and returns a new instance.
   ///
-  /// - Warning: Credentials in a URL can leak through logs, proxies and the `Referer` header. Prefer
-  ///   an `Authorization` header.
+  /// - Important: Deprecated. Requests never send a user name or password from the URL:
+  ///   `HTTPRequest` keeps only the scheme, host and port, and ``HTTPRequestConfigurable/url`` removes
+  ///   them. Send credentials in an `Authorization` header instead, for example with
+  ///   `HTTPField.authorization(_:)` in `headerFields` or a request modifier.
   ///
   /// - Parameter user: The new user string or `nil` to clear it.
   /// - Returns: A copy of the current environment with the user updated.
+  @available(*, deprecated, message: "Requests never send URL credentials, and HTTPRequestConfigurable.url removes them. Add an Authorization header instead, for example with HTTPField.authorization(_:).")
   @discardableResult
   func setUser(_ user: String?) -> Self {
     var components = self
@@ -206,11 +211,14 @@ public extension HTTPEnvironment {
 
   /// Sets the password component and returns a new instance.
   ///
-  /// - Warning: Credentials in a URL can leak through logs, proxies and the `Referer` header. Prefer
-  ///   an `Authorization` header.
+  /// - Important: Deprecated. Requests never send a user name or password from the URL:
+  ///   `HTTPRequest` keeps only the scheme, host and port, and ``HTTPRequestConfigurable/url`` removes
+  ///   them. Send credentials in an `Authorization` header instead, for example with
+  ///   `HTTPField.authorization(_:)` in `headerFields` or a request modifier.
   ///
   /// - Parameter password: The new password string or `nil` to clear it.
   /// - Returns: A copy of the current environment with the password updated.
+  @available(*, deprecated, message: "Requests never send URL credentials, and HTTPRequestConfigurable.url removes them. Add an Authorization header instead, for example with HTTPField.authorization(_:).")
   @discardableResult
   func setPassword(_ password: String?) -> Self {
     var components = self
@@ -244,8 +252,14 @@ public extension HTTPEnvironment {
 
   /// Sets the percent‑encoded user component.
   ///
+  /// - Important: Deprecated. Requests never send a user name or password from the URL:
+  ///   `HTTPRequest` keeps only the scheme, host and port, and ``HTTPRequestConfigurable/url`` removes
+  ///   them. Send credentials in an `Authorization` header instead, for example with
+  ///   `HTTPField.authorization(_:)` in `headerFields` or a request modifier.
+  ///
   /// - Parameter percentEncodedUser: The percent‑encoded username or `nil`.
   /// - Returns: A copy of the current environment with the user updated.
+  @available(*, deprecated, message: "Requests never send URL credentials, and HTTPRequestConfigurable.url removes them. Add an Authorization header instead, for example with HTTPField.authorization(_:).")
   @discardableResult
   func setPercentEncodedUser(_ percentEncodedUser: String?) -> Self {
     var components = self
@@ -266,8 +280,14 @@ public extension HTTPEnvironment {
 
   /// Sets the percent‑encoded password component.
   ///
+  /// - Important: Deprecated. Requests never send a user name or password from the URL:
+  ///   `HTTPRequest` keeps only the scheme, host and port, and ``HTTPRequestConfigurable/url`` removes
+  ///   them. Send credentials in an `Authorization` header instead, for example with
+  ///   `HTTPField.authorization(_:)` in `headerFields` or a request modifier.
+  ///
   /// - Parameter percentEncodedPassword: The percent‑encoded password string or `nil`.
   /// - Returns: A copy of the current environment with the password updated.
+  @available(*, deprecated, message: "Requests never send URL credentials, and HTTPRequestConfigurable.url removes them. Add an Authorization header instead, for example with HTTPField.authorization(_:).")
   @discardableResult
   func setPercentEncodedPassword(_ percentEncodedPassword: String?) -> Self {
     var components = self

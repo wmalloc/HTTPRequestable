@@ -93,6 +93,13 @@ struct Request: HTTPRequestConfigurable {
   var headerFields: HTTPFields = [[.accept: "application/json"]
 }
 ```
+## #URL
+Creates a `URL` from a string literal that is checked when you build, so it needs no `!` or `try`:
+```swift
+let base = #URL("https://api.example.com/v1")
+```
+The build fails if the literal isn't a valid URL with a scheme and a host, contains interpolation or unencoded characters such as spaces, or includes a user name or password.
+
 ## Usage
 ### Creating an API Manager
 
