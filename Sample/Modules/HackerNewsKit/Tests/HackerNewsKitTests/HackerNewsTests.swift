@@ -60,18 +60,18 @@ struct HackerNewsTests {
   // MARK: Configuration
 
   @Test("Points at the v0 Hacker News API")
-  func defaultEnvironment() async {
+  func defaultEnvironment() {
     let api = makeAPI()
-    let environment = await api.environment
+    let environment = api.environment
     #expect(environment.scheme == "https")
     #expect(environment.host == "hacker-news.firebaseio.com")
     #expect(environment.path == "/v0")
   }
 
   @Test("Installs the default, JSON and trace request modifiers")
-  func requestModifiers() async {
+  func requestModifiers() {
     let api = makeAPI()
-    let modifiers = await api.requestModifiers
+    let modifiers = api.requestModifiers
     #expect(modifiers.count == 3)
     #expect(modifiers.contains { $0 is TraceRequestModifier })
   }

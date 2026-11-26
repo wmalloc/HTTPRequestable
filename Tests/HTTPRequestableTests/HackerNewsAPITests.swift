@@ -9,6 +9,15 @@ extension HTTPURLResponse {
   }
 }
 
+extension Tag {
+  /// Tests that call a real server over the network.
+  @Tag static var live: Self
+}
+
+/// Whether tests that call the live Hacker News API run. They are off by default, so the suite passes
+/// offline and does not depend on the API being up; set `HTTPREQUESTABLE_LIVE_TESTS=1` to run them.
+let liveTestsEnabled = ProcessInfo.processInfo.environment["HTTPREQUESTABLE_LIVE_TESTS"] == "1"
+
 struct HackerNewsAPITests {
   private var api: HackerNews = {
     let configuration = URLSessionConfiguration.ephemeral
@@ -17,7 +26,8 @@ struct HackerNewsAPITests {
     return HackerNews(session: session)
   }()
 
-  @Test("Top Stories from Live API")
+  @Test("Top Stories from Live API", .tags(.live),
+        .enabled(if: liveTestsEnabled, "Set HTTPREQUESTABLE_LIVE_TESTS=1 to call the live Hacker News API"))
   func testTopStories() async throws {
     let topStories = try await HackerNews.shared.storyList(type: "topstories")
     #expect(!topStories.isEmpty)
@@ -35,7 +45,8 @@ struct HackerNewsAPITests {
     #expect(topStories.count == 466)
   }
 
-  @Test("New Stories from Live API")
+  @Test("New Stories from Live API", .tags(.live),
+        .enabled(if: liveTestsEnabled, "Set HTTPREQUESTABLE_LIVE_TESTS=1 to call the live Hacker News API"))
   func testNewStories() async throws {
     let topStories = try await HackerNews.shared.storyList(type: "newstories")
     #expect(!topStories.isEmpty)
@@ -53,7 +64,8 @@ struct HackerNewsAPITests {
     #expect(newStories.count == 500)
   }
 
-  @Test("Best Stories from Live API")
+  @Test("Best Stories from Live API", .tags(.live),
+        .enabled(if: liveTestsEnabled, "Set HTTPREQUESTABLE_LIVE_TESTS=1 to call the live Hacker News API"))
   func testBestStories() async throws {
     let topStories = try await HackerNews.shared.storyList(type: "beststories")
     #expect(!topStories.isEmpty)

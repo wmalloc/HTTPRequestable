@@ -173,6 +173,14 @@ Interceptors do not run for `bytes(for:)`, which streams the response; request m
 
 No logging interceptor is included. If you write one, keep credentials out of your logs: `HTTPClientResponse.request` is the request as it was sent, so redact the fields in `HTTPRedirectPolicy.defaultSensitiveHeaders` (and any others your API uses), and avoid logging request or response bodies.
 
+## Running the tests
+```sh
+swift test                                   # the package, without network access
+(cd Sample/Modules/HackerNewsKit && swift test)  # the sample client
+HTTPREQUESTABLE_LIVE_TESTS=1 swift test      # also call the live Hacker News API
+```
+Tests that call the live API are tagged `live` and skipped unless `HTTPREQUESTABLE_LIVE_TESTS=1` is set, so the suite passes offline. CI runs the same commands on macOS; see `.github/workflows/ci.yml`.
+
 ## License
 
 **HTTPRequestable** is released under the MIT license. See LICENSE for details.
