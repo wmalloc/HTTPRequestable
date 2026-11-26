@@ -53,7 +53,7 @@ struct TraceRequestModifierTests {
   @Test("Sets the trace header on a URLRequest")
   func modifiesURLRequest() async throws {
     let modifier = TraceRequestModifier(idGenerator: { "trace-2" })
-    var request = try URLRequest(url: #require(URL(string: "https://hacker-news.firebaseio.com/v0/topstories.json")))
+    var request = URLRequest(url: #URL("https://hacker-news.firebaseio.com/v0/topstories.json"))
 
     try await modifier.modify(&request, for: nil)
     #expect(request.value(forHTTPHeaderField: "X-Trace-Id") == "trace-2")

@@ -65,6 +65,10 @@ extension MultipartFormBodyPart {
       }
 
       if bytesRead > 0 {
+        // Stop as soon as the stream exceeds the declared length instead of buffering all of it.
+        guard UInt64(encoded.count + bytesRead) <= contentLength else {
+          throw MultipartFormError.inputStreamLength(Self.lengthMessage(expected: contentLength, actual: UInt64(encoded.count + bytesRead)))
+        }
         encoded.append(buffer, count: bytesRead)
       } else {
         break
@@ -72,9 +76,7 @@ extension MultipartFormBodyPart {
     }
 
     guard UInt64(encoded.count) == contentLength else {
-      let message = String(localized: "multipart_error_expected_length", bundle: .module) + " \(contentLength), " +
-        String(localized: "multipart_error_encoded_length", bundle: .module) + " \(encoded.count)"
-      throw MultipartFormError.inputStreamLength(message)
+      throw MultipartFormError.inputStreamLength(Self.lengthMessage(expected: contentLength, actual: UInt64(encoded.count)))
     }
 
     return encoded
@@ -111,6 +113,9 @@ extension MultipartFormBodyPart {
 
       if bytesRead > 0 {
         totalRead += UInt64(bytesRead)
+        guard totalRead <= contentLength else {
+          throw MultipartFormError.inputStreamLength(Self.lengthMessage(expected: contentLength, actual: totalRead))
+        }
         if buffer.count != bytesRead {
           buffer = Array(buffer[0 ..< bytesRead])
         }
@@ -123,9 +128,14 @@ extension MultipartFormBodyPart {
     }
 
     if totalRead != contentLength {
-      let message = String(localized: "multipart_error_expected_length", bundle: .module) + " \(contentLength), " +
-        String(localized: "multipart_error_encoded_length", bundle: .module) + " \(totalRead)"
-      throw MultipartFormError.inputStreamLength(message)
+      throw MultipartFormError.inputStreamLength(Self.lengthMessage(expected: contentLength, actual: totalRead))
     }
+  }
+}
+
+extension MultipartFormBodyPart {
+  static func lengthMessage(expected: UInt64, actual: UInt64) -> String {
+    String(localized: "multipart_error_expected_length", bundle: .module) + " \(expected), " +
+      String(localized: "multipart_error_encoded_length", bundle: .module) + " \(actual)"
   }
 }

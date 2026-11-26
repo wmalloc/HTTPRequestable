@@ -32,7 +32,7 @@ struct RequestTests {
   func storyListConfiguration() throws {
     let request = try StoryListRequest(environment, storyType: "newstories")
     #expect(request.method == .get)
-    #expect(request.headerFields?[.accept] == "application/json")
+    #expect(request.headerFields[.accept] == "application/json")
     #expect(request.queryItems == [URLQueryItem(name: "print", value: "pretty")])
     #expect(request.httpBody == nil)
   }

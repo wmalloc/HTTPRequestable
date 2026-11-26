@@ -15,27 +15,35 @@ import HTTPTypes
 extension URLSession {
   /// Sends the given HTTP request through the provided interceptor chain and returns the resulting response.
   ///
-  /// This method applies the registered interceptors to the provided request in reverse order, wrapping each one around the provided `interceptor` closure.
-  /// The resulting chain is then executed asynchronously, allowing each interceptor to observe and modify the request or response as needed before ultimately
-  /// forwarding the response back to the caller.
+  /// Wraps `send` in `interceptors` and runs the chain. The first interceptor is the outermost: it sees
+  /// the request first and the response last.
+  ///
+  /// Before `send` runs, the request the interceptors forward is checked against the one that entered the
+  /// chain, using the redirect policy of `delegate` (see ``HTTPRedirectPolicy/forwardedRequest(_:original:)``),
+  /// and the delegate they forward is combined with `delegate`'s redirect policy, pins and response size
+  /// limit (see `chainedTaskDelegate(_:caller:)`). Both come from the caller's delegate, not one an
+  /// interceptor substitutes, so an interceptor cannot relax them.
   ///
   /// - Parameters:
   ///   - request: The `HTTPRequest` to send through the interceptor chain.
-  ///   - next: The terminal closure that is called to perform the actual network operation. This closure receives the (potentially modified)
-  ///   - interceptors: A collection of`HTTPInterceptor` that allows customization of the request and response behavior. If not provided, empty array.
+  ///   - send: The terminal closure that performs the network operation with the (potentially modified) request.
+  ///   - interceptors: The interceptors to run, outermost first. Defaults to none.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
-  /// request and returns an `HTTPClientResponse` asynchronously. Interceptors can call this closure to forward the request and receive the response.
   ///
   /// - Returns: An `HTTPClientResponse` containing the data and metadata received from the server after all interceptors have been applied.
   ///
-  /// - Throws: Any error thrown by an interceptor or during the final network operation. Errors propagate up through the interceptor chain.
-  ///
-  /// - Note: Interceptors are processed in reverse order so that the first interceptor in the array is the last to execute before the network request is made.
-  func performRequest(_ request: HTTPRequest, next interceptor: @escaping HTTPInterceptor.NextHandler,
+  /// - Throws: Any error thrown by an interceptor or during the final network operation, or
+  ///   `URLError(.appTransportSecurityRequiresSecureConnection)` when an interceptor moves an `https`
+  ///   request to another scheme. Errors propagate up through the interceptor chain.
+  func performRequest(_ request: HTTPRequest, next send: @escaping HTTPInterceptor.NextHandler,
                       interceptors: some Sequence<any HTTPInterceptor> = [],
                       delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse
   {
-    var next = interceptor
+    let policy = Self.redirectPolicy(of: delegate)
+    var next: HTTPInterceptor.NextHandler = { forwarded, forwardedDelegate in
+      try await send(policy.forwardedRequest(forwarded, original: request),
+                     Self.chainedTaskDelegate(forwardedDelegate, caller: delegate))
+    }
     for interceptor in interceptors.reversed() {
       let _next = next
       next = {
@@ -51,28 +59,75 @@ extension URLSession: HTTPTransportable {
                              delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse
   {
     var attempt = 0
+    var generator = SystemRandomNumberGenerator()
+    let taskDelegate = Self.secureTaskDelegate(delegate)
+    let maxResponseSize = Self.maxResponseSize(of: taskDelegate)
+    let retryPolicy = retryPolicy.flatMap { $0.allowsRetry(for: request.method) ? $0 : nil }
 
     while true {
+      let clientResponse: HTTPClientResponse
       do {
-        let (data, response) = if let body {
-          try await upload(for: request, from: body, delegate: delegate)
+        let (data, response) = if let maxResponseSize {
+          try await limitedData(for: request, httpBody: body, maxResponseSize: maxResponseSize, delegate: taskDelegate)
+        } else if let body {
+          try await upload(for: request, from: body, delegate: taskDelegate)
         } else {
-          try await data(for: request, delegate: delegate)
+          try await data(for: request, delegate: taskDelegate)
         }
-        return HTTPClientResponse(request: request, requestBody: body.map(HTTPClientResponse.Body.data) ?? .empty, response: response, responseData: data)
+        clientResponse = HTTPClientResponse(request: request, requestBody: body.map(HTTPClientResponse.Body.data) ?? .empty,
+                                            response: response, responseData: data)
       } catch {
-        // Check if we should retry
         guard let retryPolicy, retryPolicy.shouldRetry(error: error, attempt: attempt) else {
           throw error
         }
-
-        // Calculate delay and wait before retrying
-        let delay = retryPolicy.delay(for: attempt)
-        try await Task.sleep(nanoseconds: UInt64(delay * 1000000000))
-
+        try await Task.sleep(for: .seconds(retryPolicy.retryDelay(for: attempt, using: &generator)))
         attempt += 1
+        continue
       }
+
+      // A retryable status such as 503 is retried; once the retries are used up, the last response is
+      // returned as it is, for the caller to validate.
+      guard let retryPolicy, let delay = retryPolicy.retryDelay(after: clientResponse.response, attempt: attempt, now: Date(), using: &generator) else {
+        return clientResponse
+      }
+      try await Task.sleep(for: .seconds(delay))
+      attempt += 1
     }
+  }
+
+  /// Loads the response body into memory, failing as soon as it exceeds `maxResponseSize` bytes instead
+  /// of buffering all of it.
+  ///
+  /// - Throws: `URLError(.dataLengthExceedsMaximum)` when the declared or received length is too large.
+  func limitedData(for request: HTTPRequest, httpBody body: Data?, maxResponseSize: Int,
+                   delegate: any URLSessionTaskDelegate) async throws -> (Data, HTTPResponse)
+  {
+    guard var urlRequest = URLRequest(httpRequest: request) else {
+      throw HTTPError.cannotCreateURLRequest
+    }
+    urlRequest.httpBody = body
+    let (bytes, urlResponse) = try await bytes(for: urlRequest, delegate: delegate)
+    guard let response = (urlResponse as? HTTPURLResponse)?.httpResponse else {
+      bytes.task.cancel()
+      throw HTTPError.cannotConvertToHTTPResponse
+    }
+
+    let expectedLength = urlResponse.expectedContentLength
+    guard expectedLength <= Int64(maxResponseSize) else {
+      bytes.task.cancel()
+      throw URLError(.dataLengthExceedsMaximum)
+    }
+
+    var data = Data()
+    data.reserveCapacity(expectedLength > 0 ? Int(expectedLength) : 0)
+    for try await byte in bytes {
+      guard data.count < maxResponseSize else {
+        bytes.task.cancel()
+        throw URLError(.dataLengthExceedsMaximum)
+      }
+      data.append(byte)
+    }
+    return (data, response)
   }
 
   /// Request data from server
@@ -92,7 +147,7 @@ extension URLSession: HTTPTransportable {
   /// - Returns: Data and response.
   public func upload(for request: some HTTPRequestConvertible, fromFile fileURL: URL, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updateRequest = try request.httpRequest
-    let (data, response) = try await upload(for: updateRequest, fromFile: fileURL, delegate: delegate)
+    let (data, response) = try await upload(for: updateRequest, fromFile: fileURL, delegate: Self.secureTaskDelegate(delegate))
     return HTTPClientResponse(request: updateRequest, requestBody: .file(fileURL), response: response, responseData: data)
   }
 
@@ -104,7 +159,7 @@ extension URLSession: HTTPTransportable {
   /// - Returns: Data and response.
   public func upload(for request: some HTTPRequestConvertible, from bodyData: Data, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updateRequest = try request.httpRequest
-    let (data, response) = try await upload(for: updateRequest, from: bodyData, delegate: delegate)
+    let (data, response) = try await upload(for: updateRequest, from: bodyData, delegate: Self.secureTaskDelegate(delegate))
     return HTTPClientResponse(request: updateRequest, requestBody: .data(bodyData), response: response, responseData: data)
   }
 
@@ -145,7 +200,7 @@ extension URLSession: HTTPTransportable {
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
   public func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let updateRequest = try request.httpRequest
-    let (url, response) = try await download(for: updateRequest, delegate: delegate)
+    let (url, response) = try await download(for: updateRequest, delegate: Self.secureTaskDelegate(delegate))
     return HTTPClientResponse(request: updateRequest, response: response, responseFileURL: url)
   }
 
@@ -156,7 +211,7 @@ extension URLSession: HTTPTransportable {
   /// - Returns: Data stream and response.
   public func bytes(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (URLSession.AsyncBytes, HTTPResponse) {
     let updateRequest = try request.httpRequest
-    return try await bytes(for: updateRequest, delegate: delegate)
+    return try await bytes(for: updateRequest, delegate: Self.secureTaskDelegate(delegate))
   }
 
   /**

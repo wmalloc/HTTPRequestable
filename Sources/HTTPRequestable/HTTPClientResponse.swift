@@ -141,36 +141,40 @@ public extension HTTPClientResponse {
     return self
   }
 
-  /// Validates the content type if acceptable content types are given.
-  /// - Parameter acceptableContentTypes: Set of acceptable content types, defaults to nil.
-  /// - Returns: Self if the content type is acceptable.
+  /// Checks that the response's `Content-Type` is in one of the acceptable media ranges.
+  ///
+  /// - Parameter acceptableContentTypes: The acceptable media ranges, such as `application/json` or
+  ///   `text/*`. Strings that are not valid media ranges are left out, so they accept nothing.
+  /// - Returns: `self`.
+  /// - Throws: The errors of the overload that takes `HTTPContentType` values.
   @discardableResult
   func validateContentTypes(_ acceptableContentTypes: some Sequence<String>) throws -> Self {
-    let contentTypes = acceptableContentTypes.map(HTTPContentType.init(rawValue:))
-    return try validateContentTypes(contentTypes)
+    try validateContentTypes(acceptableContentTypes.compactMap(HTTPContentType.init(rawValue:)))
   }
 
-  /// Validates the content type if acceptable content types are given.
-  /// - Parameter acceptableContentTypes: Set of acceptable content types, defaults to nil.
-  /// - Returns: Self if the content type is acceptable.
+  /// Checks that the response's `Content-Type` is in one of the acceptable media ranges.
+  ///
+  /// A range matches by type and subtype, ignoring parameters and case, so `application/json` accepts
+  /// `application/json; charset=utf-8`. `*/*` accepts any response, even one without `Content-Type`.
+  ///
+  /// - Parameter acceptableContentTypes: The acceptable media ranges, such as `application/json` or
+  ///   `text/*`. When empty, nothing is acceptable.
+  /// - Returns: `self`.
+  /// - Throws: `HTTPError.contentTypeHeaderMissing` when the response has no `Content-Type`, or
+  ///   `HTTPError.invalidContentType` when it is not a valid media type or is in none of the ranges.
   @discardableResult
   func validateContentTypes(_ acceptableContentTypes: some Sequence<HTTPContentType>) throws -> Self {
-    // Wildcard accepts anything
-    if acceptableContentTypes.contains(HTTPContentType.any) {
+    let acceptable = Array(acceptableContentTypes)
+    if acceptable.contains(HTTPContentType.any) {
       return self
     }
 
-    // Ensure the server provided a content type
-    guard let contentTypes = response.contentTypes else {
+    guard let raw = response.headerFields[.contentType], !raw.trimmingCharacters(in: .whitespaces).isEmpty else {
       throw HTTPError.contentTypeHeaderMissing
     }
-
-    // Check if any of the response content types match the acceptable types
-    let acceptable = Set(acceptableContentTypes)
-    guard !contentTypes.isDisjoint(with: acceptable) else {
+    guard let contentType = HTTPContentType(rawValue: raw), acceptable.contains(where: { $0.matches(contentType) }) else {
       throw HTTPError.invalidContentType
     }
-
     return self
   }
 

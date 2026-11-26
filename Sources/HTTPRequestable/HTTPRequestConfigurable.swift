@@ -41,7 +41,23 @@ public protocol HTTPRequestConfigurable: URLConvertible, URLRequestConvertible, 
   var method: HTTPMethod { get }
 
   /// Path to append to the base URL
+  ///
+  /// The path is split on `/` into segments; empty segments are removed. Use ``pathComponents`` instead
+  /// when a segment comes from a value that may itself contain `/`, such as an ID or a file name.
   var path: String { get }
+
+  /// The path segments to append to the environment's path, each percent-encoded on its own.
+  ///
+  /// A `/` inside a segment is sent as `%2F`, so a value cannot add segments of its own. Empty segments
+  /// are removed. The default implementation splits ``path`` on `/`.
+  ///
+  /// ```swift
+  /// var pathComponents: [String] { ["files", fileName] }  // "a/b.txt" → /files/a%2Fb.txt
+  /// ```
+  ///
+  /// - Note: A segment of `.` or `..` makes ``url`` throw, because servers resolve them and the request
+  ///   could reach a different path.
+  var pathComponents: [String] { get }
 
   /// Additional query items to include in the URL
   var queryItems: [URLQueryItem] { get mutating set }
@@ -81,23 +97,40 @@ public extension HTTPRequestConfigurable {
     nil
   }
 
-  /// URLConvertible
-  /// Note: Path segments from `environment.path` and `path` are split on `/`, empty segments are removed,
-  /// and the result is joined with a single leading `/`.
+  var pathComponents: [String] {
+    path.split(separator: "/").map(String.init)
+  }
+
+  /// The request URL: the environment with ``pathComponents`` and ``queryItems`` appended.
+  ///
+  /// - The environment's path is kept as it is percent-encoded, and each of ``pathComponents`` is
+  ///   percent-encoded on its own and appended. Empty segments are removed and the result has a single
+  ///   leading `/`, so a trailing `/` is not kept.
+  /// - The environment's query is kept as it is percent-encoded, and ``queryItems`` are appended after it,
+  ///   with `&`, `=`, `;` and `+` in names and values percent-encoded.
+  /// - Any user name or password on the environment is removed. `HTTPRequest` never sends them, so
+  ///   keeping them would only put credentials where the URL gets logged.
+  ///
+  /// - Throws: `HTTPError.invalidURL` when the environment has no scheme or no host, when a path segment is
+  ///   `.` or `..` (also percent-encoded), or when no URL can be formed.
   var url: URL {
     get throws {
       var components = environment
-      var paths = components.path.components(separatedBy: "/")
-      paths.append(contentsOf: path.components(separatedBy: "/"))
-      paths = paths.filter { !$0.isEmpty }
-      if !paths.isEmpty {
-        paths.insert("", at: 0)
+      guard components.scheme?.isEmpty == false, components.host?.isEmpty == false else {
+        throw HTTPError.invalidURL
       }
-      components.path = paths.joined(separator: "/")
-      var items: [URLQueryItem] = environment.queryItems ?? []
-      items.append(contentsOf: queryItems)
-      components.queryItems = items.isEmpty ? nil : Array(items)
-      guard let url = components.url else {
+
+      let segments = components.percentEncodedPath.split(separator: "/").map(String.init)
+        + pathComponents.filter { !$0.isEmpty }.map(URLEncoding.pathSegment)
+      guard !segments.contains(where: URLEncoding.isDotSegment) else {
+        throw HTTPError.invalidURL
+      }
+      components.percentEncodedPath = segments.isEmpty ? "" : "/" + segments.joined(separator: "/")
+      components.percentEncodedQuery = URLEncoding.joinedQuery(environment.percentEncodedQuery, URLEncoding.query(queryItems))
+      components.user = nil
+      components.password = nil
+
+      guard let url = components.url, URLEncoding.isRequestable(url) else {
         throw HTTPError.invalidURL
       }
       return url
@@ -105,6 +138,8 @@ public extension HTTPRequestConfigurable {
   }
 
   /// HTTPRequestConvertible
+  ///
+  /// - Throws: `HTTPError.invalidURL` when ``url`` throws.
   var httpRequest: HTTPRequest {
     get throws {
       try HTTPRequest(method: method, url: url, headerFields: headerFields)

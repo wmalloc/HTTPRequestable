@@ -26,10 +26,10 @@ import Foundation
 ///
 /// Usage:
 /// ```swift
-/// let quality: Quality = [
-///   .init(item: "br", parameters: .init(q: 1.0)),
-///   .init(item: "gzip", parameters: .init(q: 0.9)),
-///   .init(item: "deflate", parameters: .init(q: 0.8))
+/// let quality: Quality = try [
+///   .init(item: "br", parameters: 1.0),
+///   .init(item: "gzip", parameters: 0.9),
+///   .init(item: "deflate", parameters: 0.8)
 /// ]
 /// print(quality.encoded) // "br;q=1.0,gzip;q=0.9,deflate;q=0.8"
 /// ```
@@ -57,7 +57,7 @@ public struct Quality: Hashable, Sendable {
   ///
   /// Example usage:
   /// ```swift
-  /// let item = Quality.Item(item: "gzip", parameters: .init(q: 0.9))
+  /// let item = try Quality.Item(item: "gzip", parameters: 0.9)
   /// ```
   ///
   /// - SeeAlso: `Quality`, `Quality.Parameter`
@@ -66,9 +66,31 @@ public struct Quality: Hashable, Sendable {
     public let item: String
     public let parameters: Parameter
 
-    public init(item: String, parameters: Parameter) {
+    /// Creates an item.
+    ///
+    /// - Parameters:
+    ///   - item: The value, such as `gzip`, `en-US` or `text/html`. It must be a token or a media range.
+    ///   - parameters: The q-value, or `nil` to leave it out.
+    /// - Throws: ``HTTPFieldValueError/invalidItem`` when `item` is not a token or a media range.
+    public init(item: String, parameters: Parameter = nil) throws {
+      guard HTTPFieldValueSyntax.isItem(item) else {
+        throw HTTPFieldValueError.invalidItem
+      }
       self.item = item
       self.parameters = parameters
+    }
+
+    private enum CodingKeys: String, CodingKey {
+      case item, parameters
+    }
+
+    /// Decodes an item, validating it like ``init(item:parameters:)``.
+    ///
+    /// - Throws: ``HTTPFieldValueError`` when the decoded item or q-value is invalid, or a decoding error.
+    public init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      try self.init(item: container.decode(String.self, forKey: .item),
+                    parameters: container.decode(Parameter.self, forKey: .parameters))
     }
   }
 
@@ -96,25 +118,61 @@ public struct Quality: Hashable, Sendable {
     // swiftlint:disable identifier_name
     public let q: Float?
 
-    public init(q: Float? = nil) {
+    /// Creates a q-value.
+    ///
+    /// - Parameter q: The quality, from `0` (not acceptable) to `1` (most preferred), or `nil` to leave
+    ///   it out. It is written with at most three decimals, rounded.
+    /// - Throws: ``HTTPFieldValueError/invalidQuality`` when `q` is NaN or outside `0...1`.
+    public init(q: Float? = nil) throws {
+      if let q, !(0 ... 1).contains(q) {
+        throw HTTPFieldValueError.invalidQuality
+      }
+      self.init(uncheckedQ: q)
+    }
+
+    /// Creates a q-value from a `Double`.
+    ///
+    /// - Parameter double: The quality, from `0` to `1`.
+    /// - Throws: ``HTTPFieldValueError/invalidQuality`` when `double` is NaN or outside `0...1`.
+    public init(double: Double) throws {
+      try self.init(q: Float(double))
+    }
+
+    /// Creates a q-value the caller has already checked.
+    init(uncheckedQ q: Float?) {
       self.q = q
     }
 
-    public init(double: Double) {
-      self.q = Float(double)
+    private enum CodingKeys: String, CodingKey {
+      case q
+    }
+
+    /// Decodes a q-value, validating it like ``init(q:)``.
+    ///
+    /// - Throws: ``HTTPFieldValueError/invalidQuality`` when the decoded value is outside `0...1`, or a
+    ///   decoding error.
+    public init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      try self.init(q: container.decodeIfPresent(Float.self, forKey: .q))
     }
     // swiftlint:enable identifier_name
   }
 
+  /// The items as a field value, such as `br;q=1.0,gzip;q=0.9`.
+  ///
+  /// q-values are written with at most three decimals, rounded (RFC 9110 section 12.4.2).
   public var encoded: String {
-    items.map { item in
-      var string = item.item
-      if let quality = item.parameters.q {
-        string += ";q=\(quality)"
-      }
-      return string
+    items.map(\.encoded).joined(separator: ",")
+  }
+}
+
+extension Quality.Item {
+  /// The item with its q-value, if it has one.
+  var encoded: String {
+    guard let qvalue = parameters.q.flatMap(HTTPFieldValueSyntax.qvalue) else {
+      return item
     }
-    .joined(separator: ",")
+    return "\(item);q=\(qvalue)"
   }
 }
 
@@ -147,20 +205,31 @@ extension Quality: MutableCollection {
 }
 
 extension Quality.Parameter: ExpressibleByFloatLiteral {
+  /// Creates a q-value from a literal such as `0.9`.
+  ///
+  /// - Precondition: `value` is in `0...1`.
   public init(floatLiteral value: Float) {
-    self.init(q: value)
+    precondition((0 ... 1).contains(value), "A q-value must be between 0 and 1")
+    self.init(uncheckedQ: value)
   }
 }
 
 extension Quality.Parameter: ExpressibleByNilLiteral {
+  /// Creates a parameter without a q-value.
   public init(nilLiteral: ()) {
-    self.init(q: nil)
+    self.init(uncheckedQ: nil)
   }
 }
 
 extension Quality.Parameter: ExpressibleByStringLiteral {
+  /// Creates a q-value from a literal such as `"0.9"`.
+  ///
+  /// - Precondition: `value` is a number in `0...1`.
   public init(stringLiteral value: String) {
-    self.init(q: Float(value))
+    guard let quality = Float(value), (0 ... 1).contains(quality) else {
+      preconditionFailure("A q-value must be a number between 0 and 1")
+    }
+    self.init(uncheckedQ: quality)
   }
 }
 

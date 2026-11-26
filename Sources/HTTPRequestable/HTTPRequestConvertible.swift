@@ -13,7 +13,6 @@ import HTTPTypesFoundation
 
 import HTTPTypes
 
-
 /// A lightweight protocol for types that can produce a fully formed `HTTPRequest`.
 ///
 /// Conform to `HTTPRequestConvertible` when you already have enough information to construct
@@ -51,17 +50,29 @@ public protocol HTTPRequestConvertible {
 }
 
 extension String: HTTPRequestConvertible {
+  /// A `GET` request for the URL in the string.
+  ///
+  /// - Throws: `URLError(.badURL)` when the string is not a URL with a scheme and a host.
   public var httpRequest: HTTPRequest {
     get throws {
-      try HTTPRequest(url: url)
+      let url = try url
+      // HTTPRequest(url:) traps on a URL without a scheme, so check before calling it.
+      guard URLEncoding.isRequestable(url) else {
+        throw URLError(.badURL)
+      }
+      return HTTPRequest(url: url)
     }
   }
 }
 
 extension URLComponents: HTTPRequestConvertible {
+  /// A `GET` request for the URL the components form.
+  ///
+  /// - Throws: `URLError(.badURL)` when the components do not form a URL with a scheme and a host.
   public var httpRequest: HTTPRequest {
     get throws {
-      guard let url else {
+      // HTTPRequest(url:) traps on a URL without a scheme, so check before calling it.
+      guard let url, URLEncoding.isRequestable(url) else {
         throw URLError(.badURL)
       }
       return HTTPRequest(url: url)
