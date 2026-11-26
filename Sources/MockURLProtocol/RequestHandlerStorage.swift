@@ -61,8 +61,8 @@ actor RequestHandlerStorage {
   }
 
   func executeHandler(for request: URLRequest) async throws -> (Data, HTTPURLResponse) {
-    guard let identifier = request.testIdentifier else {
-      throw HTTPError.headerValueMissing("testIdentifier")
+    guard let identifier = request.mockIdentifier else {
+      throw HTTPError.headerValueMissing("mockIdentifier")
     }
     guard let handler = removeHandler(forIdentifier: identifier) else {
       throw HTTPError.cannotCreateURLRequest

@@ -9,21 +9,20 @@ import Foundation
 import HTTPTypes
 
 public extension HTTPResponse {
-  /// The MIME types declared in the response’s `Content-Type` header.
+  /// The media type in the response's `Content-Type` header.
   ///
-  /// Returns `nil` if the header is missing, empty, or contains only whitespace.
+  /// `Content-Type` holds a single media type, so a comma, for example inside a quoted parameter
+  /// value, does not separate it into several.
+  ///
+  /// Returns `nil` if the header is missing or blank, or is not a valid media type.
+  var contentType: HTTPContentType? {
+    headerFields[.contentType].flatMap(HTTPContentType.init(rawValue:))
+  }
+
+  /// The media type in the response's `Content-Type` header, as a set of one.
+  ///
+  /// Returns `nil` if the header is missing or blank, or is not a valid media type. See ``contentType``.
   var contentTypes: Set<HTTPContentType>? {
-    // Grab the raw value of the Content‑Type header (if any).
-    guard let raw = headerFields[.contentType] else { return nil }
-
-    // Split on commas, trim whitespace, and discard empties.
-    let types = raw
-      .split(separator: ",")
-      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-      .filter { !$0.isEmpty }
-      .map(HTTPContentType.init(rawValue:))
-
-    // If the resulting array is empty, treat it as “no content‑types”.
-    return types.isEmpty ? nil : Set(types)
+    contentType.map { [$0] }
   }
 }

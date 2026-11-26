@@ -12,20 +12,17 @@ import Foundation
 import HTTPTypes
 
 public extension HTTPRequest {
-  /// The set of MIME types the request declares it accepts.
+  /// The media ranges the request's `Accept` header lists, without their parameters.
   ///
-  /// If the `Accept` header is missing or empty, this property returns `nil`.
+  /// Commas inside quoted parameter values do not separate entries. Entries that are not valid media
+  /// ranges, or whose `q` is invalid or `0` (not acceptable), are left out, so the set can be empty
+  /// even though the header is set; nothing is then acceptable.
+  ///
+  /// Returns `nil` if the `Accept` header is missing or blank.
   var acceptContentTypes: Set<HTTPContentType>? {
-    // Grab the raw header value (if any)
-    guard let raw = headerFields[.accept] else { return nil }
-
-    // Split on commas, trim whitespace, and drop empties
-    let types = raw
-      .split(separator: ",")
-      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-      .filter { !$0.isEmpty }
-      .compactMap(HTTPContentType.init(stringLiteral:))
-
-    return types.isEmpty ? nil : Set(types)
+    guard let raw = headerFields[.accept], !raw.trimmingCharacters(in: .whitespaces).isEmpty else {
+      return nil
+    }
+    return Set(HTTPFieldValueSyntax.listElements(raw).compactMap(HTTPContentType.acceptedRange))
   }
 }

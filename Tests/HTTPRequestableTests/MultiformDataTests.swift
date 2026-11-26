@@ -93,4 +93,13 @@ struct MultiformDataTests {
     form.append(stream: stream, withLength: UInt64(data.count), headers: [])
     #expect(form.bodyParts.count == 1)
   }
+
+  @Test("Parameter values are quoted and cannot inject parameters")
+  func parameterQuoting() {
+    #expect(MultipartForm.quotedParameter("plain.png") == "\"plain.png\"")
+    #expect(MultipartForm.quotedParameter("\"Profile\"") == "\"Profile\"")
+    #expect(MultipartForm.quotedParameter("a.png; name=admin") == "\"a.png; name=admin\"")
+    #expect(MultipartForm.quotedParameter("a\"; x=\"b") == "\"a%22; x=%22b\"")
+    #expect(MultipartForm.quotedParameter("a\r\nX-Evil: 1") == "\"a%0D%0AX-Evil: 1\"")
+  }
 }

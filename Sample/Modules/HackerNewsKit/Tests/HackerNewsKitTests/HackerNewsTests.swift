@@ -31,7 +31,7 @@ struct HackerNewsTests {
   }
 
   /// Stubs a single response. `MockURLProtocol` keys handlers by the request's absolute URL when no
-  /// `X-Test-Identifier` header is present, so each URL can be stubbed exactly once.
+  /// `X-Mock-Identifier` header is present, so each URL can be stubbed exactly once.
   @discardableResult
   private func stub(_ url: URL, with body: Data, status: Int = 200) async throws -> URL {
     try await MockURLProtocol.setRequestHandler({ _ in

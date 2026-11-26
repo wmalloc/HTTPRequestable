@@ -12,19 +12,41 @@ import Foundation
 import HTTPTypes
 
 /// Interceptor is a middleware component that can intercept, modify, or observe network requests and responses.
+///
+/// Interceptors run after request modifiers, in the order they are listed. The first interceptor is the
+/// outermost: it sees the request first and the response last.
+///
+/// The request an interceptor chain forwards is checked before it is sent:
+/// - If its origin (scheme and authority) differs from the request that entered the chain, sensitive
+///   header values carried over from that request, such as an `Authorization` header a modifier added,
+///   are removed. Values an interceptor sets itself after changing the origin are kept.
+/// - A move from `https` to another scheme fails with `URLError(.appTransportSecurityRequiresSecureConnection)`.
+///
+/// Both rules follow the ``HTTPRedirectPolicy`` of the delegate passed to the request, or
+/// ``HTTPRedirectPolicy/default``.
+///
+/// An interceptor may pass a different delegate to `next`, for example to collect metrics. On platforms
+/// with the Objective-C runtime, the caller's
+/// redirect policy, public key pins and response size limit still apply to the task; the interceptor's
+/// delegate receives the remaining callbacks and can add restrictions but not remove them.
+///
+/// - Important: Interceptors do not run for `bytes(for:delegate:)`, which streams the response.
 public protocol HTTPInterceptor: Sendable {
   /// A closure type representing the next step in the interceptor chain.
   ///
-  /// This typealias is used to forward the current HTTP request, optional body data, and an optional delegate
-  /// to the next interceptor or the actual network execution. It allows interceptors to perform pre-processing,
+  /// This typealias is used to forward the current HTTP request and an optional delegate to the next
+  /// interceptor or the actual network execution. It allows interceptors to perform pre-processing,
   /// post-processing, or short-circuit the request handling.
+  ///
+  /// The handler is `@Sendable`, so an interceptor can call it from a child task, for example to race the
+  /// request against a timeout in a task group. A closure you create of this type must be `@Sendable` too.
   ///
   /// - Parameters:
   ///   - request: The `HTTPRequest` object representing the original or modified outbound HTTP request.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
   /// - Returns: An `HTTPClientResponse` representing the response for the request.
   /// - Throws: Propagates any error thrown by the next interceptor or the underlying network operation.
-  typealias NextHandler = (_ request: HTTPRequest, _ delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPClientResponse
+  typealias NextHandler = @Sendable (_ request: HTTPRequest, _ delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPClientResponse
 
   /**
    Intercepts an outgoing HTTP request, allowing modification, observation, or short-circuiting of the request before it continues through the interceptor chain.

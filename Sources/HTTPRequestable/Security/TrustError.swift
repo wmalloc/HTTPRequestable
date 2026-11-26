@@ -22,6 +22,9 @@ public enum TrustError: Error {
   /// during a trust evaluation process.
   case certificateNotFound
 
+  /// The system could not validate the server's certificate chain.
+  case evaluationFailed
+
   /// Indicates that the provided certificates do not match the expected values.
   ///
   /// This error may occur when validating a certificate chain or comparing certificates
