@@ -35,8 +35,8 @@ struct HTTPFieldNameMacroUsageTests {
 
   @Test("Names built with #HTTPFieldName keep their spelling")
   func builtInNames() {
-    #expect(HTTPField.Name.xTestIdentifier.rawName == "X-Test-Identifier")
-    #expect(String.xTestIdentifier == "X-Test-Identifier")
+    #expect(HTTPField.Name.xMockIdentifier.rawName == "X-Mock-Identifier")
+    #expect(String.xMockIdentifier == "X-Mock-Identifier")
     #expect(HTTPRedirectPolicy.defaultSensitiveHeaders.contains(HTTPField.Name("x-api-key")!))
   }
 }

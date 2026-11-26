@@ -11,40 +11,27 @@ import Foundation
 #endif
 import HTTPRequestable
 
-/// Adds a unique test‑identifier header to an ``HTTPRequestable``.
-///
-/// The method injects the `X-Test-Identifier` HTTP header with a freshly generated
-/// UUID string.  This is useful in unit tests where you want every request to be
-/// uniquely identifiable and then intercepted by :class:`MockURLProtocol`.
-///
-/// ```swift
-/// let original = URLRequest(url: URL(string: "https://example.com")!)
-/// let requestWithId = original.byAddingTestIdentifierHeader()
-/// // requestWithId.headerFields[.xTestIdentifier] now contains a UUID string
-/// ```
-///
-/// - Returns: A new instance of the conforming type with the header added.
-///   The operation is value‑semantics safe – it does not mutate the receiver.
 public extension HTTPRequestConfigurable {
-  /// Adds an ``X-Test-Identifier`` header containing a random UUID to this request.
+  /// A copy of the request with an `X-Mock-Identifier` header set to a random UUID.
   ///
-  /// The header key is provided by :enum:`HTTPHeaderField.xTestIdentifier`.
-  /// If the request already contains any headers, they are preserved and
-  /// only the `X-Test-Identifier` field is added or overwritten.
+  /// The header gives the request an identifier of its own, so ``MockURLProtocol`` can answer it with
+  /// its own handler even when other requests share its URL. Other headers are kept; an existing
+  /// `X-Mock-Identifier` header is replaced.
   ///
-  /// - Returns: A copy of the request with the new header set.
-  func byAddingTestIdentifierHeader() -> Self {
+  /// ```swift
+  /// let request = try StoryListRequest(environment, storyType: "topstories").byAddingMockIdentifierHeader()
+  /// try await MockURLProtocol.setRequestHandler(handler, forRequest: request)
+  /// ```
+  ///
+  /// - Returns: A copy of the request with the header set.
+  func byAddingMockIdentifierHeader() -> Self {
     var request = self
-    request.headerFields[.xTestIdentifier] = UUID().uuidString
+    request.headerFields[.xMockIdentifier] = UUID().uuidString
     return request
   }
 
-  /// The value of the ``X-Test-Identifier`` header, if present.
-  ///
-  /// This property is used by :class:`MockURLProtocol` and other utilities to
-  /// identify a request at runtime.  If the header has not been set,
-  /// `nil` is returned.
-  var testIdentifier: String? {
-    headerFields[.xTestIdentifier]
+  /// The value of the `X-Mock-Identifier` header, or `nil` when it is not set.
+  var mockIdentifier: String? {
+    headerFields[.xMockIdentifier]
   }
 }

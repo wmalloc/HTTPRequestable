@@ -13,9 +13,9 @@ import HTTPRequestable
 import HTTPTypes
 
 public extension HTTPField.Name {
-  /// A predefined `HTTPField.Name` representing the `X-Test-Identifier` header field.
+  /// The `X-Mock-Identifier` header field, which ``MockURLProtocol`` uses to find the handler for a request.
   @inlinable
-  static var xTestIdentifier: HTTPField.Name {
-    #HTTPFieldName("X-Test-Identifier")
+  static var xMockIdentifier: HTTPField.Name {
+    #HTTPFieldName("X-Mock-Identifier")
   }
 }

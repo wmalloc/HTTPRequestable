@@ -12,9 +12,9 @@ import Foundation
 import HTTPTypes
 
 public extension String {
-  /// A predefined `String` representing the `X-Test-Identifier` header field.
+  /// The name of the `X-Mock-Identifier` header field.
   @inlinable
-  static var xTestIdentifier: Self {
-    HTTPField.Name.xTestIdentifier.rawName
+  static var xMockIdentifier: Self {
+    HTTPField.Name.xMockIdentifier.rawName
   }
 }
