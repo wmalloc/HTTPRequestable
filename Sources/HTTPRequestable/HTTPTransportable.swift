@@ -132,7 +132,9 @@ public protocol HTTPTransportable {
   ///   - request: The `HTTPRequestConfigurable` object representing the HTTP request. This protocol defines properties necessary to create an URLRequest and also specifies the type of the resulting object `ResultType`.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
   /// - Returns: An object of type `Request.ResultType` which is the parsed response from the server.
-  /// - Throws: An error of type `Error` if the fetch operation fails, such as network issues or invalid requests.
+  /// - Throws: An error if the fetch operation fails, such as network issues or invalid requests; the
+  ///   error from the request's `validateResponse(_:)`, by default `HTTPError.unacceptableStatusCode` for
+  ///   a status outside `2xx`; or the error from its `responseDataTransformer`.
   ///
   /// - Note: The `HTTPRequestConfigurable` protocol must be implemented by the request object for this method to work correctly.
   /// - Note: The `ResultType` must be defined by the request object and represents the type of the resulting object after parsing.

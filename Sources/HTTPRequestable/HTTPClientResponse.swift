@@ -191,13 +191,13 @@ public extension HTTPClientResponse {
   /// Transforms the response body with the supplied transformer.
   ///
   /// The bytes are taken from `.data` when the body is in memory, or read from
-  /// disk via ``responseFileData()`` when the body is `.file`. An `.empty` body throws
-  /// `URLError(.zeroByteResource)`.
+  /// disk via ``responseFileData()`` when the body is `.file`. An empty or `.empty` body is passed as
+  /// empty `Data`, so a `Void`, `Data` or `String` result can come from a `204 No Content` response;
+  /// the default `Decodable` transformer throws `URLError(.zeroByteResource)` for it.
   ///
   /// - Parameter transformer: The closure used to convert raw `Data` into the desired type.
   /// - Returns: The result of applying `transformer` to the response body.
   /// - Throws:
-  ///   * `URLError(.zeroByteResource)` when the body is empty.
   ///   * Any error raised while reading a `.file` body from disk.
   ///   * Any error thrown by `transformer`.
   func transformed<ResultType>(using transformer: Transformer<Data, ResultType>) throws -> ResultType {
@@ -210,11 +210,7 @@ public extension HTTPClientResponse {
       payload = try Data(contentsOf: url, options: .mappedIfSafe)
 
     case .empty:
-      throw URLError(.zeroByteResource)
-    }
-
-    guard !payload.isEmpty else {
-      throw URLError(.zeroByteResource)
+      payload = Data()
     }
 
     return try transformer(payload)

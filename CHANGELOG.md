@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0]
+
+### Added
+- **HTTPContentType(pathExtension:)**: The content type for a file name extension, such as `image/png` for `png`, ignoring case. Common extensions come from a built-in table, so they are the same on every platform; others are looked up with `UTType` where it is available. Returns `nil` for unknown extensions.
+- **HTTPContentType** constants: `csv`, `heic`, `javascript`, `m4a`, `mp3`, `mp4`, `pdf`, `quickTime`, `webp` and `zip`.
+- **HTTPRequestConfigurable.validateResponse(_:)**: Checks a response before `object(for:)` decodes it. The default accepts only `2xx` statuses; implement it to accept other statuses, check the content type with `HTTPClientResponse.validate()`, or throw your own error decoded from the response body.
+
+### Fixed
+- **MultipartForm**: The file imported `CoreServices`, `OSLog` and `UniformTypeIdentifiers` without checking they exist, so the package could not build where they are missing, such as on Linux. `OSLog` and `CoreServices` were unused and are removed; file MIME types now come from `HTTPContentType(pathExtension:)`, which uses `UTType` only where `UniformTypeIdentifiers` exists. Uploaded `.m4a` files are now sent as the registered `audio/mp4` instead of Apple's `audio/x-m4a`.
+
+### Changed
+- **Breaking — object(for:)** on `HTTPTransferable` and `URLSession` now throws `HTTPError.unacceptableStatusCode` for a status outside `2xx`, through the request's `validateResponse(_:)`. A `404` or `500` body was previously passed to the response transformer: `Decodable` results failed with a misleading decoding error, and `Data` or `String` results returned the error page as if it succeeded. This includes the last response after `RetryPolicy` retries are used up. Requests that relied on decoding non-`2xx` bodies must implement `validateResponse(_:)`.
+- **Empty responses**: `HTTPClientResponse.transformed(using:)` no longer throws `URLError(.zeroByteResource)` for an empty body; it passes empty `Data` to the transformer. A `Void` result now succeeds for `204 No Content`, and `Data` and `String` results can be empty. The default `Decodable` transformer still throws `URLError(.zeroByteResource)` for an empty body. Custom transformers can now be called with empty `Data`.
+
 ## [0.90.0]
 
 ### Added

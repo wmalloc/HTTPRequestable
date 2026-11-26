@@ -100,6 +100,16 @@ struct HTTPContentTypeTests {
     #expect(HTTPContentType.svg.rawValue == "image/svg+xml")
     #expect(HTTPContentType.textPlain.rawValue == "text/plain")
     #expect(HTTPContentType.xml.rawValue == "application/xml")
+    #expect(HTTPContentType.csv.rawValue == "text/csv")
+    #expect(HTTPContentType.heic.rawValue == "image/heic")
+    #expect(HTTPContentType.javascript.rawValue == "text/javascript")
+    #expect(HTTPContentType.m4a.rawValue == "audio/mp4")
+    #expect(HTTPContentType.mp3.rawValue == "audio/mpeg")
+    #expect(HTTPContentType.mp4.rawValue == "video/mp4")
+    #expect(HTTPContentType.pdf.rawValue == "application/pdf")
+    #expect(HTTPContentType.quickTime.rawValue == "video/quicktime")
+    #expect(HTTPContentType.webp.rawValue == "image/webp")
+    #expect(HTTPContentType.zip.rawValue == "application/zip")
   }
 
   @Test("Hashable and Sendable conformances are valid")

@@ -9,6 +9,9 @@ import FoundationNetworking
 #else
 import Foundation
 #endif
+#if canImport(UniformTypeIdentifiers)
+import UniformTypeIdentifiers
+#endif
 
 /// A media type, such as `application/json` or `text/html; charset=utf-8` (RFC 9110 section 8.3.1),
 /// used in `Content-Type` and `Accept` headers.
@@ -220,6 +223,12 @@ public extension HTTPContentType {
     "text/css"
   }
 
+  /// CSV content type.
+  @inlinable
+  static var csv: Self {
+    "text/csv"
+  }
+
   /// URL-encoded Form Data.
   @inlinable
   static var formEncoded: Self {
@@ -230,6 +239,12 @@ public extension HTTPContentType {
   @inlinable
   static var gif: Self {
     "image/gif"
+  }
+
+  /// HEIC image content type.
+  @inlinable
+  static var heic: Self {
+    "image/heic"
   }
 
   /// HTML content type.
@@ -244,6 +259,12 @@ public extension HTTPContentType {
     "image/jpeg"
   }
 
+  /// JavaScript content type (RFC 9239).
+  @inlinable
+  static var javascript: Self {
+    "text/javascript"
+  }
+
   /// JSON content type.
   @inlinable
   static var json: Self {
@@ -254,6 +275,24 @@ public extension HTTPContentType {
   @inlinable
   static var jsonUTF8: Self {
     "application/json; charset=utf-8"
+  }
+
+  /// MPEG-4 audio (`.m4a`) content type.
+  @inlinable
+  static var m4a: Self {
+    "audio/mp4"
+  }
+
+  /// MP3 audio content type.
+  @inlinable
+  static var mp3: Self {
+    "audio/mpeg"
+  }
+
+  /// MPEG-4 video content type.
+  @inlinable
+  static var mp4: Self {
+    "video/mp4"
   }
 
   /// Multi-part form data.
@@ -268,6 +307,12 @@ public extension HTTPContentType {
     "application/octet-stream"
   }
 
+  /// PDF content type.
+  @inlinable
+  static var pdf: Self {
+    "application/pdf"
+  }
+
   /// Patch JSON content type.
   @inlinable
   static var patchjson: Self {
@@ -278,6 +323,12 @@ public extension HTTPContentType {
   @inlinable
   static var png: Self {
     "image/png"
+  }
+
+  /// QuickTime video (`.mov`) content type.
+  @inlinable
+  static var quickTime: Self {
+    "video/quicktime"
   }
 
   /// SVG content type.
@@ -292,9 +343,64 @@ public extension HTTPContentType {
     "text/plain"
   }
 
+  /// WebP image content type.
+  @inlinable
+  static var webp: Self {
+    "image/webp"
+  }
+
   /// XML content type.
   @inlinable
   static var xml: Self {
     "application/xml"
   }
+
+  /// ZIP archive content type.
+  @inlinable
+  static var zip: Self {
+    "application/zip"
+  }
+}
+
+// MARK: - File name extensions
+
+public extension HTTPContentType {
+  /// The content type for a file name extension, such as `image/png` for `png`.
+  ///
+  /// Looks in ``commonPathExtensions`` first, so these extensions get the same type on every platform,
+  /// then asks `UTType` where `UniformTypeIdentifiers` is available. Platforms without it, such as
+  /// Linux, know only the common extensions. Case is ignored.
+  ///
+  /// ```swift
+  /// HTTPContentType(pathExtension: "JPG")  // image/jpeg
+  /// HTTPContentType(pathExtension: "unknown")  // nil
+  /// ```
+  ///
+  /// - Parameter pathExtension: The extension, without the leading `.`.
+  /// - Returns: `nil` when the extension is not known.
+  init?(pathExtension: String) {
+    if let contentType = Self.commonPathExtensions[pathExtension.lowercased()] {
+      self = contentType
+      return
+    }
+    #if canImport(UniformTypeIdentifiers)
+    if let mimeType = UTType(filenameExtension: pathExtension)?.preferredMIMEType,
+       let contentType = HTTPContentType(rawValue: mimeType)
+    {
+      self = contentType
+      return
+    }
+    #endif
+    return nil
+  }
+
+  /// Content types for common file name extensions, in lowercase. ``init(pathExtension:)`` checks them
+  /// before `UTType`, so they are the same on every platform. They use the registered IANA types, so
+  /// `m4a` is `audio/mp4` rather than Apple's `audio/x-m4a`.
+  static let commonPathExtensions: [String: HTTPContentType] = [
+    "css": .css, "csv": .csv, "gif": .gif, "heic": .heic, "htm": .html, "html": .html, "jpeg": .jpeg,
+    "jpg": .jpeg, "js": .javascript, "json": .json, "m4a": .m4a, "mov": .quickTime, "mp3": .mp3,
+    "mp4": .mp4, "pdf": .pdf, "png": .png, "svg": .svg, "txt": .textPlain, "webp": .webp, "xml": .xml,
+    "zip": .zip,
+  ]
 }

@@ -4,11 +4,12 @@
 //  Created by Waqar Malik on 1/15/23.
 //
 
-import CoreServices
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import HTTPTypes
-import OSLog
-import UniformTypeIdentifiers
 
 /// https://datatracker.ietf.org/doc/html/rfc7578
 open class MultipartForm: AnyMultipartFormBodyPart {
@@ -206,11 +207,10 @@ extension MultipartForm {
 }
 
 extension MultipartForm {
+  /// The MIME type for a file name extension, such as `image/png` for `png`, or
+  /// `application/octet-stream` when it is not known. See ``HTTPContentType/init(pathExtension:)``.
   static func mimeType(forPathExtension pathExtension: String) -> String {
-    if let id = UTType(filenameExtension: pathExtension), let contentType = id.preferredMIMEType {
-      return contentType
-    }
-    return HTTPContentType.octetStream.rawValue
+    (HTTPContentType(pathExtension: pathExtension) ?? .octetStream).rawValue
   }
 }
 

@@ -214,16 +214,18 @@ extension URLSession: HTTPTransportable {
     return try await bytes(for: updateRequest, delegate: Self.secureTaskDelegate(delegate))
   }
 
-  /**
-   Make a request call and return decoded data as decoded by the transformer, this request must return data
-
-   - Parameters:
-     - request: Request where to get the data from
-     - delegate: Delegate to handle the request, defaults to nil
-   - returns: Transformed Object
-   */
+  /// Sends `request`, checks the response with the request's `validateResponse(_:)`, and decodes the
+  /// body with its `responseDataTransformer`.
+  ///
+  /// - Parameters:
+  ///   - request: The request to send.
+  ///   - delegate: Task-specific delegate, defaults to nil.
+  /// - Returns: The decoded result.
+  /// - Throws: Any error thrown while sending the request, by `validateResponse(_:)` (by default
+  ///   `HTTPError.unacceptableStatusCode` for a status outside `2xx`), or by the transformer.
   public func object<R: HTTPRequestConfigurable>(for request: R, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> R.ResultType {
-    try await performRequest(request, delegate: delegate)
-      .transformed(using: request.responseDataTransformer)
+    let response = try await performRequest(request, delegate: delegate)
+    try request.validateResponse(response)
+    return try response.transformed(using: request.responseDataTransformer)
   }
 }
