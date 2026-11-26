@@ -18,7 +18,7 @@ import HTTPTypes
 /// existing values, depending on the `replaceExisting` policy.  This makes
 /// it trivial to add a common set of headers (e.g., `User-Agent`,
 /// `Accept‑Encoding`) to every request.
-public final class HTTPRequestHeadersModifier: HTTPRequestModifier, @unchecked Sendable {
+public final class HTTPRequestHeadersModifier: HTTPRequestModifier, Sendable {
   /// The collection of header fields that will be applied.
   ///
   /// This property is immutable; all mutation occurs through the

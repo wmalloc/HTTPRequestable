@@ -11,6 +11,13 @@ import Foundation
 #endif
 import HTTPRequestable
 
+/// A `URLProtocol` that answers requests with handlers registered by the test, instead of the network.
+///
+/// Add it to a session's `URLSessionConfiguration.protocolClasses`, then register a handler for each
+/// request with ``setRequestHandler(_:forRequest:)`` or ``setRequestHandler(_:forIdentifier:)``.
+// `@unchecked` because `URLProtocol` is an open Foundation class that is not `Sendable`, so the compiler
+// cannot check a subclass. MockURLProtocol adds no stored state of its own: handlers live in the
+// `RequestHandlerStorage` actor, and the URL Loading System owns the inherited `request` and `client`.
 public class MockURLProtocol: URLProtocol, @unchecked Sendable {
   private static let requestHandlerStorage = RequestHandlerStorage()
 

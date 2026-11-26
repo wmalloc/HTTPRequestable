@@ -30,7 +30,7 @@ import Foundation
 /// - Important: `URLSession` sends session-level challenges, such as server trust, to the session's own
 ///   delegate when it implements `urlSession(_:didReceive:completionHandler:)`, before any task delegate.
 ///   Pinning here only takes effect for sessions whose delegate does not handle those challenges.
-public final class HTTPSecurityDelegate: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+public final class HTTPSecurityDelegate: NSObject, URLSessionTaskDelegate, Sendable {
   /// Uses ``HTTPRedirectPolicy/default`` with no pinning and no response size limit.
   public static let `default` = HTTPSecurityDelegate()
 

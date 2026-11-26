@@ -20,7 +20,7 @@ import HTTPTypes
 /// It is applied automatically through ``HTTPSecurityDelegate``, which also wraps any delegate you pass
 /// to a request. Pass an `HTTPRedirectPolicy` as the delegate to use a policy of your own. On platforms
 /// without the Objective-C runtime a delegate cannot be wrapped, so one you pass replaces this policy.
-public final class HTTPRedirectPolicy: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+public final class HTTPRedirectPolicy: NSObject, URLSessionTaskDelegate, Sendable {
   /// The policy used when a request has no delegate: blocks downgrades and strips sensitive headers
   /// on cross-origin redirects.
   public static let `default` = HTTPRedirectPolicy()
