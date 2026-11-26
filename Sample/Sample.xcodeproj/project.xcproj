@@ -54,7 +54,6 @@
       "dependencies": [
         { "kind": "package", "package": "HTTPRequestable", "product-name": "HTTPRequestable" },
         { "kind": "package", "package": "HTTPRequestable", "product-name": "MockURLProtocol" },
-        { "kind": "package", "package": "HTTPRequestable", "product-name": "MultipartForm" },
         { "kind": "package", "package": "HackerNewsKit", "product-name": "HackerNewsKit" },
       ],
       "build-phases": [

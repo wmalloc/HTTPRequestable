@@ -6,6 +6,7 @@
 
 import HTTPRequestable
 import HTTPTypes
+import MockURLProtocol
 import Testing
 
 private extension HTTPField.Name {
@@ -30,5 +31,12 @@ struct HTTPFieldNameMacroUsageTests {
     fields[#HTTPFieldName("X-API-Key")] = "key"
     #expect(fields[#HTTPFieldName("x-request-id")] == "abc")
     #expect(fields[HTTPField.Name("X-API-Key")!] == "key")
+  }
+
+  @Test("Names built with #HTTPFieldName keep their spelling")
+  func builtInNames() {
+    #expect(HTTPField.Name.xTestIdentifier.rawName == "X-Test-Identifier")
+    #expect(String.xTestIdentifier == "X-Test-Identifier")
+    #expect(HTTPRedirectPolicy.defaultSensitiveHeaders.contains(HTTPField.Name("x-api-key")!))
   }
 }

@@ -27,7 +27,7 @@ public final class HTTPRedirectPolicy: NSObject, URLSessionTaskDelegate, @unchec
 
   /// Header fields that are removed when a redirect leaves the origin of the request.
   public static let defaultSensitiveHeaders: Set<HTTPField.Name> = [
-    .authorization, .cookie, .proxyAuthorization, HTTPField.Name("X-API-Key")!
+    .authorization, .cookie, .proxyAuthorization, #HTTPFieldName("X-API-Key")
   ]
 
   /// When `true`, a redirect from `https` to any other scheme is not followed.
