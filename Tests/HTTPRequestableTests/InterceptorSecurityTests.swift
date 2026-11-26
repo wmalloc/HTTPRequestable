@@ -32,8 +32,13 @@ private final class RecordingProtocol: URLProtocol, @unchecked Sendable {
   // @unchecked: URLProtocol is not Sendable; this subclass adds no mutable state.
   static let requests = Log<URLRequest>()
 
-  override class func canInit(with _: URLRequest) -> Bool { true }
-  override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+  override class func canInit(with _: URLRequest) -> Bool {
+    true
+  }
+
+  override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+    request
+  }
 
   override func startLoading() {
     Self.requests.append(request)
@@ -60,7 +65,9 @@ private final class RecordingProtocol: URLProtocol, @unchecked Sendable {
 
 /// Adds a bearer token for `origin.test` only, like a typical auth modifier.
 private struct AuthModifier: HTTPRequestModifier {
-  var allowedHosts: Set<String>? { ["origin.test"] }
+  var allowedHosts: Set<String>? {
+    ["origin.test"]
+  }
 
   func modify(_ request: inout HTTPRequest, for session: URLSession?) async throws {
     request.headerFields[.authorization] = "Bearer secret"

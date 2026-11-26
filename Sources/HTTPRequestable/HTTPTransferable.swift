@@ -78,7 +78,8 @@ public protocol HTTPTransferable: HTTPTransportable {
   var retryPolicy: RetryPolicy? { get }
 }
 
-extension HTTPTransferable {
+public extension HTTPTransferable {
+  /// No retries. Conforming types provide a ``RetryPolicy`` to retry transient failures.
   var retryPolicy: RetryPolicy? {
     nil
   }

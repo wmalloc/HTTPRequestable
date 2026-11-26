@@ -26,17 +26,17 @@ struct HTTPFieldNameMacroUsageTests {
   }
 
   @Test("#HTTPFieldName works where a field name is expected")
-  func usableAsName() {
+  func usableAsName() throws {
     var fields: HTTPFields = [.requestID: "abc"]
     fields[#HTTPFieldName("X-API-Key")] = "key"
     #expect(fields[#HTTPFieldName("x-request-id")] == "abc")
-    #expect(fields[HTTPField.Name("X-API-Key")!] == "key")
+    #expect(try fields[#require(HTTPField.Name("X-API-Key"))] == "key")
   }
 
   @Test("Names built with #HTTPFieldName keep their spelling")
-  func builtInNames() {
+  func builtInNames() throws {
     #expect(HTTPField.Name.xMockIdentifier.rawName == "X-Mock-Identifier")
     #expect(String.xMockIdentifier == "X-Mock-Identifier")
-    #expect(HTTPRedirectPolicy.defaultSensitiveHeaders.contains(HTTPField.Name("x-api-key")!))
+    #expect(try HTTPRedirectPolicy.defaultSensitiveHeaders.contains(#require(HTTPField.Name("x-api-key"))))
   }
 }

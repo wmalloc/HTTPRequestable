@@ -4,14 +4,14 @@
 
 #if canImport(ObjectiveC) && canImport(Security) && canImport(CryptoKit)
 import Foundation
-import HTTPTypes
 @testable import HTTPRequestable
+import HTTPTypes
 import MockURLProtocol
 import Security
 import Testing
 
-// Self-signed test certificates; pins computed with
-// `openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64`.
+/// Self-signed test certificates; pins computed with
+/// `openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64`.
 private enum TestCertificates {
   static let ecDER = "MIIBHDCBwgIJAN6USjMPRbLCMAoGCCqGSM49BAMCMBYxFDASBgNVBAMMC3Bpbi10ZXN0LWVjMB4XDTI2MTEyMTIyNDY1NFoXDTM2MTExODIyNDY1NFowFjEUMBIGA1UEAwwLcGluLXRlc3QtZWMwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASMXc3nxSEPYH7dtH2FQLMdNgLjEPSUptOFV88x8CEVcIXZ0WN3DEL+VYHNjtggSpSdi/tQaFJ4X7tE40BmKG8pMAoGCCqGSM49BAMCA0kAMEYCIQDi66Pwxtvbdxf4JPAWBTwZ/htaFKQaas5cIcPkCR1vbwIhALJ6uvSfnToOuQ3N5CoLS7hfq2RWS75MxmcLuzU5BTJU"
   static let ecPin = "LxpGyHQz+lJx1MwgSvOeNq/n1gW/kPEqMibyLAvUOiM="
@@ -31,13 +31,15 @@ private final class RecordingDelegate: NSObject, URLSessionTaskDelegate, @unchec
   var challengeCount = 0
 
   func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
-                  newRequest request: URLRequest, completionHandler: @escaping @Sendable (URLRequest?) -> Void) {
+                  newRequest request: URLRequest, completionHandler: @escaping @Sendable (URLRequest?) -> Void)
+  {
     redirectedRequest = request
     completionHandler(request)
   }
 
   func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge,
-                  completionHandler: @escaping @Sendable (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+                  completionHandler: @escaping @Sendable (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
+  {
     challengeCount += 1
     completionHandler(.rejectProtectionSpace, nil)
   }
@@ -54,7 +56,9 @@ private final class ChallengeSender: NSObject, URLAuthenticationChallengeSender 
 
 private final class Box<Value>: @unchecked Sendable {
   var value: Value
-  init(_ value: Value) { self.value = value }
+  init(_ value: Value) {
+    self.value = value
+  }
 }
 
 struct HTTPSecurityDelegateTests {

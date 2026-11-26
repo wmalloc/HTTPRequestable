@@ -35,7 +35,8 @@ public extension HTTPEnvironment {
     // a path or a query (for example "good.com@evil.com" or "evil.com/x") is not an authority and is
     // assigned to `host` as is, where URLComponents rejects or percent-encodes it.
     if let parsed = URLComponents(string: "//" + authority), parsed.user == nil, parsed.password == nil,
-       parsed.path.isEmpty, parsed.query == nil, parsed.fragment == nil, let host = parsed.host {
+       parsed.path.isEmpty, parsed.query == nil, parsed.fragment == nil, let host = parsed.host
+    {
       self.host = host
       self.port = parsed.port
     } else {

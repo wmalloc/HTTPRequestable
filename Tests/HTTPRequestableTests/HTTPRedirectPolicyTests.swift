@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import HTTPTypes
 @testable import HTTPRequestable
+import HTTPTypes
 import Testing
 
 struct HTTPRedirectPolicyTests {

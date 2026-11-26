@@ -19,7 +19,10 @@ private struct SegmentRequest: HTTPRequestConfigurable {
   typealias ResultType = Data
   var environment: HTTPEnvironment = .init(authority: "api.example.com", path: "/v1")
   var segments: [String]
-  var pathComponents: [String] { segments }
+  var pathComponents: [String] {
+    segments
+  }
+
   var queryItems: [URLQueryItem] = []
   var headerFields: HTTPFields = [:]
 }
@@ -92,7 +95,7 @@ struct URLBuildingTests {
     ("/items//detail/", "https://api.example.com/v1/items/detail"),
     ("a b/c?d#e", "https://api.example.com/v1/a%20b/c%3Fd%23e"),
     ("", "https://api.example.com/v1"),
-    ("//evil.example.org/x", "https://api.example.com/v1/evil.example.org/x"),
+    ("//evil.example.org/x", "https://api.example.com/v1/evil.example.org/x")
   ])
   func stringPaths(path: String, expected: String) throws {
     #expect(try url(Request(path: path)) == expected)
@@ -142,7 +145,7 @@ struct URLBuildingTests {
       URLQueryItem(name: "q", value: "a&admin=true;x"),
       URLQueryItem(name: "a b", value: "c d"),
       URLQueryItem(name: "flag", value: nil),
-      URLQueryItem(name: "empty", value: ""),
+      URLQueryItem(name: "empty", value: "")
     ])
     #expect(try url(request) == "https://api.example.com/v1/search?email=a%2Btag@example.com&q=a%26admin%3Dtrue%3Bx&a%20b=c%20d&flag&empty=")
     let items = try #require(URLComponents(url: request.url, resolvingAgainstBaseURL: false)?.queryItems)
@@ -160,7 +163,7 @@ struct URLBuildingTests {
 
   @Test("No query is added when there are no items")
   func emptyQuery() throws {
-    #expect(try url(Request(environment: HTTPEnvironment(string: "https://api.example.com/v1?")!, path: "items")) == "https://api.example.com/v1/items")
+    #expect(try url(Request(environment: #require(HTTPEnvironment(string: "https://api.example.com/v1?")), path: "items")) == "https://api.example.com/v1/items")
   }
 
   // MARK: HTTPEnvironment query helpers

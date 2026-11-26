@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import HTTPTypes
 @testable import HTTPRequestable
+import HTTPTypes
 import Testing
 
 struct SecurityHardeningTests {
@@ -14,7 +14,7 @@ struct SecurityHardeningTests {
     #expect(policy.delay(for: 0) == 1)
     #expect(policy.delay(for: 5) == 30)
     #expect(policy.delay(for: 999) == 30)
-    #expect(RetryPolicy(initialDelay: -5).delay(for: 1) == 0)
+    #expect(RetryPolicy(maxDelay: .greatestFiniteMagnitude).delay(for: 2000) == RetryPolicy.longestDelay)
   }
 
   @Test("Only transient URL errors are retried")

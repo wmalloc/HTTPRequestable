@@ -13,7 +13,6 @@ import HTTPTypesFoundation
 
 import HTTPTypes
 
-
 /// A lightweight protocol for types that can produce a fully formed `HTTPRequest`.
 ///
 /// Conform to `HTTPRequestConvertible` when you already have enough information to construct

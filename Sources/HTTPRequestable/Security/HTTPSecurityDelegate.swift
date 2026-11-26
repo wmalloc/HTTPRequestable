@@ -57,7 +57,8 @@ public final class HTTPSecurityDelegate: NSObject, URLSessionTaskDelegate, @unch
   ///   - maxResponseSize: Largest accepted response body in bytes. Defaults to `nil`.
   ///   - delegate: Receives all other callbacks. Defaults to `nil`.
   public init(redirectPolicy: HTTPRedirectPolicy? = .default, pinning: HTTPPublicKeyPinning? = nil,
-              maxResponseSize: Int? = nil, delegate: (any URLSessionTaskDelegate)? = nil) {
+              maxResponseSize: Int? = nil, delegate: (any URLSessionTaskDelegate)? = nil)
+  {
     self.redirectPolicy = redirectPolicy
     self.pinning = pinning
     self.maxResponseSize = maxResponseSize.map { Swift.max($0, 0) }
@@ -67,14 +68,16 @@ public final class HTTPSecurityDelegate: NSObject, URLSessionTaskDelegate, @unch
   // MARK: Redirects
 
   public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
-                         newRequest request: URLRequest, completionHandler: @escaping @Sendable (URLRequest?) -> Void) {
+                         newRequest request: URLRequest, completionHandler: @escaping @Sendable (URLRequest?) -> Void)
+  {
     let originalURL = task.currentRequest?.url ?? task.originalRequest?.url
     guard let request = redirectPolicy.map({ $0.redirectedRequest(request, from: originalURL) }) ?? request else {
       completionHandler(nil)
       return
     }
     if delegate?.urlSession?(session, task: task, willPerformHTTPRedirection: response, newRequest: request,
-                             completionHandler: completionHandler) != nil {
+                             completionHandler: completionHandler) != nil
+    {
       return
     }
     completionHandler(request)
@@ -83,20 +86,24 @@ public final class HTTPSecurityDelegate: NSObject, URLSessionTaskDelegate, @unch
   // MARK: Challenges
 
   public func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge,
-                         completionHandler: @escaping @Sendable (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+                         completionHandler: @escaping @Sendable (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
+  {
     handle(challenge, session: session, task: task, completionHandler: completionHandler)
   }
 
   public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
-                         completionHandler: @escaping @Sendable (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+                         completionHandler: @escaping @Sendable (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
+  {
     handle(challenge, session: session, task: nil, completionHandler: completionHandler)
   }
 
   private func handle(_ challenge: URLAuthenticationChallenge, session: URLSession, task: URLSessionTask?,
-                      completionHandler: @escaping @Sendable (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+                      completionHandler: @escaping @Sendable (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
+  {
     let protectionSpace = challenge.protectionSpace
     if protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust, let pinning,
-       pinning.applies(toHost: protectionSpace.host) {
+       pinning.applies(toHost: protectionSpace.host)
+    {
       guard let trust = protectionSpace.serverTrust else {
         completionHandler(.cancelAuthenticationChallenge, nil)
         return
@@ -171,7 +178,8 @@ extension URLSession {
   ///   those settings do not consume reach `forwarded`, so its own redirect policy and pins still run
   ///   and can only add restrictions. The smaller of the two response size limits applies.
   static func chainedTaskDelegate(_ forwarded: (any URLSessionTaskDelegate)?,
-                                  caller: (any URLSessionTaskDelegate)?) -> any URLSessionTaskDelegate {
+                                  caller: (any URLSessionTaskDelegate)?) -> any URLSessionTaskDelegate
+  {
     let secured = secureTaskDelegate(caller)
     guard let forwarded, forwarded !== caller, forwarded !== secured else {
       return secured
@@ -224,7 +232,8 @@ extension URLSession {
   /// Objective-C runtime a delegate cannot be wrapped, so a delegate an interceptor passes replaces the
   /// caller's, as one a caller passes replaces the default redirect policy.
   static func chainedTaskDelegate(_ forwarded: (any URLSessionTaskDelegate)?,
-                                  caller: (any URLSessionTaskDelegate)?) -> any URLSessionTaskDelegate {
+                                  caller: (any URLSessionTaskDelegate)?) -> any URLSessionTaskDelegate
+  {
     secureTaskDelegate(forwarded ?? caller)
   }
 

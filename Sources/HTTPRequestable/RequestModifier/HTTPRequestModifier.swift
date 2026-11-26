@@ -49,7 +49,9 @@ public protocol HTTPRequestModifier: Sendable {
 
 /// Default implementation
 public extension HTTPRequestModifier {
-  var allowedHosts: Set<String>? { nil }
+  var allowedHosts: Set<String>? {
+    nil
+  }
 
   /// Returns `true` if this modifier should be applied to a request for `url`.
   ///

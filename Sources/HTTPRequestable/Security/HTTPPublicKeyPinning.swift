@@ -54,7 +54,8 @@ public struct HTTPPublicKeyPinning: Sendable, Hashable {
   ///   - hosts: Hosts the pins apply to, or `nil` for every host. Defaults to `nil`.
   ///   - includesSubdomains: Whether pinned hosts cover their subdomains. Defaults to `false`.
   public init(certificates: some Sequence<SecCertificate>, additionalPublicKeyHashes: some Sequence<String> = [String](),
-              hosts: Set<String>? = nil, includesSubdomains: Bool = false) {
+              hosts: Set<String>? = nil, includesSubdomains: Bool = false)
+  {
     let hashes = certificates.compactMap(Self.publicKeyHash(for:))
     self.init(publicKeyHashes: hashes + Array(additionalPublicKeyHashes), hosts: hosts, includesSubdomains: includesSubdomains)
   }

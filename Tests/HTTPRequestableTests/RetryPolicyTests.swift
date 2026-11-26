@@ -152,9 +152,25 @@ struct RetryPolicyTests {
   @Test("Policy with zero max retries never retries")
   func zeroMaxRetries() {
     let policy = RetryPolicy(maxRetries: 0)
+
+    #expect(!policy.shouldRetry(error: URLError(.notConnectedToInternet), attempt: 0))
+    #expect(!policy.shouldRetry(status: .serviceUnavailable, attempt: 0))
+  }
+
+  @Test("A multiplier of 1 or less gives a fixed delay of initialDelay", arguments: [0.0, 0.5, 1.0])
+  func multiplierAtMostOne(multiplier: Double) {
+    let policy = RetryPolicy(maxRetries: 5, initialDelay: 2, multiplier: multiplier)
+
+    #expect((0 ..< 5).map(policy.delay(for:)) == [2, 2, 2, 2, 2])
+  }
+
+  @Test("Policy with one retry retries once")
+  func oneRetry() {
+    let policy = RetryPolicy(maxRetries: 1)
     let error = URLError(.notConnectedToInternet)
 
-    #expect(!policy.shouldRetry(error: error, attempt: 0))
+    #expect(policy.shouldRetry(error: error, attempt: 0))
+    #expect(!policy.shouldRetry(error: error, attempt: 1))
   }
 
   @Test("Policy with very large max retries allows many attempts")
@@ -167,20 +183,19 @@ struct RetryPolicyTests {
     #expect(!policy.shouldRetry(error: error, attempt: 100))
   }
 
-  @Test("Delay with zero initial delay always returns zero")
-  func zeroInitialDelay() {
-    let policy = RetryPolicy(maxRetries: 3, initialDelay: 0.0, multiplier: 2.0)
+  @Test("A tiny initial delay stays above zero")
+  func tinyInitialDelay() {
+    let policy = RetryPolicy(maxRetries: 3, initialDelay: .leastNonzeroMagnitude, multiplier: 1.0)
 
-    #expect(policy.delay(for: 0) == 0.0)
-    #expect(policy.delay(for: 1) == 0.0)
-    #expect(policy.delay(for: 2) == 0.0)
+    #expect(policy.delay(for: 0) > 0)
+    #expect(policy.delay(for: 2) > 0)
   }
 
-  @Test("Negative attempt number calculates delay correctly")
+  @Test("A negative attempt number counts as the first attempt")
   func negativeAttempt() {
     let policy = RetryPolicy(maxRetries: 3, initialDelay: 2.0, multiplier: 2.0)
 
-    // 2.0 * 2^(-1) = 1.0
-    #expect(policy.delay(for: -1) == 1.0)
+    #expect(policy.delay(for: -1) == 2.0)
+    #expect(policy.delay(for: .min) == 2.0)
   }
 }

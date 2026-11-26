@@ -80,5 +80,7 @@ struct MockURLProtocolTests {
 
 private struct CustomKey: MockRequestKey {
   let url: URL
-  var mockIdentifier: String? { url.absoluteString }
+  var mockIdentifier: String? {
+    url.absoluteString
+  }
 }

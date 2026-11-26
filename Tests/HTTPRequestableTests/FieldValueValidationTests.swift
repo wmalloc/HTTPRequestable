@@ -29,7 +29,7 @@ struct KeyedItemValidationTests {
     (#"say "hi""#, #""say \"hi\"""#),
     (#"back\slash"#, #""back\\slash""#),
     ("", #""""#),
-    ("ä.txt", #""ä.txt""#),
+    ("ä.txt", #""ä.txt""#)
   ])
   func quotesNonTokens(value: String, expected: String) throws {
     #expect(try KeyedItem(item: "attachment", parameters: ["filename": value]).encoded == "attachment; filename=\(expected)")
@@ -39,7 +39,7 @@ struct KeyedItemValidationTests {
     "109AF0987D004171B0A8481D6401B62D",
     #""name.png""#,
     #""a \"b\" c""#,
-    #""ä.txt""#,
+    #""ä.txt""#
   ])
   func keepsValidValues(value: String) throws {
     #expect(try KeyedItem(item: "attachment", parameters: ["filename": value]).encoded == "attachment; filename=\(value)")
@@ -48,7 +48,7 @@ struct KeyedItemValidationTests {
   @Test("Values that only look quoted are quoted again", arguments: [
     (#""a\""#, #""\"a\\\"""#),
     (#""a"b""#, #""\"a\"b\"""#),
-    (#"""#, #""\"""#),
+    (#"""#, #""\"""#)
   ])
   func requotesBrokenQuotedStrings(value: String, expected: String) throws {
     #expect(try KeyedItem(item: "attachment", parameters: ["filename": value]).encoded == "attachment; filename=\(expected)")
@@ -142,7 +142,7 @@ struct QualityValidationTests {
   }
 
   @Test("Items that are not tokens or media ranges are rejected", arguments: [
-    "gzip, br;q=1", "a b", "", "text/", "/html", "a/b/c", "x\r\ny", "ä",
+    "gzip, br;q=1", "a b", "", "text/", "/html", "a/b/c", "x\r\ny", "ä"
   ])
   func rejectsInvalidItems(item: String) {
     #expect(throws: HTTPFieldValueError.invalidItem) {
@@ -225,7 +225,7 @@ struct QualityValidationTests {
 
 struct MultipartBoundaryValidationTests {
   @Test("RFC 2046 boundaries are valid", arguments: [
-    "B", UUID().uuidString, "MUTATION-BOUNDARY", "a'()+_,-./:=? b", String(repeating: "x", count: 70),
+    "B", UUID().uuidString, "MUTATION-BOUNDARY", "a'()+_,-./:=? b", String(repeating: "x", count: 70)
   ])
   func validBoundaries(boundary: String) {
     #expect(MultipartForm.isValidBoundary(boundary))

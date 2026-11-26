@@ -148,10 +148,7 @@ extension HTTPFieldValueSyntax {
       if scanner.isAtEnd || scanner.peek == ";" {
         continue
       }
-      guard let name = scanner.token(), scanner.consume("=") else {
-        return nil
-      }
-      guard let value = scanner.peek == "\"" ? scanner.quotedString() : scanner.token() else {
+      guard let name = scanner.token(), scanner.consume("="), let value = scanner.peek == "\"" ? scanner.quotedString() : scanner.token() else {
         return nil
       }
       parameters.append((name: name.lowercased(), value: value))
@@ -195,10 +192,7 @@ extension HTTPFieldValueSyntax {
     }
     if parts.count == 2 {
       let decimals = parts[1]
-      guard decimals.count <= 3, decimals.allSatisfy(\.isASCII), decimals.allSatisfy(\.isNumber) else {
-        return nil
-      }
-      guard parts[0] == "0" || decimals.allSatisfy({ $0 == "0" }) else {
+      guard decimals.count <= 3, decimals.allSatisfy(\.isASCII), decimals.allSatisfy(\.isNumber), parts[0] == "0" || decimals.allSatisfy({ $0 == "0" }) else {
         return nil
       }
     }
@@ -211,7 +205,7 @@ extension HTTPFieldValueSyntax {
     private var index = 0
 
     init(_ string: String) {
-      scalars = Array(string.unicodeScalars)
+      self.scalars = Array(string.unicodeScalars)
     }
 
     var isAtEnd: Bool {

@@ -45,14 +45,16 @@ public final class HTTPRedirectPolicy: NSObject, URLSessionTaskDelegate, @unchec
   ///   - sensitiveHeaders: Fields removed on cross-origin redirects. Defaults to `defaultSensitiveHeaders`.
   ///   - allowedHosts: Hosts redirects may go to, or `nil` for any host. Defaults to `nil`.
   public init(blocksDowngrade: Bool = true, sensitiveHeaders: Set<HTTPField.Name> = HTTPRedirectPolicy.defaultSensitiveHeaders,
-              allowedHosts: Set<String>? = nil) {
+              allowedHosts: Set<String>? = nil)
+  {
     self.blocksDowngrade = blocksDowngrade
     self.sensitiveHeaders = sensitiveHeaders
     self.allowedHosts = allowedHosts
   }
 
   public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
-                         newRequest request: URLRequest, completionHandler: @escaping @Sendable (URLRequest?) -> Void) {
+                         newRequest request: URLRequest, completionHandler: @escaping @Sendable (URLRequest?) -> Void)
+  {
     completionHandler(redirectedRequest(request, from: task.currentRequest?.url ?? task.originalRequest?.url))
   }
 
@@ -102,7 +104,8 @@ public final class HTTPRedirectPolicy: NSObject, URLSessionTaskDelegate, @unchec
       throw URLError(.appTransportSecurityRequiresSecureConnection)
     }
     if original.scheme?.lowercased() == request.scheme?.lowercased(),
-       original.authority?.lowercased() == request.authority?.lowercased() {
+       original.authority?.lowercased() == request.authority?.lowercased()
+    {
       return request
     }
 

@@ -22,7 +22,7 @@ struct ContentTypeParsingTests {
   @Test("Valid media types are accepted", arguments: [
     "application/json", "*/*", "text/*", "image/svg+xml", "application/vnd.api+json",
     "text/plain;", "text/plain; ; charset=utf-8", "text/plain;charset=utf-8", "text/plain \t; charset=utf-8",
-    "multipart/form-data; boundary=\"a b:c\"", "text/plain; name=\"ä\"",
+    "multipart/form-data; boundary=\"a b:c\"", "text/plain; name=\"ä\""
   ])
   func valid(value: String) {
     #expect(HTTPContentType(rawValue: value) != nil)
@@ -40,7 +40,7 @@ struct ContentTypeParsingTests {
   }
 
   @Test("Equality ignores the case of type, subtype, parameter names and charset")
-  func equality() throws {
+  func equality() {
     let base: HTTPContentType = "application/json; charset=utf-8"
     #expect(base == "Application/JSON; Charset=UTF-8")
     #expect(base == "application/json;charset=utf-8")
@@ -97,7 +97,8 @@ struct ContentTypeParsingTests {
 /// Expects `body` to throw an `HTTPError` that `matches` accepts. `HTTPError` is not `Equatable`, so
 /// cases are matched with a pattern.
 private func expectHTTPError(_ matches: (HTTPError) -> Bool, sourceLocation: SourceLocation = #_sourceLocation,
-                             _ body: () throws -> Void) {
+                             _ body: () throws -> Void)
+{
   let error = #expect(throws: HTTPError.self, sourceLocation: sourceLocation) {
     try body()
   }
@@ -105,11 +106,19 @@ private func expectHTTPError(_ matches: (HTTPError) -> Bool, sourceLocation: Sou
 }
 
 private func isInvalidContentType(_ error: HTTPError) -> Bool {
-  if case .invalidContentType = error { true } else { false }
+  if case .invalidContentType = error {
+    true
+  } else {
+    false
+  }
 }
 
 private func isContentTypeHeaderMissing(_ error: HTTPError) -> Bool {
-  if case .contentTypeHeaderMissing = error { true } else { false }
+  if case .contentTypeHeaderMissing = error {
+    true
+  } else {
+    false
+  }
 }
 
 struct ContentTypeHeaderTests {
@@ -161,7 +170,7 @@ struct ContentTypeHeaderTests {
     ("text/*", "application/json"),
     ("application/json;q=0", "application/json"),
     ("application/json", "not a type"),
-    ("application/json", "application/json, text/html"),
+    ("application/json", "application/json, text/html")
   ])
   func rejected(accept: String, contentType: String) {
     expectHTTPError(isInvalidContentType) {

@@ -59,10 +59,13 @@ extension URLSession: HTTPTransportable {
                              delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse
   {
     var attempt = 0
+    var generator = SystemRandomNumberGenerator()
     let taskDelegate = Self.secureTaskDelegate(delegate)
     let maxResponseSize = Self.maxResponseSize(of: taskDelegate)
+    let retryPolicy = retryPolicy.flatMap { $0.allowsRetry(for: request.method) ? $0 : nil }
 
     while true {
+      let clientResponse: HTTPClientResponse
       do {
         let (data, response) = if let maxResponseSize {
           try await limitedData(for: request, httpBody: body, maxResponseSize: maxResponseSize, delegate: taskDelegate)
@@ -71,20 +74,24 @@ extension URLSession: HTTPTransportable {
         } else {
           try await data(for: request, delegate: taskDelegate)
         }
-        return HTTPClientResponse(request: request, requestBody: body.map(HTTPClientResponse.Body.data) ?? .empty, response: response, responseData: data)
+        clientResponse = HTTPClientResponse(request: request, requestBody: body.map(HTTPClientResponse.Body.data) ?? .empty,
+                                            response: response, responseData: data)
       } catch {
-        // Check if we should retry
-        guard let retryPolicy, retryPolicy.allowsRetry(for: request.method),
-              retryPolicy.shouldRetry(error: error, attempt: attempt) else {
+        guard let retryPolicy, retryPolicy.shouldRetry(error: error, attempt: attempt) else {
           throw error
         }
-
-        // Calculate delay and wait before retrying
-        let delay = retryPolicy.delay(for: attempt)
-        try await Task.sleep(for: .seconds(delay))
-
+        try await Task.sleep(for: .seconds(retryPolicy.retryDelay(for: attempt, using: &generator)))
         attempt += 1
+        continue
       }
+
+      // A retryable status such as 503 is retried; once the retries are used up, the last response is
+      // returned as it is, for the caller to validate.
+      guard let retryPolicy, let delay = retryPolicy.retryDelay(after: clientResponse.response, attempt: attempt, now: Date(), using: &generator) else {
+        return clientResponse
+      }
+      try await Task.sleep(for: .seconds(delay))
+      attempt += 1
     }
   }
 
@@ -93,7 +100,8 @@ extension URLSession: HTTPTransportable {
   ///
   /// - Throws: `URLError(.dataLengthExceedsMaximum)` when the declared or received length is too large.
   func limitedData(for request: HTTPRequest, httpBody body: Data?, maxResponseSize: Int,
-                   delegate: any URLSessionTaskDelegate) async throws -> (Data, HTTPResponse) {
+                   delegate: any URLSessionTaskDelegate) async throws -> (Data, HTTPResponse)
+  {
     guard var urlRequest = URLRequest(httpRequest: request) else {
       throw HTTPError.cannotCreateURLRequest
     }
