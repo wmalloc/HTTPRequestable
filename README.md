@@ -100,6 +100,15 @@ let base = #URL("https://api.example.com/v1")
 ```
 The build fails if the literal isn't a valid URL with a scheme and a host, contains interpolation or unencoded characters such as spaces, or includes a user name or password.
 
+## #HTTPFieldName
+Creates an `HTTPField.Name` from a string literal that is checked when you build, so it needs no `!`:
+```swift
+extension HTTPField.Name {
+  static let requestID = #HTTPFieldName("X-Request-ID")
+}
+```
+The build fails if the literal is empty, contains interpolation, or has a character not allowed in a field name, such as a space, a colon or a line break.
+
 ## Usage
 ### Creating an API Manager
 
