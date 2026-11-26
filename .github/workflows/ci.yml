@@ -48,15 +48,14 @@ jobs:
 
   sample-app:
     name: Sample app
-    runs-on: macos-26
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v5
 
-      # Sample.xcodeproj uses the project.xcproj format, which only Xcode 27 or later can open; older
-      # Xcode versions report that project.pbxproj is missing.
+      # Sample.xcodeproj is kept in the project.pbxproj format, so any Xcode 26 or later can open it.
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '27'
+          xcode-version: latest-stable
 
       - name: Toolchain
         run: xcodebuild -version
