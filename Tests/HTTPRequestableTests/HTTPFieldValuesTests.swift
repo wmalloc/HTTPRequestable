@@ -11,22 +11,21 @@ import Testing
 
 struct HTTPFieldValuesTests {
   @Test("KeyedItem form-data encoding")
-  func keyedItemFormData() {
-    let values = KeyedItem(item: "form-data", parameters: ["name": "\"name.png\"", "filename": "\"filename.txt\""])
-    #expect(["form-data; name=\"name.png\"; filename=\"filename.txt\"", "form-data; filename=\"filename.txt\"; name=\"name.png\""]
-      .contains(values.encoded))
+  func keyedItemFormData() throws {
+    let values = try KeyedItem(item: "form-data", parameters: ["name": "\"name.png\"", "filename": "\"filename.txt\""])
+    #expect(values.encoded == "form-data; filename=\"filename.txt\"; name=\"name.png\"")
   }
 
   @Test("KeyedItem boundary encoding")
-  func keyedItemBoundary() {
-    let boundary = "boundary".initialBoundary
-    let values = KeyedItem(item: "multipart/form-data", parameters: ["boundary": boundary])
+  func keyedItemBoundary() throws {
+    let boundary = UUID().uuidString
+    let values = try KeyedItem(item: "multipart/form-data", parameters: ["boundary": boundary])
     #expect(values.encoded == "multipart/form-data; boundary=\(boundary)")
   }
 
   @Test("Quality encoding")
-  func testQuality() {
-    let items = [
+  func testQuality() throws {
+    let items = try [
       Quality.Item(item: "br", parameters: Quality.Parameter(q: 1.0)),
       Quality.Item(item: "gzip", parameters: Quality.Parameter(q: 0.9)),
       Quality.Item(item: "deflate", parameters: Quality.Parameter(q: 0.8))

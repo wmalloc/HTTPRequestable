@@ -27,10 +27,23 @@ open class MultipartForm: AnyMultipartFormBodyPart {
     }
   }
 
+  /// Creates an empty form.
+  ///
+  /// - Parameters:
+  ///   - fileManager: Used to read files appended by URL.
+  ///   - boundary: Separates the body parts. It must be 1 to 70 characters from the set RFC 2046 allows
+  ///     (letters, digits, space and `'()+_,-./:=?`) and must not end with a space. The default, a UUID,
+  ///     always is.
+  ///   - streamBufferSize: The size of the buffer used to copy streams into the body.
+  /// - Precondition: `boundary` is valid. An invalid boundary, such as one containing CR or LF, would
+  ///   be written differently in the `Content-Type` header and in the body, and the server could not
+  ///   split the body.
   public init(fileManager: FileManager = .default, boundary: String = UUID().uuidString, streamBufferSize: Int = 1024) {
+    precondition(Self.isValidBoundary(boundary), "MultipartForm boundary must be 1 to 70 RFC 2046 characters, not ending with a space")
     self.fileManager = fileManager
     self.boundary = boundary
-    self.contentType = KeyedItem(item: HTTPContentType.multipartForm.rawValue, parameters: ["boundary": boundary])
+    // The precondition above leaves only RFC 2046 characters, which are valid parameter values.
+    self.contentType = KeyedItem(uncheckedItem: HTTPContentType.multipartForm.rawValue, parameters: ["boundary": boundary])
     self.headers = [HTTPField.contentType(contentType.encoded)]
     self.streamBufferSize = streamBufferSize
   }
@@ -134,10 +147,12 @@ open class MultipartForm: AnyMultipartFormBodyPart {
 
 extension MultipartForm {
   func contentHeaders(withName name: String, fileName: String? = nil, mimeType: String? = nil) -> [HTTPField] {
-    var disposition = KeyedItem(item: HTTPContentType.formData.rawValue, parameters: ["name": Self.quotedParameter(name)])
+    var parameters = ["name": Self.quotedParameter(name)]
     if let fileName {
-      disposition["filename"] = Self.quotedParameter(fileName)
+      parameters["filename"] = Self.quotedParameter(fileName)
     }
+    // quotedParameter percent-encodes every control character, so the values are valid.
+    let disposition = KeyedItem(uncheckedItem: HTTPContentType.formData.rawValue, parameters: parameters)
 
     var fields: [HTTPField] = []
     fields.append(.contentDisposition(disposition.encoded))
@@ -149,20 +164,43 @@ extension MultipartForm {
 }
 
 extension MultipartForm {
+  /// Whether `boundary` is a valid RFC 2046 boundary: 1 to 70 `bchars`, not ending with a space.
+  static func isValidBoundary(_ boundary: String) -> Bool {
+    let scalars = boundary.unicodeScalars
+    guard (1 ... 70).contains(scalars.count), scalars.last != " " else {
+      return false
+    }
+    return scalars.allSatisfy { scalar in
+      switch scalar {
+      case "a" ... "z", "A" ... "Z", "0" ... "9", "'", "(", ")", "+", "_", ",", "-", ".", "/", ":", "=", "?", " ":
+        true
+      default:
+        false
+      }
+    }
+  }
+}
+
+extension MultipartForm {
   /// Returns `value` as a quoted `Content-Disposition` parameter value that cannot end the value early
   /// or inject other parameters or headers.
   ///
-  /// `"`, CR and LF are percent-encoded (RFC 7578 section 4.2). A value that the caller already wrapped
-  /// in double quotes is unwrapped first, so it is not quoted twice.
+  /// `"` and control characters such as CR and LF are percent-encoded (RFC 7578 section 4.2). A value
+  /// that the caller already wrapped in double quotes is unwrapped first, so it is not quoted twice.
   static func quotedParameter(_ value: String) -> String {
     var inner = Substring(value)
     if inner.count >= 2, inner.hasPrefix("\""), inner.hasSuffix("\"") {
       inner = inner.dropFirst().dropLast()
     }
-    let escaped = inner
-      .replacingOccurrences(of: "\r", with: "%0D")
-      .replacingOccurrences(of: "\n", with: "%0A")
-      .replacingOccurrences(of: "\"", with: "%22")
+    var escaped = ""
+    for scalar in inner.unicodeScalars {
+      if scalar == "\"" || HTTPFieldValueSyntax.isControlCharacter(scalar) {
+        let hex = String(scalar.value, radix: 16, uppercase: true)
+        escaped += (hex.count < 2 ? "%0" : "%") + hex
+      } else {
+        escaped.unicodeScalars.append(scalar)
+      }
+    }
     return "\"\(escaped)\""
   }
 }
