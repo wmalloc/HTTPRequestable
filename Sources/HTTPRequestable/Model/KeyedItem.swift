@@ -4,10 +4,9 @@
 //  Created by Waqar Malik on 5/18/24
 //
 
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
 
 /// A structure that wraps an item with a set of associated key-value string parameters.

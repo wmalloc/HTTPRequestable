@@ -4,10 +4,9 @@
 //  Created by Waqar Malik on 5/18/24
 //
 
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
 
 /// "br;q=1.0, gzip;q=0.9, deflate;q=0.8"

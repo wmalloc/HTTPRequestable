@@ -4,10 +4,9 @@
 //  Created by Waqar Malik on 5/31/24.
 //
 
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
 
 /// Loads binary data from a bundle resource.

@@ -4,6 +4,9 @@
 
 #if canImport(ObjectiveC) && canImport(Security) && canImport(CryptoKit)
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 @testable import HTTPRequestable
 import HTTPTypes
 import MockURLProtocol

@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 1/14/26.
 //
 
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
-import HTTPTypesFoundation
 #endif
+import HTTPTypesFoundation
 import HTTPTypes
 
 public extension HTTPRequest {

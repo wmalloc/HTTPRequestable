@@ -4,10 +4,9 @@
 //  Created by Waqar Malik on 4/16/25.
 //
 
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
 import HTTPRequestable
 

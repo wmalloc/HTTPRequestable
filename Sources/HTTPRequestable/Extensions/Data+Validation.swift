@@ -4,10 +4,9 @@
 //  Created by Waqar Malik on 4/27/23.
 //
 
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
 
 /// Extension providing validation methods for Data instances.

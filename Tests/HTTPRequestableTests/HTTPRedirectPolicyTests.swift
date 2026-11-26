@@ -3,6 +3,9 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 @testable import HTTPRequestable
 import HTTPTypes
 import Testing

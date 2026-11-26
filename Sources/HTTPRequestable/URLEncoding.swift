@@ -4,10 +4,9 @@
 //  Created by Waqar Malik on 11/23/26.
 //
 
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
 
 /// Percent-encoding used to build request URLs.

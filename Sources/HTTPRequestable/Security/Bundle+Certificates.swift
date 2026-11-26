@@ -5,10 +5,9 @@
 //
 
 #if canImport(Security)
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
 @preconcurrency import Security
 
