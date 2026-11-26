@@ -152,7 +152,7 @@ extension MultipartForm {
       parameters["filename"] = Self.quotedParameter(fileName)
     }
     // quotedParameter percent-encodes every control character, so the values are valid.
-    let disposition = KeyedItem(uncheckedItem: HTTPContentType.formData.rawValue, parameters: parameters)
+    let disposition = KeyedItem(uncheckedItem: "form-data", parameters: parameters)
 
     var fields: [HTTPField] = []
     fields.append(.contentDisposition(disposition.encoded))

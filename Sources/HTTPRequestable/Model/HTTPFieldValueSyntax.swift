@@ -112,3 +112,186 @@ enum HTTPFieldValueSyntax {
     return "0.\(decimals)"
   }
 }
+
+// MARK: - Parsing
+
+extension HTTPFieldValueSyntax {
+  /// The parts of a parsed media type, such as `text/html; charset=utf-8`.
+  struct MediaType {
+    /// The type, lowercased.
+    var type: String
+    /// The subtype, lowercased.
+    var subtype: String
+    /// The parameters in order, with names lowercased and quoted values unquoted.
+    var parameters: [(name: String, value: String)]
+  }
+
+  /// Parses `string` as a `media-type` (RFC 9110 section 8.3.1): `type "/" subtype`, then any number of
+  /// `; name=value` parameters, where each value is a token or a quoted-string. Whitespace is allowed
+  /// only around the `;` separators. Returns `nil` when `string` does not match.
+  static func parseMediaType(_ string: String) -> MediaType? {
+    var scanner = FieldScanner(string)
+    guard let type = scanner.token(), scanner.consume("/"), let subtype = scanner.token() else {
+      return nil
+    }
+    var parameters: [(name: String, value: String)] = []
+    while true {
+      scanner.skipWhitespace()
+      if scanner.isAtEnd {
+        break
+      }
+      guard scanner.consume(";") else {
+        return nil
+      }
+      scanner.skipWhitespace()
+      // RFC 9110 allows empty parameters, as in `text/plain;`.
+      if scanner.isAtEnd || scanner.peek == ";" {
+        continue
+      }
+      guard let name = scanner.token(), scanner.consume("=") else {
+        return nil
+      }
+      guard let value = scanner.peek == "\"" ? scanner.quotedString() : scanner.token() else {
+        return nil
+      }
+      parameters.append((name: name.lowercased(), value: value))
+    }
+    return MediaType(type: type.lowercased(), subtype: subtype.lowercased(), parameters: parameters)
+  }
+
+  /// The elements of a comma-separated list, trimmed of whitespace and without empty elements. Commas
+  /// inside quoted-strings do not separate elements.
+  static func listElements(_ string: String) -> [String] {
+    var elements: [String] = []
+    var current = String.UnicodeScalarView()
+    var isQuoted = false
+    var isEscaped = false
+    for scalar in string.unicodeScalars {
+      if isEscaped {
+        isEscaped = false
+      } else if isQuoted, scalar == "\\" {
+        isEscaped = true
+      } else if scalar == "\"" {
+        isQuoted.toggle()
+      } else if scalar == ",", !isQuoted {
+        elements.append(String(current))
+        current = String.UnicodeScalarView()
+        continue
+      }
+      current.append(scalar)
+    }
+    elements.append(String(current))
+    return elements
+      .map { $0.trimmingWhitespace() }
+      .filter { !$0.isEmpty }
+  }
+
+  /// Parses a `qvalue` (RFC 9110 section 12.4.2): `0` to `1` with at most three decimals. Returns `nil`
+  /// for anything else, such as `2`, `0.1234` or `abc`.
+  static func parseQValue(_ string: String) -> Double? {
+    let parts = string.split(separator: ".", omittingEmptySubsequences: false)
+    guard (1 ... 2).contains(parts.count), parts[0] == "0" || parts[0] == "1" else {
+      return nil
+    }
+    if parts.count == 2 {
+      let decimals = parts[1]
+      guard decimals.count <= 3, decimals.allSatisfy(\.isASCII), decimals.allSatisfy(\.isNumber) else {
+        return nil
+      }
+      guard parts[0] == "0" || decimals.allSatisfy({ $0 == "0" }) else {
+        return nil
+      }
+    }
+    return Double(string)
+  }
+
+  /// Reads the parts of a field value one at a time.
+  private struct FieldScanner {
+    private let scalars: [Unicode.Scalar]
+    private var index = 0
+
+    init(_ string: String) {
+      scalars = Array(string.unicodeScalars)
+    }
+
+    var isAtEnd: Bool {
+      index == scalars.count
+    }
+
+    var peek: Unicode.Scalar? {
+      isAtEnd ? nil : scalars[index]
+    }
+
+    /// Consumes `scalar` if it is next.
+    mutating func consume(_ scalar: Unicode.Scalar) -> Bool {
+      guard peek == scalar else {
+        return false
+      }
+      index += 1
+      return true
+    }
+
+    /// Skips spaces and horizontal tabs (`OWS`).
+    mutating func skipWhitespace() {
+      while let scalar = peek, scalar == " " || scalar == "\t" {
+        index += 1
+      }
+    }
+
+    /// Consumes a token, or returns `nil` when none is next.
+    mutating func token() -> String? {
+      let start = index
+      while let scalar = peek, HTTPFieldValueSyntax.isTokenCharacter(scalar) {
+        index += 1
+      }
+      guard index > start else {
+        return nil
+      }
+      var token = String.UnicodeScalarView()
+      token.append(contentsOf: scalars[start ..< index])
+      return String(token)
+    }
+
+    /// Consumes a quoted-string and returns its content with quoted-pairs resolved, or returns `nil`
+    /// when the string is not closed or contains a control character.
+    mutating func quotedString() -> String? {
+      guard consume("\"") else {
+        return nil
+      }
+      var content = String.UnicodeScalarView()
+      while let scalar = peek {
+        index += 1
+        if HTTPFieldValueSyntax.isControlCharacter(scalar) {
+          return nil
+        }
+        if scalar == "\"" {
+          return String(content)
+        }
+        if scalar == "\\" {
+          guard let escaped = peek, !HTTPFieldValueSyntax.isControlCharacter(escaped) else {
+            return nil
+          }
+          index += 1
+          content.append(escaped)
+        } else {
+          content.append(scalar)
+        }
+      }
+      return nil
+    }
+  }
+}
+
+private extension String {
+  /// The string without leading or trailing spaces and horizontal tabs.
+  func trimmingWhitespace() -> String {
+    var scalars = Substring(self).unicodeScalars
+    while let first = scalars.first, first == " " || first == "\t" {
+      scalars.removeFirst()
+    }
+    while let last = scalars.last, last == " " || last == "\t" {
+      scalars.removeLast()
+    }
+    return String(scalars)
+  }
+}

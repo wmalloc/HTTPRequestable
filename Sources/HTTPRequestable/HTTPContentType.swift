@@ -10,40 +10,124 @@ import FoundationNetworking
 import Foundation
 #endif
 
+/// A media type, such as `application/json` or `text/html; charset=utf-8` (RFC 9110 section 8.3.1),
+/// used in `Content-Type` and `Accept` headers.
+///
+/// A content type is checked when it is created: it must be `type/subtype` followed by any number of
+/// `; name=value` parameters, where each name, type and subtype is a token and each value is a token or
+/// a quoted-string. Type, subtype and parameter names are compared without regard to case.
+///
+/// ```swift
+/// let type = HTTPContentType(rawValue: "Text/HTML; Charset=UTF-8")  // type "text", subtype "html"
+/// type?.parameters["charset"]  // "UTF-8"
+/// HTTPContentType(rawValue: "not a type")  // nil
+/// ```
 @frozen
 public struct HTTPContentType: RawRepresentable, Hashable, Sendable {
-  /// The raw string value of the content type.
+  /// The content type as written, without leading or trailing whitespace.
   public let rawValue: String
 
-  /// The MIME type extracted from the raw value, without parameters such as `charset`.
-  /// Empty when the raw value has no media type.
+  /// The type, such as `text` in `text/html`, lowercased. `*` in a media range such as `*/*`.
+  public let type: String
+
+  /// The subtype, such as `html` in `text/html`, lowercased. `*` in a media range such as `text/*`.
+  public let subtype: String
+
+  /// The parameters, such as `charset`, with names lowercased and quoted values unquoted.
+  public let parameters: [String: String]
+
+  /// The type and subtype without parameters, lowercased, such as `text/html`.
   public var mimeType: String {
-    Self.mimeType(for: rawValue)
+    "\(type)/\(subtype)"
   }
 
-  /// Initializes a new `HTTPContentType` with the given raw value.
+  /// Creates a content type from a media type such as `text/html; charset=utf-8`.
   ///
-  /// - Parameter rawValue: The raw string value of the content type.
-  public init(rawValue: String) {
-    self.rawValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+  /// - Parameter rawValue: The media type. Leading and trailing whitespace is removed.
+  /// - Returns: `nil` when `rawValue` is not a valid media type, for example when it has no `/`,
+  ///   contains a space or control character outside a quoted parameter value, or names a parameter
+  ///   twice.
+  public init?(rawValue: String) {
+    let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard let mediaType = HTTPFieldValueSyntax.parseMediaType(trimmed) else {
+      return nil
+    }
+    var parameters: [String: String] = [:]
+    for parameter in mediaType.parameters {
+      // A repeated parameter is ambiguous, so it is rejected rather than resolved either way.
+      guard parameters.updateValue(parameter.value, forKey: parameter.name) == nil else {
+        return nil
+      }
+    }
+    self.rawValue = trimmed
+    self.type = mediaType.type
+    self.subtype = mediaType.subtype
+    self.parameters = parameters
   }
 
-  /// Splits a string and creates content types from the MIME type only.
+  /// Whether `contentType` is in this media range, as used to check a response against `Accept`.
+  ///
+  /// `*/*` matches every content type and `text/*` every `text` subtype; otherwise the type and subtype
+  /// must be equal. Parameters are ignored, so `application/json` matches
+  /// `application/json; charset=utf-8`.
+  ///
+  /// - Parameter contentType: The content type to check, such as a response's `Content-Type`.
+  /// - Returns: `true` when `contentType` is in this range.
+  public func matches(_ contentType: HTTPContentType) -> Bool {
+    if type == "*" {
+      return subtype == "*"
+    }
+    return type == contentType.type && (subtype == "*" || subtype == contentType.subtype)
+  }
+
+  /// Splits a comma-separated list, such as an `Accept` value, into content types.
+  ///
+  /// Commas inside quoted parameter values do not separate entries. Entries that are blank or not valid
+  /// media types are left out.
   ///
   /// - Parameter value: A string containing one or more content types, separated by commas.
-  /// - Returns: An array of `HTTPContentType` objects.
+  /// - Returns: The valid content types, in order.
   public static func contentTypes(for value: String) -> [Self] {
-    guard !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
-    return value.split(separator: ",")
-      .map { Self(rawValue: String($0)) }
-      .filter { !$0.rawValue.isEmpty }
+    HTTPFieldValueSyntax.listElements(value).compactMap(Self.init(rawValue:))
   }
 
-  /// The part of `value` before the first `;`, trimmed. Unlike `split`, this keeps an empty
-  /// media type empty instead of returning the parameters.
-  static func mimeType(for value: String) -> String {
-    let mimeType = value.prefix { $0 != ";" }
-    return mimeType.trimmingCharacters(in: .whitespacesAndNewlines)
+  /// Two content types are equal when their type, subtype and parameters are, comparing type, subtype
+  /// and parameter names without regard to case. The `charset` value is also compared without regard
+  /// to case; other parameter values must match exactly.
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.type == rhs.type && lhs.subtype == rhs.subtype && lhs.comparableParameters == rhs.comparableParameters
+  }
+
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(type)
+    hasher.combine(subtype)
+    hasher.combine(comparableParameters)
+  }
+
+  /// The parameters with the `charset` value lowercased, since charset names ignore case.
+  private var comparableParameters: [String: String] {
+    var parameters = parameters
+    if let charset = parameters["charset"] {
+      parameters["charset"] = charset.lowercased()
+    }
+    return parameters
+  }
+}
+
+extension HTTPContentType {
+  /// The media range an `Accept` list element names, without its parameters, or `nil` when the element
+  /// is not a valid media range, has an invalid `q`, or has `q=0`, which marks it as not acceptable.
+  static func acceptedRange(_ element: String) -> HTTPContentType? {
+    guard let range = HTTPContentType(rawValue: element) else {
+      return nil
+    }
+    if let quality = range.parameters["q"] {
+      guard let value = HTTPFieldValueSyntax.parseQValue(quality), value > 0 else {
+        return nil
+      }
+    }
+    // Only the type and subtype take part in matching, so parameters, including q, are not kept.
+    return HTTPContentType(rawValue: range.mimeType)
   }
 }
 
@@ -57,11 +141,15 @@ extension HTTPContentType: Identifiable {
 
 /// A type that can be initialized with a string literal.
 extension HTTPContentType: ExpressibleByStringLiteral {
-  /// Initializes a new `HTTPContentType` with a string literal.
+  /// Creates a content type from a literal such as `"application/json"`.
   ///
-  /// - Parameter value: The string literal value.
+  /// - Parameter value: The media type.
+  /// - Precondition: `value` is a valid media type.
   public init(stringLiteral value: String) {
-    self.init(rawValue: value)
+    guard let contentType = Self(rawValue: value) else {
+      preconditionFailure("\"\(value)\" is not a valid media type")
+    }
+    self = contentType
   }
 }
 
@@ -75,9 +163,10 @@ extension HTTPContentType: CustomStringConvertible {
 
 /// A type that can be represented as a string in a lossless, unambiguous way.
 extension HTTPContentType: LosslessStringConvertible {
-  /// Initializes a new `HTTPContentType` from a description string.
+  /// Creates a content type from a media type such as `text/html; charset=utf-8`.
   ///
-  /// - Parameter description: The description string.
+  /// - Parameter description: The media type.
+  /// - Returns: `nil` when `description` is not a valid media type.
   public init?(_ description: String) {
     self.init(rawValue: description)
   }
@@ -102,13 +191,19 @@ extension HTTPContentType: Encodable {
 }
 
 extension HTTPContentType: Decodable {
-  /// Decodes a new `HTTPContentType` from the given decoder.
+  /// Decodes a content type from a string.
   ///
   /// - Parameter decoder: The decoder to read data from.
+  /// - Throws: `DecodingError.dataCorrupted` when the string is not a valid media type, or another
+  ///   decoding error.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
     let rawString = try container.decode(String.self)
-    self.init(rawValue: rawString)
+    guard let contentType = Self(rawValue: rawString) else {
+      // The value is left out of the message, so it is not repeated where errors get logged.
+      throw DecodingError.dataCorruptedError(in: container, debugDescription: "The value is not a valid media type")
+    }
+    self = contentType
   }
 }
 
@@ -123,13 +218,6 @@ public extension HTTPContentType {
   @inlinable
   static var css: Self {
     "text/css"
-  }
-
-  /// The `form-data` disposition type used in a multipart part's `Content-Disposition` header.
-  /// This is not a media type; use ``multipartForm`` for a `Content-Type` header.
-  @inlinable
-  static var formData: Self {
-    "form-data"
   }
 
   /// URL-encoded Form Data.
