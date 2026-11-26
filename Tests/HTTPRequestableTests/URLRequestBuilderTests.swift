@@ -18,11 +18,10 @@ struct URLRequestBuilderTests {
   @Test("The renamed setters set their properties")
   func renamedSetters() {
     let mainDocument = #URL("https://example.com")
-    let configured = request
-      .setMainDocumentURL(mainDocument)
-      .setAllowsConstrainedNetworkAccess(false)
-    #expect(configured.mainDocumentURL == mainDocument)
-    #expect(!configured.allowsConstrainedNetworkAccess)
+    #expect(request.setMainDocumentURL(mainDocument).mainDocumentURL == mainDocument)
+    #if canImport(Darwin)
+    #expect(!request.setAllowsConstrainedNetworkAccess(false).allowsConstrainedNetworkAccess)
+    #endif
   }
 
   @Test("setHttpBody sets the body, Content-Length and, when given, Content-Type")

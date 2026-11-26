@@ -112,9 +112,12 @@ public extension URLRequest {
 
   /// Sets whether the `URLRequest` should use pipelining.
   ///
+  /// Foundation deprecates `httpShouldUsePipelining` on every platform; on Apple platforms it only
+  /// affects the classic URL loader.
+  ///
   /// - Parameter httpShouldUsePipelining: A Boolean value indicating whether pipelining should be used.
   /// - Returns: The modified `URLRequest` instance.
-  @available(macOS 10.15, iOS 13, *)
+  @available(*, deprecated, message: "HTTP/1 pipelining has known compatibility issues and only affects the classic URL loader; adopt HTTP/2 or HTTP/3 instead.")
   @discardableResult
   func setHttpShouldUsePipelining(_ httpShouldUsePipelining: Bool) -> Self {
     var request = self
@@ -134,6 +137,8 @@ public extension URLRequest {
     return request
   }
 
+  // Constrained and expensive network access and HTTP/3 hints exist only on Apple platforms.
+  #if canImport(Darwin)
   /// Sets whether the `URLRequest` allows constrained network access.
   ///
   /// - Parameter allowsConstrainedNetworkAccess: A Boolean value indicating whether constrained network access is allowed.
@@ -156,6 +161,8 @@ public extension URLRequest {
     return request
   }
 
+  #endif
+
   /// Sets the network service type of the `URLRequest`.
   ///
   /// - Parameter networkServiceType: The network service type to set.
@@ -168,6 +175,7 @@ public extension URLRequest {
     return request
   }
 
+  #if canImport(Darwin)
   /// Sets whether the `URLRequest` assumes HTTP/3 capability.
   ///
   /// - Parameter assumesHTTP3Capable: A Boolean value indicating whether HTTP/3 capability is assumed.
@@ -179,6 +187,7 @@ public extension URLRequest {
     request.assumesHTTP3Capable = assumesHTTP3Capable
     return request
   }
+  #endif
 }
 
 // `URLRequest.Attribution` exists only on Apple platforms.
