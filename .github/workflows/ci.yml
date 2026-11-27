@@ -72,7 +72,9 @@ jobs:
   android:
     name: Android
     # The Android emulator needs KVM, which Ubuntu runners provide; Apple silicon macOS runners cannot run it.
-    runs-on: ubuntu-latest
+    # Pinned to 24.04 because the action downloads the host toolchain for the runner's Ubuntu version, and
+    # swift.org has no Swift 6.3 build for Ubuntu 26.04, which ubuntu-latest now is.
+    runs-on: ubuntu-24.04
     # Android has not been built for yet. This job reports problems without blocking merges; remove
     # continue-on-error once it passes.
     continue-on-error: true
