@@ -44,8 +44,18 @@ public extension HTTPField {
   }
 
   /// See the [Accept-Language HTTP header documentation](https://tools.ietf.org/html/rfc7231#section-5.3.5).
+  ///
+  /// Lists up to six of the user's preferred languages, or `*` (any language) when the system reports
+  /// none, as can happen on Linux.
   static var defaultAcceptLanguage: Self {
-    HTTPField(name: .acceptLanguage, value: Quality(validValuesOf: Array(Locale.preferredLanguages.prefix(6))).encoded)
+    HTTPField(name: .acceptLanguage, value: acceptLanguageValue(for: Locale.preferredLanguages))
+  }
+
+  /// The `Accept-Language` value for `languages`: up to six of them with falling q-values, or `*` when
+  /// none is a valid language tag, so the header is never empty.
+  internal static func acceptLanguageValue(for languages: [String]) -> String {
+    let value = Quality(validValuesOf: Array(languages.prefix(6))).encoded
+    return value.isEmpty ? "*" : value
   }
 
   /// See the [User-Agent header](https://tools.ietf.org/html/rfc7231#section-5.5.3).

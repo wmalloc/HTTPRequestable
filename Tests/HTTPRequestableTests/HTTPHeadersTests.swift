@@ -60,8 +60,8 @@ struct HTTPHeadersTests {
   func uRLRequestHTTPFields() throws {
     var request = try URLRequest(url: #require(URL(string: "https://api.github.com")))
       .setMethod(.get)
-    #expect(request.allHTTPHeaderFields != nil)
-    #expect(request.allHTTPHeaderFields?.isEmpty == true)
+    // A new request has no headers: Foundation on Apple platforms reports `[:]`, on Linux `nil`.
+    #expect(request.allHTTPHeaderFields?.isEmpty ?? true)
     request = request.setUserAgent(String.url_userAgent)
     #expect(request.allHTTPHeaderFields?.count == 1)
 
