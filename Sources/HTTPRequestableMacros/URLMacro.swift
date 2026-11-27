@@ -15,8 +15,7 @@ import SwiftSyntaxMacros
 /// characters, so every Foundation version parses it the same way.
 public struct URLMacro: ExpressionMacro {
   public static func expansion(of node: some FreestandingMacroExpansionSyntax,
-                               in context: some MacroExpansionContext) throws -> ExprSyntax
-  {
+                               in context: some MacroExpansionContext) throws -> ExprSyntax {
     guard node.arguments.count == 1,
           let literal = node.arguments.first?.expression.as(StringLiteralExprSyntax.self),
           let string = literal.representedLiteralValue

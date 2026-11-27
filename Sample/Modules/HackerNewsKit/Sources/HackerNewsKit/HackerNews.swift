@@ -28,8 +28,7 @@ public final class HackerNews: HTTPTransferable, Sendable {
   ///     Its own delegate must not handle server trust challenges, or it replaces any pinning.
   ///   - requestDelegate: The task delegate every request is sent with. Defaults to `nil`.
   public init(session: URLSession = URLSession(configuration: .default, delegate: nil, delegateQueue: nil),
-              requestDelegate: (any URLSessionTaskDelegate)? = nil)
-  {
+              requestDelegate: (any URLSessionTaskDelegate)? = nil) {
     self.session = session
     self.requestDelegate = requestDelegate
     let modifier = HTTPRequestHeadersModifier(fields: [.accept(.json), .contentType(.json)])
@@ -97,8 +96,7 @@ public extension HackerNews {
   ///     challenges, or it replaces the pinning.
   ///   - pinning: The public key pins.
   convenience init(session: URLSession = URLSession(configuration: .default, delegate: nil, delegateQueue: nil),
-                   pinning: HTTPPublicKeyPinning)
-  {
+                   pinning: HTTPPublicKeyPinning) {
     self.init(session: session, requestDelegate: HTTPSecurityDelegate(pinning: pinning))
   }
 }

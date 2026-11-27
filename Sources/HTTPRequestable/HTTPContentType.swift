@@ -383,8 +383,7 @@ public extension HTTPContentType {
     }
     #if canImport(UniformTypeIdentifiers)
     if let mimeType = UTType(filenameExtension: pathExtension)?.preferredMIMEType,
-       let contentType = HTTPContentType(rawValue: mimeType)
-    {
+       let contentType = HTTPContentType(rawValue: mimeType) {
       self = contentType
       return
     }

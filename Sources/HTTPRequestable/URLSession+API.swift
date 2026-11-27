@@ -35,8 +35,7 @@ extension URLSession {
   ///   request to another scheme. Errors propagate up through the interceptor chain.
   func performRequest(_ request: HTTPRequest, next send: @escaping HTTPInterceptor.NextHandler,
                       interceptors: some Sequence<any HTTPInterceptor> = [],
-                      delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse
-  {
+                      delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let policy = Self.redirectPolicy(of: delegate)
     var next: HTTPInterceptor.NextHandler = { forwarded, forwardedDelegate in
       try await send(policy.forwardedRequest(forwarded, original: request),
@@ -54,8 +53,7 @@ extension URLSession {
 
 extension URLSession: HTTPTransportable {
   public func performRequest(_ request: HTTPRequest, httpBody body: Data? = nil, retryPolicy: RetryPolicy? = nil,
-                             delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse
-  {
+                             delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     var attempt = 0
     var generator = SystemRandomNumberGenerator()
     let taskDelegate = Self.secureTaskDelegate(delegate)
@@ -92,8 +90,7 @@ extension URLSession: HTTPTransportable {
   /// With a `maxResponseSize`, the body is streamed and the request fails as soon as it is exceeded. The
   /// limit is only available on Apple platforms, where ``HTTPSecurityDelegate`` provides it.
   private func load(_ request: HTTPRequest, httpBody body: Data?, maxResponseSize: Int?,
-                    delegate: any URLSessionTaskDelegate) async throws -> (Data, HTTPResponse)
-  {
+                    delegate: any URLSessionTaskDelegate) async throws -> (Data, HTTPResponse) {
     #if canImport(Darwin)
     if let maxResponseSize {
       return try await limitedData(for: request, httpBody: body, maxResponseSize: maxResponseSize, delegate: delegate)
@@ -112,8 +109,7 @@ extension URLSession: HTTPTransportable {
   ///
   /// - Throws: `URLError(.dataLengthExceedsMaximum)` when the declared or received length is too large.
   func limitedData(for request: HTTPRequest, httpBody body: Data?, maxResponseSize: Int,
-                   delegate: any URLSessionTaskDelegate) async throws -> (Data, HTTPResponse)
-  {
+                   delegate: any URLSessionTaskDelegate) async throws -> (Data, HTTPResponse) {
     guard var urlRequest = URLRequest(httpRequest: request) else {
       throw HTTPError.cannotCreateURLRequest
     }

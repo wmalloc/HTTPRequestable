@@ -34,15 +34,13 @@ private final class RecordingDelegate: NSObject, URLSessionTaskDelegate, @unchec
   var challengeCount = 0
 
   func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
-                  newRequest request: URLRequest, completionHandler: @escaping @Sendable (URLRequest?) -> Void)
-  {
+                  newRequest request: URLRequest, completionHandler: @escaping @Sendable (URLRequest?) -> Void) {
     redirectedRequest = request
     completionHandler(request)
   }
 
   func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge,
-                  completionHandler: @escaping @Sendable (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
-  {
+                  completionHandler: @escaping @Sendable (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
     challengeCount += 1
     completionHandler(.rejectProtectionSpace, nil)
   }

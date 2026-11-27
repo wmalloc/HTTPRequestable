@@ -16,16 +16,14 @@ struct URLMacroTests {
   private let macros: [String: MacroSpec] = ["URL": MacroSpec(type: URLMacro.self)]
 
   private func expectExpansion(_ source: String, _ expanded: String,
-                               fileID: StaticString = #fileID, filePath: StaticString = #filePath, line: UInt = #line, column: UInt = #column)
-  {
+                               fileID: StaticString = #fileID, filePath: StaticString = #filePath, line: UInt = #line, column: UInt = #column) {
     assertMacroExpansion("let url = \(source)", expandedSource: "let url = \(expanded)", macroSpecs: macros,
                          indentationWidth: .spaces(2), failureHandler: recordMacroFailure,
                          fileID: fileID, filePath: filePath, line: line, column: column)
   }
 
   private func expectRejected(_ source: String, message: String,
-                              fileID: StaticString = #fileID, filePath: StaticString = #filePath, line: UInt = #line, column: UInt = #column)
-  {
+                              fileID: StaticString = #fileID, filePath: StaticString = #filePath, line: UInt = #line, column: UInt = #column) {
     assertMacroExpansion("let url = \(source)", expandedSource: "let url = \(source)",
                          diagnostics: [DiagnosticSpec(message: message, line: 1, column: 11)],
                          macroSpecs: macros, indentationWidth: .spaces(2), failureHandler: recordMacroFailure,

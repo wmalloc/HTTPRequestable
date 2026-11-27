@@ -76,8 +76,7 @@ private struct CustomValidationRequest: HTTPRequestConfigurable {
 /// Expects `body` to throw `HTTPError.unacceptableStatusCode(status)`. `HTTPError` is not `Equatable`,
 /// so the case is matched with a pattern.
 private func expectUnacceptableStatus(_ status: HTTPResponse.Status, sourceLocation: SourceLocation = #_sourceLocation,
-                                      _ body: () async throws -> Void) async
-{
+                                      _ body: () async throws -> Void) async {
   let error = await #expect(throws: HTTPError.self, sourceLocation: sourceLocation) {
     try await body()
   }

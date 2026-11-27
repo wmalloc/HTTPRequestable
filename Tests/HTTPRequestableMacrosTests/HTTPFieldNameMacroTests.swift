@@ -16,16 +16,14 @@ struct HTTPFieldNameMacroTests {
   private let macros: [String: MacroSpec] = ["HTTPFieldName": MacroSpec(type: HTTPFieldNameMacro.self)]
 
   private func expectExpansion(_ source: String, _ expanded: String,
-                               fileID: StaticString = #fileID, filePath: StaticString = #filePath, line: UInt = #line, column: UInt = #column)
-  {
+                               fileID: StaticString = #fileID, filePath: StaticString = #filePath, line: UInt = #line, column: UInt = #column) {
     assertMacroExpansion("let name = \(source)", expandedSource: "let name = \(expanded)", macroSpecs: macros,
                          indentationWidth: .spaces(2), failureHandler: recordMacroFailure,
                          fileID: fileID, filePath: filePath, line: line, column: column)
   }
 
   private func expectRejected(_ source: String, message: String,
-                              fileID: StaticString = #fileID, filePath: StaticString = #filePath, line: UInt = #line, column: UInt = #column)
-  {
+                              fileID: StaticString = #fileID, filePath: StaticString = #filePath, line: UInt = #line, column: UInt = #column) {
     assertMacroExpansion("let name = \(source)", expandedSource: "let name = \(source)",
                          diagnostics: [DiagnosticSpec(message: message, line: 1, column: 12)],
                          macroSpecs: macros, indentationWidth: .spaces(2), failureHandler: recordMacroFailure,

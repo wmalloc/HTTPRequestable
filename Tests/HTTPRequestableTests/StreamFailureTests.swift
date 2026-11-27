@@ -5,11 +5,11 @@
 //
 
 import Foundation
+@testable import HTTPRequestable
+import Testing
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-@testable import HTTPRequestable
-import Testing
 
 /// An input stream whose reads fail.
 private final class FailingInputStream: InputStream {

@@ -12,4 +12,5 @@
 --indent 2
 --commas inline
 --test-case-name-format preserve
+--disable wrapMultilineStatementBraces
 # rules

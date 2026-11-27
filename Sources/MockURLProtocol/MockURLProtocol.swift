@@ -88,11 +88,11 @@ public class MockURLProtocol: URLProtocol {
 }
 
 #if canImport(Darwin)
-// `@unchecked` because `URLProtocol` is an open Foundation class that is not `Sendable`, so the compiler
-// cannot check a subclass. MockURLProtocol adds no stored state of its own: handlers live in the
-// `RequestHandlerStorage` actor, and the URL Loading System owns the inherited `request` and `client`.
-// On Linux, Foundation marks `URLProtocol`'s `Sendable` conformance unavailable, which subclasses
-// inherit, so the conformance is declared only on Apple platforms.
+/// `@unchecked` because `URLProtocol` is an open Foundation class that is not `Sendable`, so the compiler
+/// cannot check a subclass. MockURLProtocol adds no stored state of its own: handlers live in the
+/// `RequestHandlerStorage` actor, and the URL Loading System owns the inherited `request` and `client`.
+/// On Linux, Foundation marks `URLProtocol`'s `Sendable` conformance unavailable, which subclasses
+/// inherit, so the conformance is declared only on Apple platforms.
 extension MockURLProtocol: @unchecked Sendable {}
 #endif
 
