@@ -51,12 +51,12 @@ struct RequestTests {
     #expect(url.absoluteString == "https://hacker-news.firebaseio.com/v0/item/8863.json")
   }
 
-  @Test("Item request carries no query items or headers of its own")
+  @Test("Item request asks for JSON and carries no query items or body")
   func itemConfiguration() throws {
     let request = try ItemRequest(environment, item: 1)
     #expect(request.method == .get)
-    #expect(request.queryItems == nil)
-    #expect(request.headerFields == nil)
+    #expect(request.queryItems.isEmpty)
+    #expect(request.headerFields == [.accept: "application/json"])
     #expect(request.httpBody == nil)
   }
 

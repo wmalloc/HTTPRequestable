@@ -4,13 +4,11 @@
 //  Created by Waqar Malik on 11/17/23
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-
-import HTTPTypes
 
 /// A contract that enables an object to perform HTTP‑based network
 /// operations.
@@ -213,6 +211,8 @@ public extension HTTPTransferable {
     return try await performRequest(updatedRequest, next: next, delegate: delegate)
   }
 
+  // `URLSession.AsyncBytes` exists only on Apple platforms.
+  #if canImport(Darwin)
   /// Returns a byte stream that conforms to AsyncSequence protocol.
   ///
   /// `requestModifiers` are applied, and the delegate is secured as for every other request.
@@ -230,6 +230,7 @@ public extension HTTPTransferable {
     let updatedRequest = try await request.httpRequest.modify(requestModifiers, for: session)
     return try await session.bytes(for: updatedRequest, delegate: URLSession.secureTaskDelegate(delegate))
   }
+  #endif
 
   /// Creates an object from the data returned by a request.
   ///
@@ -238,12 +239,10 @@ public extension HTTPTransferable {
   ///
   /// 1. It sends the supplied `request` through the underlying
   ///    `URLSession`, optionally using a custom `URLSessionTaskDelegate`.
-  /// 2. It transforms the raw `Data` into the type expected by the
+  /// 2. It checks the response with the request's `validateResponse(_:)`,
+  ///    which by default accepts only `2xx` statuses.
+  /// 3. It transforms the raw `Data` into the type expected by the
   ///    request via the request’s `responseDataTransformer`.
-  ///
-  /// The function is marked **`@inlinable`** so the compiler can
-  /// inline it across module boundaries, improving performance for
-  /// small, frequently‑used requests.
   ///
   /// - Parameters:
   ///   - request: The `HTTPRequestConfigurable` instance that
@@ -256,15 +255,16 @@ public extension HTTPTransferable {
   /// - Returns: The object obtained by applying
   ///   `request.responseDataTransformer` to the raw data.
   ///
-  /// - Throws: Any error thrown by either `data(for:delegate:)` or
-  ///   the transformer.  Common errors include network failures,
-  ///   decoding errors, and custom validation failures.
+  /// - Throws: Any error thrown while sending the request, by
+  ///   `validateResponse(_:)` (by default `HTTPError.unacceptableStatusCode`
+  ///   for a status outside `2xx`), or by the transformer.
   ///
   /// This method is typically used inside a higher‑level service or
   /// repository that hides the details of HTTP communication from its
   /// callers.
   func object<R: HTTPRequestConfigurable>(for request: R, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> R.ResultType {
-    try await performRequest(request, delegate: delegate)
-      .transformed(using: request.responseDataTransformer)
+    let response = try await performRequest(request, delegate: delegate)
+    try request.validateResponse(response)
+    return try response.transformed(using: request.responseDataTransformer)
   }
 }

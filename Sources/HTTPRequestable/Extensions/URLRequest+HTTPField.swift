@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 7/12/23.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 /*
  # URLRequest+HTTPField

@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 1/14/23.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 /*
  # URLRequest+HTTPFields
@@ -48,7 +47,8 @@ public extension URLRequest {
 public extension URLRequest {
   /// The HTTP header fields of the `URLRequest` as an `HTTPFields` instance.
   ///
-  /// This property provides a convenient way to access or modify all HTTP header fields.
+  /// Setting it replaces every header field; `nil` removes them all. Assigning `allHTTPHeaderFields`
+  /// directly only adds and overwrites fields, so this setter removes the existing ones first.
   var headerFields: HTTPFields? {
     get {
       guard let allHTTPHeaderFields else {
@@ -57,7 +57,12 @@ public extension URLRequest {
       return HTTPFields(rawValue: allHTTPHeaderFields)
     }
     set {
-      allHTTPHeaderFields = newValue?.rawValue
+      for name in allHTTPHeaderFields?.keys ?? [:].keys {
+        setValue(nil, forHTTPHeaderField: name)
+      }
+      for field in newValue ?? HTTPFields() {
+        addValue(field.value, forHTTPHeaderField: field.name.rawName)
+      }
     }
   }
 }

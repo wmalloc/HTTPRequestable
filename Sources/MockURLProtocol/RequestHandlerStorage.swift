@@ -4,17 +4,16 @@
 //  Created by Waqar Malik on 4/16/25.
 //
 
+import Foundation
+import HTTPRequestable
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPRequestable
 
-/// A closure that produces a mock response for a given ``URLRequest``.
+/// A closure that produces a mock response for a given `URLRequest`.
 ///
 /// `MockURLRequestHandler` is the function signature used by
-/// :class:`MockURLProtocol`.  It receives the request, performs any logic you
+/// ``MockURLProtocol``.  It receives the request, performs any logic you
 /// need (e.g., matching against URL patterns or inspecting headers), and then
 /// returns a tuple containing the data to send back **and** the HTTP response.
 /// The closure is `async` so it can await I/O or other async work, and it
@@ -36,14 +35,14 @@ import HTTPRequestable
 /// }
 /// ```
 ///
-/// - Parameter request: The incoming ``URLRequest``.
+/// - Parameter request: The incoming `URLRequest`.
 /// - Returns: A tuple of the mock data and a fully‑configured
-///   ``HTTPURLResponse``.
+///   `HTTPURLResponse`.
 /// - Throws: Any error you wish to surface to the caller; e.g. an HTTP error
 ///   status or custom test failure.
 ///
 /// **Use case**
-/// Register handlers via :func:`MockURLProtocol.setRequestHandler(_:forIdentifier:)`
+/// Register handlers via ``MockURLProtocol/setRequestHandler(_:forIdentifier:)``
 /// to simulate network interactions in unit tests without hitting a real
 /// server.
 public typealias MockURLRequestHandler = @Sendable (URLRequest) async throws -> (Data, HTTPURLResponse)

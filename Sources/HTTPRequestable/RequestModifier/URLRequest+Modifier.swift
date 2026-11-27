@@ -4,10 +4,9 @@
 //  Created by Waqar Malik on 2/5/26.
 //
 
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
 
 public extension URLRequest {

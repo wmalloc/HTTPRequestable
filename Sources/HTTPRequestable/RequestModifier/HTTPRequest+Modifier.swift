@@ -4,13 +4,12 @@
 //  Created by Waqar Malik on 1/14/26.
 //
 
+import Foundation
+import HTTPTypes
+import HTTPTypesFoundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
-import HTTPTypesFoundation
 #endif
-import HTTPTypes
 
 public extension HTTPRequest {
   /// Applies an ordered collection of request modifiers and returns the resulting request.

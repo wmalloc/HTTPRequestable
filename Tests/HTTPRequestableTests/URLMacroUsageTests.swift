@@ -7,6 +7,9 @@
 import Foundation
 import HTTPRequestable
 import Testing
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Uses `#URL` through the compiler and the real plugin, so the declaration and its expansion are
 /// checked as clients see them.

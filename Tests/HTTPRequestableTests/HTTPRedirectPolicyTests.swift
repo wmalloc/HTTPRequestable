@@ -6,6 +6,9 @@ import Foundation
 @testable import HTTPRequestable
 import HTTPTypes
 import Testing
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 struct HTTPRedirectPolicyTests {
   private func request(_ url: String) throws -> URLRequest {

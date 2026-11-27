@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 4/25/26.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 /// How a request is retried after a transient failure, with exponential backoff.
 ///
@@ -26,7 +25,6 @@ import HTTPTypes
 /// ```swift
 /// let policy = RetryPolicy(maxRetries: 3, initialDelay: 0.5, maxDelay: 10)
 /// ```
-@frozen
 public struct RetryPolicy: Sendable {
   /// The number of retries after the first attempt, so a request is sent at most `maxRetries + 1` times.
   /// `0` means no retries.
@@ -76,8 +74,7 @@ public struct RetryPolicy: Sendable {
   ///   value is a programming error.
   public init(maxRetries: Int = 3, initialDelay: TimeInterval = 1, multiplier: Double = 2,
               maxDelay: TimeInterval = 60, retriesNonIdempotentRequests: Bool = false, jitter: Bool = true,
-              retryableStatuses: Set<HTTPResponse.Status> = [.tooManyRequests, .serviceUnavailable])
-  {
+              retryableStatuses: Set<HTTPResponse.Status> = [.tooManyRequests, .serviceUnavailable]) {
     precondition(maxRetries >= 0, "RetryPolicy.maxRetries must be 0 or more")
     precondition(initialDelay.isFinite && initialDelay > 0, "RetryPolicy.initialDelay must be finite and more than 0")
     precondition(multiplier.isFinite && multiplier >= 0, "RetryPolicy.multiplier must be finite and 0 or more")
@@ -139,8 +136,7 @@ public struct RetryPolicy: Sendable {
   /// The wait is ``retryDelay(for:using:)``, or a valid `Retry-After` when that is longer, so it is
   /// always more than `0`, even for `Retry-After: 0`.
   func retryDelay(after response: HTTPResponse, attempt: Int, now: Date,
-                  using generator: inout some RandomNumberGenerator) -> TimeInterval?
-  {
+                  using generator: inout some RandomNumberGenerator) -> TimeInterval? {
     guard shouldRetry(status: response.status, attempt: attempt) else { return nil }
     let backoff = retryDelay(for: attempt, using: &generator)
     guard let retryAfter = response.headerFields[.retryAfter].flatMap({ Self.retryAfterDelay($0, now: now) }) else {

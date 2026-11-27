@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 11/21/26.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 /// A task delegate that decides whether, and how, a redirect is followed.
 ///
@@ -20,14 +19,14 @@ import HTTPTypes
 /// It is applied automatically through ``HTTPSecurityDelegate``, which also wraps any delegate you pass
 /// to a request. Pass an `HTTPRedirectPolicy` as the delegate to use a policy of your own. On platforms
 /// without the Objective-C runtime a delegate cannot be wrapped, so one you pass replaces this policy.
-public final class HTTPRedirectPolicy: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+public final class HTTPRedirectPolicy: NSObject, URLSessionTaskDelegate, Sendable {
   /// The policy used when a request has no delegate: blocks downgrades and strips sensitive headers
   /// on cross-origin redirects.
   public static let `default` = HTTPRedirectPolicy()
 
   /// Header fields that are removed when a redirect leaves the origin of the request.
   public static let defaultSensitiveHeaders: Set<HTTPField.Name> = [
-    .authorization, .cookie, .proxyAuthorization, #HTTPFieldName("X-API-Key")
+    .authorization, .cookie, .proxyAuthorization, .xAPIKey
   ]
 
   /// When `true`, a redirect from `https` to any other scheme is not followed.
@@ -45,16 +44,14 @@ public final class HTTPRedirectPolicy: NSObject, URLSessionTaskDelegate, @unchec
   ///   - sensitiveHeaders: Fields removed on cross-origin redirects. Defaults to `defaultSensitiveHeaders`.
   ///   - allowedHosts: Hosts redirects may go to, or `nil` for any host. Defaults to `nil`.
   public init(blocksDowngrade: Bool = true, sensitiveHeaders: Set<HTTPField.Name> = HTTPRedirectPolicy.defaultSensitiveHeaders,
-              allowedHosts: Set<String>? = nil)
-  {
+              allowedHosts: Set<String>? = nil) {
     self.blocksDowngrade = blocksDowngrade
     self.sensitiveHeaders = sensitiveHeaders
     self.allowedHosts = allowedHosts
   }
 
   public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
-                         newRequest request: URLRequest, completionHandler: @escaping @Sendable (URLRequest?) -> Void)
-  {
+                         newRequest request: URLRequest, completionHandler: @escaping @Sendable (URLRequest?) -> Void) {
     completionHandler(redirectedRequest(request, from: task.currentRequest?.url ?? task.originalRequest?.url))
   }
 
@@ -104,8 +101,7 @@ public final class HTTPRedirectPolicy: NSObject, URLSessionTaskDelegate, @unchec
       throw URLError(.appTransportSecurityRequiresSecureConnection)
     }
     if original.scheme?.lowercased() == request.scheme?.lowercased(),
-       original.authority?.lowercased() == request.authority?.lowercased()
-    {
+       original.authority?.lowercased() == request.authority?.lowercased() {
       return request
     }
 

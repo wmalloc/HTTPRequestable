@@ -4,14 +4,17 @@
 //  Created by Waqar Malik on 5/31/24.
 //
 
+import Foundation
+import HTTPRequestable
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPRequestable
 
-public class MockURLProtocol: URLProtocol, @unchecked Sendable {
+/// A `URLProtocol` that answers requests with handlers registered by the test, instead of the network.
+///
+/// Add it to a session's `URLSessionConfiguration.protocolClasses`, then register a handler for each
+/// request with ``setRequestHandler(_:forRequest:)`` or ``setRequestHandler(_:forIdentifier:)``.
+public class MockURLProtocol: URLProtocol {
   private static let requestHandlerStorage = RequestHandlerStorage()
 
   /// Registers `handler` to answer the next request sent for `request`.
@@ -65,17 +68,43 @@ public class MockURLProtocol: URLProtocol, @unchecked Sendable {
   }
 
   override public func startLoading() {
+    // `URLProtocol` is not `Sendable` on every platform, so the task reaches this instance through a box
+    // instead of capturing `self`.
+    let loader = UncheckedSendableBox(self)
     Task {
+      let urlProtocol = loader.value
       do {
-        let (data, response) = try await executeHandler(for: request)
-        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-        client?.urlProtocol(self, didLoad: data)
-        client?.urlProtocolDidFinishLoading(self)
+        let (data, response) = try await urlProtocol.executeHandler(for: urlProtocol.request)
+        urlProtocol.client?.urlProtocol(urlProtocol, didReceive: response, cacheStoragePolicy: .notAllowed)
+        urlProtocol.client?.urlProtocol(urlProtocol, didLoad: data)
+        urlProtocol.client?.urlProtocolDidFinishLoading(urlProtocol)
       } catch {
-        client?.urlProtocol(self, didFailWithError: error)
+        urlProtocol.client?.urlProtocol(urlProtocol, didFailWithError: error)
       }
     }
   }
 
   override public func stopLoading() {}
+}
+
+#if canImport(Darwin)
+/// `@unchecked` because `URLProtocol` is an open Foundation class that is not `Sendable`, so the compiler
+/// cannot check a subclass. MockURLProtocol adds no stored state of its own: handlers live in the
+/// `RequestHandlerStorage` actor, and the URL Loading System owns the inherited `request` and `client`.
+/// On Linux, Foundation marks `URLProtocol`'s `Sendable` conformance unavailable, which subclasses
+/// inherit, so the conformance is declared only on Apple platforms.
+extension MockURLProtocol: @unchecked Sendable {}
+#endif
+
+/// Carries a value that is not `Sendable` into a task.
+///
+/// `@unchecked` because the value is a `URLProtocol` that the URL Loading System hands to
+/// `startLoading()`. The loading task is the only code that uses it after that call, and it only
+/// reports to the protocol's `client`, as `URLProtocol` subclasses do from their own threads.
+private struct UncheckedSendableBox<Value>: @unchecked Sendable {
+  let value: Value
+
+  init(_ value: Value) {
+    self.value = value
+  }
 }

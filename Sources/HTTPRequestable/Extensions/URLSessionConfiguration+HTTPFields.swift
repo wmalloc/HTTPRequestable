@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 1/14/23.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 public extension URLSessionConfiguration {
   /// The HTTP header fields of the session configuration as an `HTTPFields` instance.

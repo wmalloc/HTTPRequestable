@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 10/24/24.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 /// Extension providing a computed property for error in HTTP responses.
 public extension HTTPResponse {

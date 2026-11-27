@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 4/28/23.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 /// Extension providing static methods for creating HTTP fields (headers) with specific values.
 public extension HTTPField {

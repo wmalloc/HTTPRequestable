@@ -4,10 +4,9 @@
 //  Created by Waqar Malik on 4/28/23.
 //
 
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
 
 extension String {
@@ -28,6 +27,12 @@ extension String {
     "macOS"
     #elseif os(visionOS)
     "visionOS"
+    #elseif os(Android)
+    "Android"
+    #elseif os(Linux)
+    "Linux"
+    #elseif os(Windows)
+    "Windows"
     #else
     "Unknown"
     #endif
