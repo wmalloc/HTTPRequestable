@@ -1,7 +1,12 @@
 // swift-tools-version: 6.3
 
 import CompilerPluginSupport
+import Foundation
 import PackageDescription
+
+/// Whether the package is being cross-compiled for Android. The Android CI action
+/// (skiptools/swift-android-action) sets `TARGET_OS_ANDROID` while it builds.
+let isBuildingForAndroid = ProcessInfo.processInfo.environment["TARGET_OS_ANDROID"] != nil
 
 let package = Package(
   name: "HTTPRequestable",
@@ -30,8 +35,15 @@ let package = Package(
                 dependencies: ["HTTPRequestable", "MockURLProtocol",
                                .product(name: "HTTPTypes", package: "swift-http-types"),
                                .product(name: "HTTPTypesFoundation", package: "swift-http-types")],
-                resources: [.copy("MockData")]),
-    .testTarget(name: "HTTPRequestableMacrosTests", dependencies: ["HTTPRequestableMacros",
-                                                                   .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")])
+                resources: [.copy("MockData")])
   ]
 )
+
+// The macro tests link the macro implementation, which runs on the build machine, so they cannot be
+// cross-compiled for Android. They test compile-time behaviour, which the macOS and Linux builds cover.
+if !isBuildingForAndroid {
+  package.targets.append(
+    .testTarget(name: "HTTPRequestableMacrosTests", dependencies: ["HTTPRequestableMacros",
+                                                                   .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")])
+  )
+}
