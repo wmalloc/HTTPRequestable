@@ -48,9 +48,16 @@ private final class FailingInputStream: InputStream {
 
 /// An output stream whose writes fail.
 private final class FailingOutputStream: OutputStream {
-  init() {
+  // Foundation on Linux declares init(toMemory:) `required`; on Apple platforms it is a plain override.
+  #if canImport(Darwin)
+  override init(toMemory: ()) {
     super.init(toMemory: ())
   }
+  #else
+  required init(toMemory: ()) {
+    super.init(toMemory: ())
+  }
+  #endif
 
   override func write(_ buffer: UnsafePointer<UInt8>, maxLength len: Int) -> Int {
     -1
@@ -92,7 +99,7 @@ struct StreamFailureTests {
   func writeFailure() {
     var buffer: [UInt8] = [1, 2, 3]
     let error = #expect(throws: MultipartFormError.self) {
-      try Data.write(buffer: &buffer, to: FailingOutputStream())
+      try Data.write(buffer: &buffer, to: FailingOutputStream(toMemory: ()))
     }
     let underlying = underlyingError(error)
     #expect(underlying != nil)
