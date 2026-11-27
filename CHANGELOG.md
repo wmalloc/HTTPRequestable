@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [1.0.0]
 
 ### Added
+- **Linux and Android**: The package builds and its tests pass on Linux and on Android, both checked in CI. Features that need Apple-only Foundation APIs (streamed responses with `bytes(for:)`, `HTTPSecurityDelegate` pinning and size limits, and a few `URLRequest` setters) are available only on Apple platforms.
 - **HTTPContentType(pathExtension:)**: The content type for a file name extension, such as `image/png` for `png`, ignoring case. Common extensions come from a built-in table, so they are the same on every platform; others are looked up with `UTType` where it is available. Returns `nil` for unknown extensions.
 - **HTTPContentType** constants: `csv`, `heic`, `javascript`, `m4a`, `mp3`, `mp4`, `pdf`, `quickTime`, `webp` and `zip`.
 - **HTTPRequestConfigurable.validateResponse(_:)**: Checks a response before `object(for:)` decodes it. The default accepts only `2xx` statuses; implement it to accept other statuses, check the content type with `HTTPClientResponse.validate()`, or throw your own error decoded from the response body.

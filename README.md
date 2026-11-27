@@ -1,7 +1,7 @@
 ![](https://img.shields.io/github/v/tag/wmalloc/HTTPRequestable?label=Version&sort=semver)
 [![CI](https://github.com/wmalloc/HTTPRequestable/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/wmalloc/HTTPRequestable/actions/workflows/ci.yml)
 [![Swift](https://img.shields.io/badge/Swift-6.3-orange?style=flat-square)](https://swift.org)
-[![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20iOS%20%7C%20tvOS%20%7C%20watchOS%20%7C%20visionOS%20%7C%20Linux-yellowgreen?style=flat-square)](#platforms)
+[![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20iOS%20%7C%20tvOS%20%7C%20watchOS%20%7C%20visionOS%20%7C%20Linux%20%7C%20Android-yellowgreen?style=flat-square)](#platforms)
 [![Swift Package Manager](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)](https://swift.org/package-manager)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)
 
@@ -35,7 +35,7 @@ cannot change the request, and optionally pins server keys and limits response s
 ## Requirements
 
 - Swift 6.3 or later
-- iOS 18, tvOS 18, macOS 15, watchOS 11, Mac Catalyst 18, visionOS 2, or Linux (see [Platforms](#platforms))
+- iOS 18, tvOS 18, macOS 15, watchOS 11, Mac Catalyst 18, visionOS 2, Linux or Android (see [Platforms](#platforms))
 
 ## Installation
 
@@ -404,15 +404,18 @@ import Testing
 
 ## Platforms
 
-Everything works on Apple platforms. On Linux the package builds and its tests run, but these need
-Apple-only Foundation APIs and are not available there:
+Everything works on Apple platforms. On Linux and Android the package builds and its tests pass in CI,
+but these need Apple-only Foundation APIs and are not available there:
 
 - `bytes(for:)` (streamed responses)
 - `HTTPSecurityDelegate`, `HTTPPublicKeyPinning` and the response size limit
 - The `URLRequest` setters `setAttribution(_:)`, `setAllowsConstrainedNetworkAccess(_:)`,
   `setAllowsExpensiveNetworkAccess(_:)` and `setAssumesHTTP3Capable(_:)`
 
-Redirect protection still applies on Linux, but a delegate you pass replaces it instead of being wrapped.
+Redirect protection still applies on Linux and Android, but a delegate you pass replaces it instead of
+being wrapped.
+
+Android builds use the [Swift SDK for Android](https://www.swift.org/documentation/articles/swift-sdk-for-android-getting-started.html).
 
 ## Upgrading to 1.0.0
 
@@ -439,7 +442,8 @@ HTTPREQUESTABLE_LIVE_TESTS=1 swift test          # also call the live Hacker New
 ```
 
 Tests that call the live API are tagged `live` and skipped unless `HTTPREQUESTABLE_LIVE_TESTS=1` is set,
-so the suite passes offline. CI runs these on macOS and Linux; see `.github/workflows/ci.yml`.
+so the suite passes offline. CI runs these on macOS and Linux, and builds and tests the package on an
+Android emulator; see `.github/workflows/ci.yml`.
 
 ## License
 
