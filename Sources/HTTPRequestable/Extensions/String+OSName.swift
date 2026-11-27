@@ -27,6 +27,12 @@ extension String {
     "macOS"
     #elseif os(visionOS)
     "visionOS"
+    #elseif os(Android)
+    "Android"
+    #elseif os(Linux)
+    "Linux"
+    #elseif os(Windows)
+    "Windows"
     #else
     "Unknown"
     #endif
