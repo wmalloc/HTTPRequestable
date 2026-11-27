@@ -2,7 +2,13 @@
 //  InterceptorSecurityTests.swift
 //
 
+// These tests exercise HTTPSecurityDelegate, which needs the Objective-C runtime, Security and CryptoKit,
+// and streamed requests, which need URLSession.AsyncBytes; all are available only on Apple platforms.
+#if canImport(ObjectiveC) && canImport(Security) && canImport(CryptoKit)
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 @testable import HTTPRequestable
 import HTTPTypes
 import Testing
@@ -336,3 +342,4 @@ struct InterceptorSecurityTests {
     #expect(log.all == ["A in", "B in", "B out", "A out"])
   }
 }
+#endif

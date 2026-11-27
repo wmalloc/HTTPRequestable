@@ -8,6 +8,9 @@ import Foundation
 import HTTPRequestable
 import MockURLProtocol
 import Testing
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 struct MockURLProtocolTests {
   private let session: URLSession = {

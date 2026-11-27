@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 8/30/25.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 /// A value that supplies the identifier ``MockURLProtocol`` uses to find the handler for a request.
 ///

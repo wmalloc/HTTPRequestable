@@ -15,7 +15,8 @@ import Testing
 struct EndpointMacroTests {
   private let macros: [String: MacroSpec] = ["Endpoint": MacroSpec(type: EndpointMacro.self)]
 
-  @Test func bareAddsHeaderFieldsAndQueryItems() {
+  @Test("Without arguments, adds empty header fields and query items")
+  func bareAddsHeaderFieldsAndQueryItems() {
     assertMacroExpansion(
       """
       @Endpoint
@@ -36,7 +37,8 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test func addsAllMembers() {
+  @Test("With every argument, adds the method, path, header fields and query items")
+  func addsAllMembers() {
     assertMacroExpansion(
       """
       @Endpoint(.post, path: "/api/v1/items", headerFields: [.accept: "application/json"], queryItems: ["limit": "10"])
@@ -65,7 +67,8 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test func pathOnlyKeepsDefaultMethod() {
+  @Test("A path alone adds no method, so the default GET applies")
+  func pathOnlyKeepsDefaultMethod() {
     assertMacroExpansion(
       """
       @Endpoint(path: "/api/v1/items")
@@ -90,7 +93,8 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test func methodOnlyLeavesHandWrittenPath() {
+  @Test("A method alone leaves a hand-written path in place")
+  func methodOnlyLeavesHandWrittenPath() {
     assertMacroExpansion(
       """
       @Endpoint(.put)
@@ -121,7 +125,8 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test func keepsHandWrittenQueryItems() {
+  @Test("Hand-written query items are kept when queryItems is not passed")
+  func keepsHandWrittenQueryItems() {
     assertMacroExpansion(
       """
       @Endpoint
@@ -142,7 +147,8 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test func emptyQueryItemsAddsEmptyStorage() {
+  @Test("Empty query items add empty storage")
+  func emptyQueryItemsAddsEmptyStorage() {
     assertMacroExpansion(
       """
       @Endpoint(queryItems: [:])
@@ -163,7 +169,8 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test func queryItemsKeepOrderDuplicatesAndNil() {
+  @Test("Query items keep their order, duplicate names and nil values")
+  func queryItemsKeepOrderDuplicatesAndNil() {
     assertMacroExpansion(
       """
       @Endpoint(queryItems: ["tag": "a", "tag": "b", "flag": nil])
@@ -184,7 +191,8 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test func queryItemsFromDictionary() {
+  @Test("Query items are built from a dictionary literal")
+  func queryItemsFromDictionary() {
     assertMacroExpansion(
       """
       @Endpoint(queryItems: ["limit": "10"])
@@ -205,7 +213,8 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test func mapsNonLiteralQueryItemsAndAcceptsConstantPath() {
+  @Test("Query items and a path from constants are accepted")
+  func mapsNonLiteralQueryItemsAndAcceptsConstantPath() {
     assertMacroExpansion(
       """
       @Endpoint(path: Constants.path, queryItems: Constants.defaultQuery)
@@ -232,7 +241,7 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test(arguments: [
+  @Test("A type that already declares a member the macro adds is rejected", arguments: [
     ("var headerFields = HTTPFields()", "headerFields", "@Endpoint"),
     ("let path: String = \"/api/v2/items\"", "path", "@Endpoint(path: \"/api/v1/items\")"),
     ("var queryItems: [URLQueryItem] = []", "queryItems", "@Endpoint (queryItems: [:])")
@@ -257,7 +266,8 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test func rejectsExistingMember() {
+  @Test("A type that already declares the method is rejected")
+  func rejectsExistingMember() {
     assertMacroExpansion(
       """
       @Endpoint(.post)
@@ -277,7 +287,8 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test func rejectsEnum() {
+  @Test("Enums are rejected")
+  func rejectsEnum() {
     assertMacroExpansion(
       """
       @Endpoint
@@ -293,7 +304,8 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test func ignoresStaticMembersWithSameName() {
+  @Test("Static members with the same name do not conflict")
+  func ignoresStaticMembersWithSameName() {
     assertMacroExpansion(
       """
       @Endpoint(path: "/items")
@@ -320,7 +332,8 @@ struct EndpointMacroTests {
     )
   }
 
-  @Test func packageTypeGetsPackageMembers() {
+  @Test("A package type gets package members")
+  func packageTypeGetsPackageMembers() {
     assertMacroExpansion(
       """
       @Endpoint

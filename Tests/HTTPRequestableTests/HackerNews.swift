@@ -8,6 +8,9 @@
 import Foundation
 @testable import HTTPRequestable
 import HTTPTypes
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 @globalActor actor HackerNewsActor: GlobalActor {
   static let shared = HackerNewsActor()

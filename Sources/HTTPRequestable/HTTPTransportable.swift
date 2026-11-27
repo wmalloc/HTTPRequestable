@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 12/24/25.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 public protocol HTTPTransportable {
   /// Performs a network request and returns the raw response.
@@ -106,6 +105,8 @@ public protocol HTTPTransportable {
   /// - Returns: Downloaded file URL and response. The file will not be removed automatically.
   func download(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)?) async throws -> HTTPClientResponse
 
+  // `URLSession.AsyncBytes` exists only on Apple platforms.
+  #if canImport(Darwin)
   /// Downloads data from the server as part of an HTTP request asynchronously.
   ///
   /// This method sends the specified `HTTPRequestConvertible` object to a server and waits for the response, including file data. The request can optionally include a delegate
@@ -122,6 +123,7 @@ public protocol HTTPTransportable {
   ///
   /// - SeeAlso: `HTTPRequestConvertible`, `HTTPClientResponse`, `URLSessionTaskDelegate`
   func bytes(for request: some HTTPRequestConvertible, delegate: (any URLSessionTaskDelegate)?) async throws -> (URLSession.AsyncBytes, HTTPResponse)
+  #endif
 
   /// Sends an HTTP request and returns the parsed object of type `Request.ResultType` asynchronously.
   ///
@@ -132,7 +134,9 @@ public protocol HTTPTransportable {
   ///   - request: The `HTTPRequestConfigurable` object representing the HTTP request. This protocol defines properties necessary to create an URLRequest and also specifies the type of the resulting object `ResultType`.
   ///   - delegate: An optional `URLSessionTaskDelegate` that allows customization of the request and response behavior. If not provided, a default delegate will be used.
   /// - Returns: An object of type `Request.ResultType` which is the parsed response from the server.
-  /// - Throws: An error of type `Error` if the fetch operation fails, such as network issues or invalid requests.
+  /// - Throws: An error if the fetch operation fails, such as network issues or invalid requests; the
+  ///   error from the request's `validateResponse(_:)`, by default `HTTPError.unacceptableStatusCode` for
+  ///   a status outside `2xx`; or the error from its `responseDataTransformer`.
   ///
   /// - Note: The `HTTPRequestConfigurable` protocol must be implemented by the request object for this method to work correctly.
   /// - Note: The `ResultType` must be defined by the request object and represents the type of the resulting object after parsing.

@@ -4,14 +4,12 @@
 //  Created by Waqar Malik on 10/17/23.
 //
 
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#else
 import Foundation
-#endif
-
 import HTTPTypes
 import HTTPTypesFoundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Method
 public typealias HTTPMethod = HTTPRequest.Method
@@ -78,10 +76,36 @@ public protocol HTTPRequestConfigurable: URLConvertible, URLRequestConvertible, 
   /// - Returns: A closure that converts `Data` to `ResultType`, or `nil` if
   ///   no transformation is needed.
   var responseDataTransformer: Transformer<Data, ResultType> { get }
+
+  /// Checks a response before ``responseDataTransformer`` decodes it in `object(for:delegate:)`.
+  ///
+  /// The default accepts only successful (`2xx`) statuses, so an error page is never decoded as a
+  /// result. Implement it to accept other statuses, to also check the content type with
+  /// `HTTPClientResponse.validate()`, or to throw an error of your own built from the response body.
+  ///
+  /// ```swift
+  /// func validateResponse(_ response: HTTPClientResponse) throws {
+  ///   guard response.response.status.kind == .successful else {
+  ///     throw try JSONDecoder().decode(APIError.self, from: response.responseData)
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// - Parameter response: The response, with its status, headers and body.
+  /// - Throws: An error to stop the response from being decoded. The default throws
+  ///   `HTTPError.unacceptableStatusCode` for a status outside `2xx`.
+  func validateResponse(_ response: HTTPClientResponse) throws
 }
 
 /// Default implementation
 public extension HTTPRequestConfigurable {
+  /// Accepts only successful (`2xx`) statuses.
+  ///
+  /// - Throws: `HTTPError.unacceptableStatusCode` for a status outside `2xx`.
+  func validateResponse(_ response: HTTPClientResponse) throws {
+    try response.validateStatus()
+  }
+
   @inlinable
   var method: HTTPMethod {
     .get
@@ -226,9 +250,14 @@ public extension HTTPRequestConfigurable where ResultType: Decodable {
   /// (for example, different date strategies or key decoding).
   ///
   /// - Returns: A closure that decodes `Data` into `ResultType` using `JSONDecoder()`.
+  /// - Throws: `URLError(.zeroByteResource)` when the body is empty, which no JSON value can be, or a
+  ///   `DecodingError`.
   var responseDataTransformer: Transformer<Data, ResultType> {
     { data in
-      try JSONDecoder().decode(ResultType.self, from: data)
+      guard !data.isEmpty else {
+        throw URLError(.zeroByteResource)
+      }
+      return try JSONDecoder().decode(ResultType.self, from: data)
     }
   }
 }

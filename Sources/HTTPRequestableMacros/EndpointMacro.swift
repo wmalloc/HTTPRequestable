@@ -16,8 +16,7 @@ public struct EndpointMacro: MemberMacro {
   public static func expansion(of node: AttributeSyntax,
                                providingMembersOf declaration: some DeclGroupSyntax,
                                conformingTo protocols: [TypeSyntax],
-                               in context: some MacroExpansionContext) throws -> [DeclSyntax]
-  {
+                               in context: some MacroExpansionContext) throws -> [DeclSyntax] {
     let arguments = node.arguments?.as(LabeledExprListSyntax.self) ?? []
     let method = arguments.first { $0.label == nil }?.expression
     let path = argument("path", in: arguments)

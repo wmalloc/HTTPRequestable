@@ -4,14 +4,12 @@
 //  Created by Waqar Malik on 9/26/25.
 //
 
+import Foundation
+import HTTPTypes
+import HTTPTypesFoundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
-import HTTPTypesFoundation
 #endif
-
-import HTTPTypes
 
 /// A lightweight protocol for types that can produce a fully formed `HTTPRequest`.
 ///

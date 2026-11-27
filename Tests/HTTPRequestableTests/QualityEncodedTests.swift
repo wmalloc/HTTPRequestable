@@ -9,13 +9,15 @@ import Foundation
 import Testing
 
 struct QualityEncodedTests {
-  @Test func qualityEncodedLanguageUS() throws {
+  @Test("A single language is encoded with q=1.0")
+  func qualityEncodedLanguageUS() throws {
     let quality = try Quality(values: ["en-US"])
     let encoded = quality.encoded
     #expect(encoded == "en-US;q=1.0")
   }
 
-  @Test func qualityEncodedLanguageEnglish() throws {
+  @Test("Languages are encoded with q-values falling by 0.1")
+  func qualityEncodedLanguageEnglish() throws {
     let quality = try Quality(values: ["en-US", "en-GB", "en-AU", "en-CA"])
     let encoded = quality.encoded
     #expect(encoded == "en-US;q=1.0,en-GB;q=0.9,en-AU;q=0.8,en-CA;q=0.7")

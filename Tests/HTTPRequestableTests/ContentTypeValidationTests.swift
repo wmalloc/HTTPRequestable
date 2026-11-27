@@ -88,8 +88,9 @@ struct ContentTypeParsingTests {
 
   @Test("All predefined content types are valid")
   func predefined() {
-    let all: [HTTPContentType] = [.any, .css, .formEncoded, .gif, .html, .jpeg, .json, .jsonUTF8, .multipartForm,
-                                  .octetStream, .patchjson, .png, .svg, .textPlain, .xml]
+    let all: [HTTPContentType] = [.any, .css, .csv, .formEncoded, .gif, .heic, .html, .javascript, .jpeg, .json, .jsonUTF8,
+                                  .m4a, .mp3, .mp4, .multipartForm, .octetStream, .patchjson, .pdf, .png, .quickTime,
+                                  .svg, .textPlain, .webp, .xml, .zip]
     #expect(all.allSatisfy { HTTPContentType(rawValue: $0.rawValue) == $0 })
   }
 }
@@ -97,8 +98,7 @@ struct ContentTypeParsingTests {
 /// Expects `body` to throw an `HTTPError` that `matches` accepts. `HTTPError` is not `Equatable`, so
 /// cases are matched with a pattern.
 private func expectHTTPError(_ matches: (HTTPError) -> Bool, sourceLocation: SourceLocation = #_sourceLocation,
-                             _ body: () throws -> Void)
-{
+                             _ body: () throws -> Void) {
   let error = #expect(throws: HTTPError.self, sourceLocation: sourceLocation) {
     try body()
   }

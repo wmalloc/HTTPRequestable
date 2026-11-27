@@ -4,13 +4,12 @@
 //  Created by Waqar Malik on 4/28/23.
 //
 
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
 
-/// A type alias for :class:`URLComponents` that represents a full HTTP URL.
+/// A type alias for `URLComponents` that represents a full HTTP URL.
 ///
 /// The alias exists so the rest of the codebase can refer to an “environment” instead
 /// of a generic URL‑components struct, making intent clearer when building request URLs.
@@ -35,8 +34,7 @@ public extension HTTPEnvironment {
     // a path or a query (for example "good.com@evil.com" or "evil.com/x") is not an authority and is
     // assigned to `host` as is, where URLComponents rejects or percent-encodes it.
     if let parsed = URLComponents(string: "//" + authority), parsed.user == nil, parsed.password == nil,
-       parsed.path.isEmpty, parsed.query == nil, parsed.fragment == nil, let host = parsed.host
-    {
+       parsed.path.isEmpty, parsed.query == nil, parsed.fragment == nil, let host = parsed.host {
       self.host = host
       self.port = parsed.port
     } else {
@@ -106,7 +104,7 @@ public extension HTTPEnvironment {
   /// (i.e. no query component in the URL). Names and values are percent-encoded, including `+`,
   /// which `URLComponents.queryItems` leaves as is and servers decode as a space.
   ///
-  /// - Parameter queryItems: An array of :class:`URLQueryItem`.
+  /// - Parameter queryItems: An array of `URLQueryItem`.
   /// - Returns: A copy of the current environment with the query items updated.
   @discardableResult
   func setQueryItems(_ queryItems: [URLQueryItem]) -> Self {
@@ -145,7 +143,7 @@ public extension HTTPEnvironment {
   /// Existing items are preserved exactly as they are percent-encoded; if no items exist, the new ones
   /// become the sole query. New names and values are percent-encoded as in ``setQueryItems(_:)-([URLQueryItem])``.
   ///
-  /// - Parameter newQueryItems: An array of :class:`URLQueryItem` to append.
+  /// - Parameter newQueryItems: An array of `URLQueryItem` to append.
   /// - Returns: A copy of the current environment with the query items appended.
   @discardableResult
   func appendQueryItems(_ newQueryItems: [URLQueryItem]) -> Self {

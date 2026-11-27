@@ -1,5 +1,5 @@
---exclude Pods,Package.swift,.builds,.switpm,Carthage
---swiftversion 5.9
+--exclude Pods,Package.swift,.build,**/.build,.swiftpm,**/.swiftpm,Carthage
+--swiftversion 6.3
 --binarygrouping none
 --decimalgrouping none
 --hexgrouping none
@@ -11,4 +11,6 @@
 --tabwidth 2
 --indent 2
 --commas inline
+--test-case-name-format preserve
+--disable wrapMultilineStatementBraces
 # rules

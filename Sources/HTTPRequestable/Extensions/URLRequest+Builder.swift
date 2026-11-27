@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 4/27/23.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 /*
  # URLRequest+Builder
@@ -30,17 +29,6 @@ public extension URLRequest {
     return request
   }
 
-  /// Sets the HTTP method of the `URLRequest`.
-  ///
-  /// - Parameter httpMethod: The HTTP method to set.
-  /// - Returns: The modified `URLRequest` instance.
-  @discardableResult
-  func setHttpMethod(_ httpMethod: String?) -> Self {
-    var request = self
-    request.httpMethod = httpMethod
-    return request
-  }
-
   /// Sets the URL of the `URLRequest`.
   ///
   /// - Parameter url: The URL to set.
@@ -54,31 +42,12 @@ public extension URLRequest {
 
   /// Sets the main document URL of the `URLRequest`.
   ///
-  /// - Parameter maindocumentURL: The main document URL to set.
+  /// - Parameter mainDocumentURL: The main document URL to set.
   /// - Returns: The modified `URLRequest` instance.
   @discardableResult
-  func setMaindocumentURL(_ maindocumentURL: URL?) -> Self {
+  func setMainDocumentURL(_ mainDocumentURL: URL?) -> Self {
     var request = self
-    request.mainDocumentURL = maindocumentURL
-    return request
-  }
-
-  /// Sets the HTTP body of the `URLRequest` and optionally the `Content-Type` header.
-  ///
-  /// - Parameters:
-  ///   - httpBody: The HTTP body data to set.
-  ///   - contentType: The `Content-Type` header value to set. Defaults to `nil`.
-  /// - Returns: The modified `URLRequest` instance.
-  @discardableResult
-  func setHttpBody(_ httpBody: Data?, contentType: String? = nil) -> Self {
-    var request = self
-    if let contentType {
-      request.setValue(contentType, forHTTPField: .contentType)
-    }
-    request.httpBody = httpBody
-    if httpBody != nil {
-      request.setValue("\(httpBody?.count ?? 0)", forHTTPField: .contentLength)
-    }
+    request.mainDocumentURL = mainDocumentURL
     return request
   }
 
@@ -104,53 +73,16 @@ public extension URLRequest {
     return request
   }
 
-  /// Sets an HTTP header field with the specified name and value.
-  ///
-  /// - Parameters:
-  ///   - value: The value to set for the header field.
-  ///   - name: The name of the header field.
-  /// - Returns: The modified `URLRequest` instance.
-  @discardableResult
-  func setHttpHeader(_ value: String?, forName name: String) -> Self {
-    var request = self
-    request.setValue(value, forHTTPHeaderField: name)
-    return request
-  }
-
   /// Sets an HTTP header field with the specified `HTTPField.Name` and value.
   ///
   /// - Parameters:
-  ///   - value: The value to set for the header field.
+  ///   - value: The value to set for the header field, or `nil` to remove the field.
   ///   - name: The `HTTPField.Name` of the header field.
   /// - Returns: The modified `URLRequest` instance.
   @discardableResult
   func setHttpHeader(_ value: String?, forField name: HTTPField.Name) -> Self {
     var request = self
     request.setValue(value, forHTTPField: name)
-    return request
-  }
-
-  /// Sets multiple HTTP header fields.
-  ///
-  /// - Parameter httpHeaders: A dictionary of header fields and their values.
-  /// - Returns: The modified `URLRequest` instance.
-  @discardableResult
-  func setHttpHeaders(_ httpHeaders: [String: String]) -> Self {
-    var request = self
-    request.allHTTPHeaderFields = httpHeaders
-    return request
-  }
-
-  /// Adds a value to an HTTP header field with the specified name.
-  ///
-  /// - Parameters:
-  ///   - value: The value to add to the header field.
-  ///   - name: The name of the header field.
-  /// - Returns: The modified `URLRequest` instance.
-  @discardableResult
-  func addHttpHeader(_ value: String, forName name: String) -> Self {
-    var request = self
-    request.addValue(value, forHTTPHeaderField: name)
     return request
   }
 
@@ -180,9 +112,12 @@ public extension URLRequest {
 
   /// Sets whether the `URLRequest` should use pipelining.
   ///
+  /// Foundation deprecates `httpShouldUsePipelining` on every platform; on Apple platforms it only
+  /// affects the classic URL loader.
+  ///
   /// - Parameter httpShouldUsePipelining: A Boolean value indicating whether pipelining should be used.
   /// - Returns: The modified `URLRequest` instance.
-  @available(macOS 10.15, iOS 13, *)
+  @available(*, deprecated, message: "HTTP/1 pipelining has known compatibility issues and only affects the classic URL loader; adopt HTTP/2 or HTTP/3 instead.")
   @discardableResult
   func setHttpShouldUsePipelining(_ httpShouldUsePipelining: Bool) -> Self {
     var request = self
@@ -202,14 +137,16 @@ public extension URLRequest {
     return request
   }
 
+  // Constrained and expensive network access and HTTP/3 hints exist only on Apple platforms.
+  #if canImport(Darwin)
   /// Sets whether the `URLRequest` allows constrained network access.
   ///
-  /// - Parameter allowsConstraintNetworkAccess: A Boolean value indicating whether constrained network access is allowed.
+  /// - Parameter allowsConstrainedNetworkAccess: A Boolean value indicating whether constrained network access is allowed.
   /// - Returns: The modified `URLRequest` instance.
   @discardableResult
-  func setAllowsConstraintNetworkAccess(_ allowsConstraintNetworkAccess: Bool) -> Self {
+  func setAllowsConstrainedNetworkAccess(_ allowsConstrainedNetworkAccess: Bool) -> Self {
     var request = self
-    request.allowsConstrainedNetworkAccess = allowsConstraintNetworkAccess
+    request.allowsConstrainedNetworkAccess = allowsConstrainedNetworkAccess
     return request
   }
 
@@ -224,6 +161,8 @@ public extension URLRequest {
     return request
   }
 
+  #endif
+
   /// Sets the network service type of the `URLRequest`.
   ///
   /// - Parameter networkServiceType: The network service type to set.
@@ -236,6 +175,7 @@ public extension URLRequest {
     return request
   }
 
+  #if canImport(Darwin)
   /// Sets whether the `URLRequest` assumes HTTP/3 capability.
   ///
   /// - Parameter assumesHTTP3Capable: A Boolean value indicating whether HTTP/3 capability is assumed.
@@ -247,12 +187,11 @@ public extension URLRequest {
     request.assumesHTTP3Capable = assumesHTTP3Capable
     return request
   }
+  #endif
 }
 
-/*
- Adds missing documentation for the `URLRequest` extension methods.
- */
-
+// `URLRequest.Attribution` exists only on Apple platforms.
+#if canImport(Darwin)
 @available(iOS 15, tvOS 15, macOS 12, watchOS 8, macCatalyst 15, *)
 public extension URLRequest {
   /// Sets the attribution of the `URLRequest`.
@@ -265,18 +204,9 @@ public extension URLRequest {
     return request
   }
 }
+#endif
 
 public extension URLRequest {
-  /// Sets the `Content-Type` header of the `URLRequest`.
-  ///
-  /// - Parameter contentType: The `Content-Type` value to set.
-  /// - Returns: The modified `URLRequest` instance.
-  @discardableResult
-  @inline(__always)
-  func setContentType(_ contentType: String) -> Self {
-    setHeader(.contentType(contentType))
-  }
-
   /// Sets the `Content-Type` header of the `URLRequest` using an `HTTPContentType`.
   ///
   /// - Parameter contentType: The `HTTPContentType` value to set.
@@ -287,16 +217,24 @@ public extension URLRequest {
     setHeader(.contentType(contentType))
   }
 
-  /// Sets the HTTP body of the `URLRequest` and optionally the `Content-Type` header using an `HTTPContentType`.
+  /// Sets the HTTP body of the `URLRequest`, its `Content-Length` header, and optionally its
+  /// `Content-Type` header.
   ///
   /// - Parameters:
-  ///   - httpBody: The HTTP body data to set.
-  ///   - contentType: The `HTTPContentType` value to set for the `Content-Type` header. Defaults to `nil`.
+  ///   - httpBody: The HTTP body data to set, or `nil` to remove the body and its `Content-Length`.
+  ///   - contentType: The `HTTPContentType` value to set for the `Content-Type` header. Defaults to `nil`,
+  ///     which leaves the header as it is.
   /// - Returns: The modified `URLRequest` instance.
   @discardableResult
-  @inline(__always)
   func setHttpBody(_ httpBody: Data?, contentType: HTTPContentType? = nil) -> Self {
-    setHttpBody(httpBody, contentType: contentType?.rawValue)
+    var request = self
+    if let contentType {
+      request.setValue(contentType.rawValue, forHTTPField: .contentType)
+    }
+    request.httpBody = httpBody
+    // A removed body must not leave a Content-Length that promises bytes that are no longer sent.
+    request.setValue(httpBody.map { "\($0.count)" }, forHTTPField: .contentLength)
+    return request
   }
 
   /// Sets the `User-Agent` header of the `URLRequest`.
@@ -316,7 +254,9 @@ public extension URLRequest {
   @discardableResult
   @inline(__always)
   func setMethod(_ method: HTTPMethod?) -> Self {
-    setHttpMethod(method?.rawValue)
+    var request = self
+    request.httpMethod = method?.rawValue
+    return request
   }
 
   /// Sets a single HTTP header field of the `URLRequest` using an `HTTPField`.
@@ -331,17 +271,14 @@ public extension URLRequest {
     return setHttpHeader(header.value, forField: header.name)
   }
 
-  /// Sets multiple HTTP header fields of the `URLRequest` using an array of `HTTPField`.
+  /// Replaces every HTTP header field of the `URLRequest` with `headers`.
   ///
-  /// - Parameter headers: An array of `HTTPField` to set.
+  /// - Parameter headers: The header fields to set, or `nil` to remove them all.
   /// - Returns: The modified `URLRequest` instance.
   @discardableResult
   func setHeaders(_ headers: [HTTPField]?) -> Self {
     var request = self
-    request.allHTTPHeaderFields = nil
-    if let headers {
-      request.headerFields = HTTPFields(headers)
-    }
+    request.headerFields = headers.map { HTTPFields($0) }
     return request
   }
 

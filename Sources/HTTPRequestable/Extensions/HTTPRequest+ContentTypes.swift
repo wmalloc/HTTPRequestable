@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 9/6/25.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 public extension HTTPRequest {
   /// The media ranges the request's `Accept` header lists, without their parameters.

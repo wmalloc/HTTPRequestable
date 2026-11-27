@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 4/21/25.
 //
 
+import Foundation
+import HTTPRequestable
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPRequestable
 
 public extension HTTPRequestConfigurable {
   /// A copy of the request with an `X-Mock-Identifier` header set to a random UUID.

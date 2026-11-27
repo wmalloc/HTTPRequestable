@@ -4,13 +4,11 @@
 //  Created by Waqar Malik on 1/24/25.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-
-import HTTPTypes
 
 extension URLSession {
   /// Sends the given HTTP request through the provided interceptor chain and returns the resulting response.
@@ -37,8 +35,7 @@ extension URLSession {
   ///   request to another scheme. Errors propagate up through the interceptor chain.
   func performRequest(_ request: HTTPRequest, next send: @escaping HTTPInterceptor.NextHandler,
                       interceptors: some Sequence<any HTTPInterceptor> = [],
-                      delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse
-  {
+                      delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     let policy = Self.redirectPolicy(of: delegate)
     var next: HTTPInterceptor.NextHandler = { forwarded, forwardedDelegate in
       try await send(policy.forwardedRequest(forwarded, original: request),
@@ -56,8 +53,7 @@ extension URLSession {
 
 extension URLSession: HTTPTransportable {
   public func performRequest(_ request: HTTPRequest, httpBody body: Data? = nil, retryPolicy: RetryPolicy? = nil,
-                             delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse
-  {
+                             delegate: (any URLSessionTaskDelegate)? = nil) async throws -> HTTPClientResponse {
     var attempt = 0
     var generator = SystemRandomNumberGenerator()
     let taskDelegate = Self.secureTaskDelegate(delegate)
@@ -67,13 +63,7 @@ extension URLSession: HTTPTransportable {
     while true {
       let clientResponse: HTTPClientResponse
       do {
-        let (data, response) = if let maxResponseSize {
-          try await limitedData(for: request, httpBody: body, maxResponseSize: maxResponseSize, delegate: taskDelegate)
-        } else if let body {
-          try await upload(for: request, from: body, delegate: taskDelegate)
-        } else {
-          try await data(for: request, delegate: taskDelegate)
-        }
+        let (data, response) = try await load(request, httpBody: body, maxResponseSize: maxResponseSize, delegate: taskDelegate)
         clientResponse = HTTPClientResponse(request: request, requestBody: body.map(HTTPClientResponse.Body.data) ?? .empty,
                                             response: response, responseData: data)
       } catch {
@@ -95,13 +85,31 @@ extension URLSession: HTTPTransportable {
     }
   }
 
+  /// Sends `request` once and loads the whole response body.
+  ///
+  /// With a `maxResponseSize`, the body is streamed and the request fails as soon as it is exceeded. The
+  /// limit is only available on Apple platforms, where ``HTTPSecurityDelegate`` provides it.
+  private func load(_ request: HTTPRequest, httpBody body: Data?, maxResponseSize: Int?,
+                    delegate: any URLSessionTaskDelegate) async throws -> (Data, HTTPResponse) {
+    #if canImport(Darwin)
+    if let maxResponseSize {
+      return try await limitedData(for: request, httpBody: body, maxResponseSize: maxResponseSize, delegate: delegate)
+    }
+    #endif
+    if let body {
+      return try await upload(for: request, from: body, delegate: delegate)
+    }
+    return try await data(for: request, delegate: delegate)
+  }
+
+  // `URLSession.AsyncBytes`, which streaming the body needs, exists only on Apple platforms.
+  #if canImport(Darwin)
   /// Loads the response body into memory, failing as soon as it exceeds `maxResponseSize` bytes instead
   /// of buffering all of it.
   ///
   /// - Throws: `URLError(.dataLengthExceedsMaximum)` when the declared or received length is too large.
   func limitedData(for request: HTTPRequest, httpBody body: Data?, maxResponseSize: Int,
-                   delegate: any URLSessionTaskDelegate) async throws -> (Data, HTTPResponse)
-  {
+                   delegate: any URLSessionTaskDelegate) async throws -> (Data, HTTPResponse) {
     guard var urlRequest = URLRequest(httpRequest: request) else {
       throw HTTPError.cannotCreateURLRequest
     }
@@ -129,6 +137,7 @@ extension URLSession: HTTPTransportable {
     }
     return (data, response)
   }
+  #endif
 
   /// Request data from server
   /// - Parameters:
@@ -204,6 +213,8 @@ extension URLSession: HTTPTransportable {
     return HTTPClientResponse(request: updateRequest, response: response, responseFileURL: url)
   }
 
+  // `URLSession.AsyncBytes` exists only on Apple platforms.
+  #if canImport(Darwin)
   /// Returns a byte stream that conforms to AsyncSequence protocol.
   /// - Parameters:
   ///   - request: The `HTTPRequestConvertible` for which to load data.
@@ -213,17 +224,20 @@ extension URLSession: HTTPTransportable {
     let updateRequest = try request.httpRequest
     return try await bytes(for: updateRequest, delegate: Self.secureTaskDelegate(delegate))
   }
+  #endif
 
-  /**
-   Make a request call and return decoded data as decoded by the transformer, this request must return data
-
-   - Parameters:
-     - request: Request where to get the data from
-     - delegate: Delegate to handle the request, defaults to nil
-   - returns: Transformed Object
-   */
+  /// Sends `request`, checks the response with the request's `validateResponse(_:)`, and decodes the
+  /// body with its `responseDataTransformer`.
+  ///
+  /// - Parameters:
+  ///   - request: The request to send.
+  ///   - delegate: Task-specific delegate, defaults to nil.
+  /// - Returns: The decoded result.
+  /// - Throws: Any error thrown while sending the request, by `validateResponse(_:)` (by default
+  ///   `HTTPError.unacceptableStatusCode` for a status outside `2xx`), or by the transformer.
   public func object<R: HTTPRequestConfigurable>(for request: R, delegate: (any URLSessionTaskDelegate)? = nil) async throws -> R.ResultType {
-    try await performRequest(request, delegate: delegate)
-      .transformed(using: request.responseDataTransformer)
+    let response = try await performRequest(request, delegate: delegate)
+    try request.validateResponse(response)
+    return try response.transformed(using: request.responseDataTransformer)
   }
 }

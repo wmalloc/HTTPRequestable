@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 4/21/25.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 public extension String {
   /// The name of the `X-Mock-Identifier` header field.

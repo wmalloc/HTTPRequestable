@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 1/15/23.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 /// Extension providing a static property for default headers.
 public extension HTTPFields {

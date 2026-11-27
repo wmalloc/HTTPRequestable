@@ -4,13 +4,12 @@
 //  Created by Waqar Malik on 10/16/25.
 //
 
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#else
 import Foundation
-#endif
 import HTTPTypes
 import HTTPTypesFoundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 public extension HTTPRequestConfigurable {
   /// Appends an HTTP header field to the request's header collection, preserving any existing headers.

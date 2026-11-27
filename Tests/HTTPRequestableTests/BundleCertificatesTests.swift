@@ -2,12 +2,12 @@
 //  BundleCertificatesTests.swift
 //
 
+// The certificate helpers on Bundle need Security, so they and these tests exist only where it does.
+#if canImport(Security)
 import Foundation
 @testable import HTTPRequestable
-import Testing
-#if canImport(Security)
 import Security
-#endif
+import Testing
 
 @Suite("Bundle Certificates Tests")
 struct BundleCertificatesTests {
@@ -43,3 +43,4 @@ struct BundleCertificatesTests {
     #expect(paths.isEmpty)
   }
 }
+#endif

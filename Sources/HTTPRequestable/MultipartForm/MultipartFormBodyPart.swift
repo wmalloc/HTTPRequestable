@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 1/24/23
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 /// Represents a single multipart/form-data body part.
 ///
@@ -60,8 +59,9 @@ extension MultipartFormBodyPart {
       var buffer = [UInt8](repeating: 0, count: streamBufferSize)
       let bytesRead = inputStream.read(&buffer, maxLength: streamBufferSize)
 
-      if let error = inputStream.streamError {
-        throw MultipartFormError.inputStreamReadFailed(error)
+      // read returns -1 on failure; only then does the stream describe an error.
+      if bytesRead < 0 {
+        throw MultipartFormError.inputStreamReadFailed(inputStream.failureError)
       }
 
       if bytesRead > 0 {
@@ -107,8 +107,9 @@ extension MultipartFormBodyPart {
       var buffer = [UInt8](repeating: 0, count: streamBufferSize)
       let bytesRead = inputStream.read(&buffer, maxLength: streamBufferSize)
 
-      if let error = inputStream.streamError {
-        throw MultipartFormError.inputStreamReadFailed(error)
+      // read returns -1 on failure; only then does the stream describe an error.
+      if bytesRead < 0 {
+        throw MultipartFormError.inputStreamReadFailed(inputStream.failureError)
       }
 
       if bytesRead > 0 {
@@ -135,7 +136,8 @@ extension MultipartFormBodyPart {
 
 extension MultipartFormBodyPart {
   static func lengthMessage(expected: UInt64, actual: UInt64) -> String {
-    String(localized: "multipart_error_expected_length", bundle: .module) + " \(expected), " +
-      String(localized: "multipart_error_encoded_length", bundle: .module) + " \(actual)"
+    let expectedLabel = MultipartFormError.Message.expectedLength
+    let actualLabel = MultipartFormError.Message.encodedLength
+    return "\(expectedLabel) \(expected), \(actualLabel) \(actual)"
   }
 }

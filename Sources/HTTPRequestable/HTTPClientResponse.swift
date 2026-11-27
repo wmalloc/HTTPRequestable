@@ -4,12 +4,11 @@
 //  Created by Waqar Malik on 12/14/24.
 //
 
+import Foundation
+import HTTPTypes
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
-import HTTPTypes
 
 public struct HTTPClientResponse: Sendable {
   /// An HTTP message payload.
@@ -191,30 +190,25 @@ public extension HTTPClientResponse {
   /// Transforms the response body with the supplied transformer.
   ///
   /// The bytes are taken from `.data` when the body is in memory, or read from
-  /// disk via ``responseFileData()`` when the body is `.file`. An `.empty` body throws
-  /// `URLError(.zeroByteResource)`.
+  /// disk via ``responseFileData()`` when the body is `.file`. An empty or `.empty` body is passed as
+  /// empty `Data`, so a `Void`, `Data` or `String` result can come from a `204 No Content` response;
+  /// the default `Decodable` transformer throws `URLError(.zeroByteResource)` for it.
   ///
   /// - Parameter transformer: The closure used to convert raw `Data` into the desired type.
   /// - Returns: The result of applying `transformer` to the response body.
   /// - Throws:
-  ///   * `URLError(.zeroByteResource)` when the body is empty.
   ///   * Any error raised while reading a `.file` body from disk.
   ///   * Any error thrown by `transformer`.
   func transformed<ResultType>(using transformer: Transformer<Data, ResultType>) throws -> ResultType {
-    let payload: Data
-    switch responseBody {
+    let payload: Data = switch responseBody {
     case .data(let responseData):
-      payload = responseData
+      responseData
 
     case .file(let url):
-      payload = try Data(contentsOf: url, options: .mappedIfSafe)
+      try Data(contentsOf: url, options: .mappedIfSafe)
 
     case .empty:
-      throw URLError(.zeroByteResource)
-    }
-
-    guard !payload.isEmpty else {
-      throw URLError(.zeroByteResource)
+      Data()
     }
 
     return try transformer(payload)
