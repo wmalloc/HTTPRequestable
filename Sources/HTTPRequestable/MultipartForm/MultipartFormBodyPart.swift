@@ -59,8 +59,9 @@ extension MultipartFormBodyPart {
       var buffer = [UInt8](repeating: 0, count: streamBufferSize)
       let bytesRead = inputStream.read(&buffer, maxLength: streamBufferSize)
 
-      if let error = inputStream.streamError {
-        throw MultipartFormError.inputStreamReadFailed(error)
+      // read returns -1 on failure; only then does the stream describe an error.
+      if bytesRead < 0 {
+        throw MultipartFormError.inputStreamReadFailed(inputStream.failureError)
       }
 
       if bytesRead > 0 {
@@ -106,8 +107,9 @@ extension MultipartFormBodyPart {
       var buffer = [UInt8](repeating: 0, count: streamBufferSize)
       let bytesRead = inputStream.read(&buffer, maxLength: streamBufferSize)
 
-      if let error = inputStream.streamError {
-        throw MultipartFormError.inputStreamReadFailed(error)
+      // read returns -1 on failure; only then does the stream describe an error.
+      if bytesRead < 0 {
+        throw MultipartFormError.inputStreamReadFailed(inputStream.failureError)
       }
 
       if bytesRead > 0 {
